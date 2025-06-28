@@ -24,19 +24,31 @@ repositories {
 }
 
 dependencies {
+    // 🔸 JPA (Hibernate) 기반 ORM 기능 사용
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // 🔸 웹 서버 실행 및 REST API 개발
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // 🔸 Lombok 사용
     compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    // 🔸 Lombok 어노테이션 처리
     annotationProcessor 'org.projectlombok:lombok'
+    // 🔸 MariaDB JDBC 드라이버
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    // 🔸 Spring 테스트 도구
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // 🔸 Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // 🔸 이메일 전송
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // 🔸 OAuth2 소셜 로그인 (Google, Kakao, Naver 등)
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    // 🔸 Spring Security 기반 로그인/인증/인가 기능
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.security:spring-security-test'
     runtimeOnly 'com.h2database:h2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
