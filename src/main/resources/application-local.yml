@@ -6,7 +6,7 @@ spring:
       on-profile: local
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://127.0.0.1:3306/shimpyoso
+    url: jdbc:mariadb://127.0.0.1:3307/shimpyoso
     username: root
     password: 1234
 
