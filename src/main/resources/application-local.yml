@@ -1,0 +1,29 @@
+server:
+  port: 0
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://127.0.0.1:3306/shimpyoso
+    username: root
+    password: 1234
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+  servlet:
+    multipart:
+      maxFileSize: 5120MB # ?? 5GB
+      maxRequestSize: 5120MB # ?? 5GB
+
+
+
+encryption:
+  secret-key: ${ENCRYPTION_SECRET}
