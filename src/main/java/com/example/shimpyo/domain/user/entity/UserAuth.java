@@ -31,8 +31,16 @@ public class UserAuth extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private SocialType socialType = SocialType.LOCAL;
 
+    @Column
+    private String oauthId;
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
+
+    @PreUpdate
+    public void onLogin(){
+        this.lastLogin = LocalDateTime.now();
+    }
 }
