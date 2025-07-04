@@ -10,5 +10,5 @@ public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
 
     Optional<UserAuth> findByUserLoginIdAndSocialType(String userLoginId, SocialType socialType);
 
-
+    Optional<UserAuth> findByUserLoginId(String userLoginId);
 }
