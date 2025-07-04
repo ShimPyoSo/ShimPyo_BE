@@ -24,9 +24,13 @@ public class UserController {
     // [#MOO1] 사용자 회원가입 시작
     @PostMapping("/signup")
     public ResponseEntity<?> registerMember(@RequestBody RegisterUserRequest dto){
-        authService.registerMember(dto);
+        try {
+            authService.registerMember(dto);
+            return new ResponseEntity<>("signup success!!", HttpStatus.OK);
+        }catch (BaseException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
 
-        return new ResponseEntity<>("signup success!!", HttpStatus.OK);
     }
     // [#MOO1] 사용자 회원가입 끝
 
