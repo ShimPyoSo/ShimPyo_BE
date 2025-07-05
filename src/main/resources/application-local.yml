@@ -23,7 +23,8 @@ spring:
       maxFileSize: 5120MB # ?? 5GB
       maxRequestSize: 5120MB # ?? 5GB
 
-
-
-encryption:
-  secret-key: ${ENCRYPTION_SECRET}
+jwt:
+  secretKey: very-strong-access-secret-key-very-strong-access-secret-key-very-strong-access-secret-key
+  secretKeyRT: refresh-token-secret-key
+  expirationRT: 86400000
+  expiration: 86400000  # 1 day in milliseconds
