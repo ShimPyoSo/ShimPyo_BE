@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserLoginDto {
-    private String loginId;
+    private String username;
     private String password;
+    // 자동 로그인
+    private Boolean isRememberMe;
 }

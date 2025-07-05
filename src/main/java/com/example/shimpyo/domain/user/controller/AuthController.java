@@ -31,12 +31,10 @@ public class AuthController {
     // [#MOO3] 유저 로그인 시작
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginDto dto) throws JsonProcessingException {
-        UserAuth userAuth = authService.login(dto);
+        LoginResponseDto loginResponseDto = authService.login(dto);
 
-        String jwtToken = jwtTokenProvider.createToken(userAuth.getUserLoginId());
-        Map<String,Object> loginInfo = new HashMap<>();
-        loginInfo.put("userToken", jwtToken);
-        return ResponseEntity.ok(jwtToken);
+        String jwtToken = jwtTokenProvider.createToken(loginResponseDto.getUserId().toString());
+        return ResponseEntity.ok(loginResponseDto);
     }
     // [#MOO3] 유저 로그인 끝
 }

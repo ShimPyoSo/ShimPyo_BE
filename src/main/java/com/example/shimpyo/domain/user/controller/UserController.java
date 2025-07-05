@@ -7,7 +7,6 @@ import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,30 +21,20 @@ import java.util.Map;
 public class UserController {
 
     private final AuthService authService;
-    private final
-    UserService userService;
+    private final UserService userService;
 
     // [#MOO1] 사용자 회원가입 시작
     @PostMapping("/signup")
-    public ResponseEntity<?> registerMember(@RequestBody RegisterUserRequest dto){
-        try {
-            authService.registerMember(dto);
-            return new ResponseEntity<>("signup success!!", HttpStatus.OK);
-        }catch (BaseException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-
+    public ResponseEntity<?> registerUser(@RequestBody RegisterUserRequest dto){
+        authService.registerUser(dto);
+        return ResponseEntity.ok("회원가입 완료");
     }
     // [#MOO1] 사용자 회원가입 끝
 
     // [#M002] 이메일 검증 시작
-    @GetMapping("/check/email")
+    @GetMapping("/check/email/duplicate")
     public ResponseEntity<?> getEmail(@RequestParam String email){
-        try{
-            return ResponseEntity.ok(authService.emailCheck(email));
-        }catch (BaseException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
+        return ResponseEntity.ok(authService.emailCheck(email));
     }
     // [#M002] 이메일 검증 끝
 
