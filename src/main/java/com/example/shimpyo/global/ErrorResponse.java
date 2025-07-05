@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 
+@Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ErrorResponse {
