@@ -62,7 +62,7 @@ public class AuthService {
     public LoginResponseDto login(UserLoginDto dto){
         UserAuth userAuth = userAuthRepository.findByUserLoginId(dto.getUsername())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
-
+        userAuthRepository.updateLastLogin(dto.getUsername());
         return LoginResponseDto.toDto(userAuth);
     }
     // [#MOO3] 유저 로그인 끝
