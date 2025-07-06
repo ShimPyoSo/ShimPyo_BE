@@ -28,12 +28,17 @@ public class MailService {
     public void authEmail(String email) {
         Random random = new Random();
 
-        String authKey = String.valueOf(random.nextInt(888888) + 111111);
+        StringBuilder authkey = new StringBuilder();
+        for(int i = 0 ; i < 3 ; i++){
+            char letter = (char) (random.nextInt(26) + 'A');
+            authkey.append(letter);
+        }
+        authkey.append(String.valueOf(random.nextInt(888) + 111));
 
         try {
-            sendAuthEmail(email, authKey);
+            sendAuthEmail(email, authkey.toString());
             // 5분 5초의 제한 시간으로 레디스에 인증 코드 저장
-            redisTemplate.opsForValue().set(email, authKey, 305, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(email, authkey.toString(), 305, TimeUnit.SECONDS);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
