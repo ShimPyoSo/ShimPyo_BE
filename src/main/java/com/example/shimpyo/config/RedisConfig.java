@@ -20,7 +20,7 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
-    // [#MOO4] 이메일 인증 레디스 DB 0번 사용
+    // [#MOO4] 이메일 인증 레디스 DB 1번 사용
     @Bean
     @Qualifier("1")
     public RedisConnectionFactory redisConnectionFactory() {
