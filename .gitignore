@@ -6,6 +6,13 @@ build/
 !**/src/test/**/build/
 **/resources/application-local.yml
 
+.idea
+.yml
+.gradlew
+gradlew.bat
+.gitattributes
+
+
 ### STS ###
 .apt_generated
 .classpath
