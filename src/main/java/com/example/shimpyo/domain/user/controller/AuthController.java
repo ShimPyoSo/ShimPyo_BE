@@ -33,7 +33,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody UserLoginDto dto) throws JsonProcessingException {
         LoginResponseDto loginResponseDto = authService.login(dto);
 
-        String jwtToken = jwtTokenProvider.createToken(loginResponseDto.getUserId().toString());
+        String jwtToken = jwtTokenProvider.createToken(dto.getUsername());
         return ResponseEntity.ok(loginResponseDto);
     }
     // [#MOO3] 유저 로그인 끝
