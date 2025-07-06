@@ -38,5 +38,25 @@ public class RedisConfig {
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return redisTemplate;
     }
-    // [#MOO4] 이메일 인증 레디스 DB 0번 사용 끝
+    // [#MOO4] 이메일 인증 레디스 DB 1번 사용 끝
+
+    // [#MOO5] 토큰 발급 로직 수정 시작 (DB 2번 사용 )
+    @Qualifier("2")
+    public RedisConnectionFactory redisTokenConnectionFactory() {
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
+        redisStandaloneConfiguration.setDatabase(2);
+        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+    }
+
+    @Bean
+    @Qualifier("2")
+    public RedisTemplate<String, Object> redisTokenTemplate(RedisConnectionFactory redisTokenConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisTokenConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return redisTemplate;
+    }
+
+    // [#MOO5] 토큰 발급 로직 수정 끝
 }

@@ -1,5 +1,6 @@
 package com.example.shimpyo.domain.user.service;
 
+import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.UserLoginDto;
 import com.example.shimpyo.domain.user.dto.LoginResponseDto;
 import com.example.shimpyo.domain.user.dto.RegisterUserRequest;
@@ -8,21 +9,34 @@ import com.example.shimpyo.domain.user.entity.UserAuth;
 import com.example.shimpyo.domain.user.oauth.NicknamePrefixLoader;
 import com.example.shimpyo.domain.user.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
+import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import static com.example.shimpyo.global.exceptionType.AuthException.PASSWORD_NOT_MATCHED;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
+import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
+import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN;
 
 @Service
 @Slf4j
@@ -33,6 +47,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final RedisService redisService;
 
     // [#MOO1] 사용자 회원가입 시작
     public void registerUser(RegisterUserRequest dto) {
@@ -59,11 +75,92 @@ public class AuthService {
     // [#MOO2] 이메일 인증 끝
 
     // [#MOO3] 유저 로그인 시작
-    public LoginResponseDto login(UserLoginDto dto){
+    public LoginResponseDto login(UserLoginDto dto, HttpServletResponse response) throws JsonProcessingException {
+
+        // 1. 사용자 검증
         UserAuth userAuth = userAuthRepository.findByUserLoginId(dto.getUsername())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        // [#MOO5] 토큰 발급 로직 수정 시작
+        // 2. 비밀번호 검증
+        if (!passwordEncoder.matches(dto.getPassword(), userAuth.getPassword())) {
+            throw new BaseException(PASSWORD_NOT_MATCHED);
+        }
+
+        // 3. 토큰 발급
+        String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
+        String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
+
+        // 4. RefreshToken Redis 저장.
+        redisService.saveRefreshToken(userAuth.getUserLoginId(), refreshToken);
+
+        // 쿠키 설정
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(1800)// 30분
+                // 타사이트 요청시 쿠키 전송 X
+                // Lax : 안정한 타사이트 요청 (GET)에만 허용
+                .sameSite("Strict")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60*60*24*30) // 30일
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader("Set-cookie", accessCookie.toString());
+        response.addHeader("Set-cookie", refreshCookie.toString());
+
+        // [#MOO5] 토큰 발급 로직 수정 끝
+
         userAuthRepository.updateLastLogin(dto.getUsername());
         return LoginResponseDto.toDto(userAuth);
     }
     // [#MOO3] 유저 로그인 끝
+
+    // [#MOO6] access Token 재발급 로직
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
+        // 1. 쿠키에서 refresh_token 추출
+        String refreshToken = extractCookie(request, "refresh_token");
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+            throw new BaseException(INVALID_REFRESH_TOKEN);
+        }
+
+        String userId = jwtTokenProvider.getUserId(refreshToken);
+
+        // 3. redis에 저장된 토큰과 비교
+        String savedToken = redisService.getRefreshToken(userId);
+        if(!refreshToken.equals(savedToken)) {
+            throw new BaseException(NOT_MATCHED_REFRESH_TOKEN);
+        }
+
+        // 4. 새 AccessToken 발급
+        String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", newAccessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(1800)
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader("Set-cookie", accessCookie.toString());
+    }
+
+    private String extractCookie(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) return null;
+        for(Cookie cookie : request.getCookies()){
+            if(cookie.getName().equals(name)){
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+    // [#MOO6] access Token 재발급 로직
 }

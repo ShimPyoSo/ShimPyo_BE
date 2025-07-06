@@ -26,29 +26,41 @@ public class JwtTokenProvider {
     @Value("${jwt.expirationRT}")
     long expirationRT;
 
-    public String createToken(String id){
+    public String createAccessToken(String id){
+        return createToken(id, expiration, "sec");
+    }
+
+    public String createRefreshToken(String id){
+        return createToken(id, expirationRT, "ref");
+    }
+
+    private String createToken(String id, long expiry, String type){
         Claims claims = Jwts.claims().setSubject(id);
-        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        Key key = null;
+        if(type.equals("ref")) {
+           key = Keys.hmacShaKeyFor(secretKeyRT.getBytes());
+        } else{
+            key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        }
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+ expiration) )
+                .setExpiration(new Date(System.currentTimeMillis() + expiry) )
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public Long getMemberIdFromToken(String bearerToken){
+    public boolean validateToken(String token){
         try{
-            String token = bearerToken.replace("Bearer ", "");
-
-            Claims claims = Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return Long.parseLong(claims.getSubject());
-        }catch (Exception e){
-            throw new BaseException(INVALID_TOKEN);
+            Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build().parseClaimsJws(token);
+            return true;
+        }catch (JwtException e){
+            return false;
         }
+    }
+
+    public String getUserId(String token){
+        return Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build()
+                .parseClaimsJws(token).getBody().getSubject();
     }
 }
