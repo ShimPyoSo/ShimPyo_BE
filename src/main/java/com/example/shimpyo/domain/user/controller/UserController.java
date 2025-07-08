@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.user.controller;
 
 import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
 import com.example.shimpyo.domain.auth.service.MailService;
+import com.example.shimpyo.domain.user.dto.MailCodeSendDto;
 import com.example.shimpyo.domain.user.service.AuthService;
 import com.example.shimpyo.domain.user.dto.RegisterUserRequest;
 import com.example.shimpyo.domain.user.service.UserService;
@@ -43,8 +44,8 @@ public class UserController {
 
     // [#MOO4] 이메일 인증 코드 발급 시작
     @PostMapping("/email")
-    public ResponseEntity<?> sendEmail(@RequestParam String email){
-        mailService.authEmail(email);
+    public ResponseEntity<?> sendEmail(@RequestBody MailCodeSendDto dto){
+        mailService.authEmail(dto);
 
         return ResponseEntity.ok("이메일을 전송하였습니다.");
     }
