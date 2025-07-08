@@ -131,7 +131,7 @@ public class AuthService {
             throw new BaseException(INVALID_REFRESH_TOKEN);
         }
 
-        String userId = jwtTokenProvider.getUserId(refreshToken);
+        String userId = jwtTokenProvider.getUserIdToRefresh(refreshToken);
 
         // 3. redis에 저장된 토큰과 비교
         String savedToken = redisService.getRefreshToken(userId);

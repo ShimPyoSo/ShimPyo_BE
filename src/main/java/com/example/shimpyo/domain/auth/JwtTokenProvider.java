@@ -52,7 +52,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token){
         try{
-            Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(secretKeyRT.getBytes()).build().parseClaimsJws(token);
             return true;
         }catch (JwtException e){
             return false;
@@ -61,6 +61,11 @@ public class JwtTokenProvider {
 
     public String getUserId(String token){
         return Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build()
+                .parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getUserIdToRefresh(String token){
+        return Jwts.parserBuilder().setSigningKey(secretKeyRT.getBytes()).build()
                 .parseClaimsJws(token).getBody().getSubject();
     }
 }
