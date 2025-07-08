@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,6 +44,12 @@ import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHE
 @RequiredArgsConstructor
 @Transactional
 public class AuthService {
+
+    @Value("${jwt.expirationALRT}")
+    long expirationALRT;
+    // 자동 로그인 체크 X 시 유효시간 2시간.
+    @Value("${jwt.expirationRT}")
+    long expirationRT;
 
     private final UserRepository userRepository;
     private final UserAuthRepository userAuthRepository;
@@ -75,7 +82,7 @@ public class AuthService {
     // [#MOO2] 이메일 인증 끝
 
     // [#MOO3] 유저 로그인 시작
-    public LoginResponseDto login(UserLoginDto dto, HttpServletResponse response) throws JsonProcessingException {
+    public LoginResponseDto login(UserLoginDto dto, HttpServletResponse response) {
 
         // 1. 사용자 검증
         UserAuth userAuth = userAuthRepository.findByUserLoginId(dto.getUsername())
@@ -89,11 +96,13 @@ public class AuthService {
 
         // 3. 토큰 발급
         String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
-        String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
+        String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername(), dto.getIsRememberMe());
 
         // 4. RefreshToken Redis 저장.
         redisService.saveRefreshToken(userAuth.getUserLoginId(), refreshToken);
 
+        // 리프레시 토큰 유효시간
+        long refreshTokenExpire = dto.getIsRememberMe() ? expirationALRT / 1000L : expirationRT / 1000L;
         // 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true)
@@ -109,7 +118,7 @@ public class AuthService {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(60*60*24*30) // 30일
+                .maxAge(refreshTokenExpire) // 30일
                 .sameSite("Strict")
                 .build();
 

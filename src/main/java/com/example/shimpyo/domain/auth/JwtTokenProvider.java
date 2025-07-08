@@ -23,6 +23,10 @@ public class JwtTokenProvider {
     String secretKeyRT;
     @Value("${jwt.expiration}")
     long expiration;
+    // 자동 로그인 체크 시 유효시간 30일
+    @Value("${jwt.expirationALRT}")
+    long expirationALRT;
+    // 자동 로그인 체크 X 시 유효시간 2시간.
     @Value("${jwt.expirationRT}")
     long expirationRT;
 
@@ -30,8 +34,12 @@ public class JwtTokenProvider {
         return createToken(id, expiration, "sec");
     }
 
-    public String createRefreshToken(String id){
-        return createToken(id, expirationRT, "ref");
+    public String createRefreshToken(String id, boolean isRememberMe){
+        if(isRememberMe){
+            return createToken(id, expirationALRT, "ref");
+        }else{
+            return createToken(id, expirationRT, "ref");
+        }
     }
 
     private String createToken(String id, long expiry, String type){
