@@ -106,7 +106,8 @@ public class AuthService {
         // 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true)
-                .secure(true)
+                // secure(true) 라면 https 에서만 쿠키 전송
+                .secure(false)
                 .path("/")
                 .maxAge(1800)// 30분
                 // 타사이트 요청시 쿠키 전송 X
@@ -116,7 +117,8 @@ public class AuthService {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
-                .secure(true)
+                // secure(true) 라면 https 에서만 쿠키 전송
+                .secure(false)
                 .path("/")
                 .maxAge(refreshTokenExpire) // 30일
                 .sameSite("Strict")
@@ -153,7 +155,8 @@ public class AuthService {
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", newAccessToken)
                 .httpOnly(true)
-                .secure(true)
+                // secure(true) 라면 https 에서만 쿠키 전송
+                .secure(false)
                 .path("/")
                 .maxAge(1800)
                 .sameSite("Strict")

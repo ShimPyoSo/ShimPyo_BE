@@ -34,10 +34,13 @@ public class JwtTokenProvider {
         return createToken(id, expiration, "sec");
     }
 
+    // refresh token 재발급 로직
     public String createRefreshToken(String id, boolean isRememberMe){
         if(isRememberMe){
+            // 자동 로그인 체크시 30일 refresh-token
             return createToken(id, expirationALRT, "ref");
         }else{
+            // 자동 로그인 미체크시 2시간의 refresh-token
             return createToken(id, expirationRT, "ref");
         }
     }
