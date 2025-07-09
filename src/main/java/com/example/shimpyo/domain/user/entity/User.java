@@ -1,5 +1,6 @@
 package com.example.shimpyo.domain.user.entity;
 
+import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.course.entity.Suggestion;
 import com.example.shimpyo.domain.course.entity.UserCourse;

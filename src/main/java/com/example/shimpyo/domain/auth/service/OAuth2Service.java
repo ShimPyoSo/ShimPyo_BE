@@ -1,11 +1,12 @@
-package com.example.shimpyo.domain.user.oauth;
+package com.example.shimpyo.domain.auth.service;
 
-import com.example.shimpyo.domain.user.dto.LoginResponseDto;
+import com.example.shimpyo.domain.auth.dto.LoginResponseDto;
 import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
-import com.example.shimpyo.domain.user.entity.UserAuth;
-import com.example.shimpyo.domain.user.repository.UserAuthRepository;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
+import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
+import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

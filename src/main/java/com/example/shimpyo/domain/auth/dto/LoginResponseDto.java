@@ -1,6 +1,6 @@
-package com.example.shimpyo.domain.user.dto;
+package com.example.shimpyo.domain.auth.dto;
 
-import com.example.shimpyo.domain.user.entity.UserAuth;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
 import lombok.Builder;
 import lombok.Getter;
 

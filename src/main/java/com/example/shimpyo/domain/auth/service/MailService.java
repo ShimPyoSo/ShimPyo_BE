@@ -1,7 +1,7 @@
 package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
-import com.example.shimpyo.domain.user.dto.MailCodeSendDto;
+import com.example.shimpyo.domain.auth.dto.MailCodeSendDto;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
 import jakarta.mail.MessagingException;
