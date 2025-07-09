@@ -41,7 +41,7 @@ public class AuthController {
     // [#MOO3] 유저 로그인 끝
 
     // [#MOO6] AccessToken 재발급 로직
-    @PostMapping("/refresh")
+    @PostMapping("/reissue")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         authService.refreshToken(request, response);
 
