@@ -1,20 +1,17 @@
-package com.example.shimpyo.domain.user.service;
+package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.dto.UserLoginDto;
-import com.example.shimpyo.domain.user.dto.LoginResponseDto;
-import com.example.shimpyo.domain.user.dto.RegisterUserRequest;
+import com.example.shimpyo.domain.auth.dto.LoginResponseDto;
+import com.example.shimpyo.domain.auth.dto.RegisterUserRequest;
 import com.example.shimpyo.domain.user.entity.User;
-import com.example.shimpyo.domain.user.entity.UserAuth;
-import com.example.shimpyo.domain.user.oauth.NicknamePrefixLoader;
-import com.example.shimpyo.domain.user.repository.UserAuthRepository;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
+import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
+import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.global.exceptionType.MemberExceptionType;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

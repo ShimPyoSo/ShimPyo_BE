@@ -1,4 +1,4 @@
-package com.example.shimpyo.global;
+package com.example.shimpyo.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
