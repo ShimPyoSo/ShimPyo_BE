@@ -1,7 +1,7 @@
-package com.example.shimpyo.domain.user.repository;
+package com.example.shimpyo.domain.auth.repository;
 
 import com.example.shimpyo.domain.user.entity.SocialType;
-import com.example.shimpyo.domain.user.entity.UserAuth;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

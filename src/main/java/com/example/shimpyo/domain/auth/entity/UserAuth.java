@@ -1,6 +1,8 @@
-package com.example.shimpyo.domain.user.entity;
+package com.example.shimpyo.domain.auth.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
+import com.example.shimpyo.domain.user.entity.SocialType;
+import com.example.shimpyo.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

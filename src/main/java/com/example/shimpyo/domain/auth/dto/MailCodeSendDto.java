@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.user.dto;
+package com.example.shimpyo.domain.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
