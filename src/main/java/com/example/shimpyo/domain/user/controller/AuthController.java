@@ -3,20 +3,20 @@ package com.example.shimpyo.domain.user.controller;
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.UserLoginDto;
 import com.example.shimpyo.domain.user.dto.LoginResponseDto;
-import com.example.shimpyo.domain.user.entity.UserAuth;
 import com.example.shimpyo.domain.user.oauth.OAuth2Service;
 import com.example.shimpyo.domain.user.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user/auth")
 @RequiredArgsConstructor
+@Tag(name = "User Auth", description = "회원가입 등 인증 관련 API")
 public class AuthController {
 
     private final OAuth2Service oAuth2Service;
