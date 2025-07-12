@@ -3,6 +3,7 @@ package com.example.shimpyo.domain.user.controller;
 import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/user/")
 @RestController
+@Tag(name = "User", description = "유저 관련 API")
 public class UserController {
 
     private final UserService userService;
