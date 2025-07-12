@@ -30,7 +30,7 @@ import static com.example.shimpyo.global.exceptionType.AuthException.PASSWORD_NO
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
 import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
-import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN
+import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN;
 
 @Service
 @Slf4j
