@@ -40,9 +40,4 @@ public class UserAuth extends BaseEntity {
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
-
-    @PreUpdate
-    public void onLogin(){
-        this.lastLogin = LocalDateTime.now();
-    }
 }

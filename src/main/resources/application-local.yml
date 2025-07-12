@@ -44,6 +44,7 @@ spring:
 
 jwt:
   secretKey: very-strong-access-secret-key-very-strong-access-secret-key-very-strong-access-secret-key
-  secretKeyRT: refresh-token-secret-key
-  expirationRT: 86400000
-  expiration: 86400000  # 1 day in milliseconds
+  secretKeyRT: very-refresh-strong-key-secret-very-refresh-strong-key-secret-very-refresh-strong-key-secret
+  expirationRT: 7200000 # 2 hours in milliseconds
+  expirationALRT: 2592000000 # 30 days in milliseconds
+  expiration: 1800000  # 30 min in milliseconds
