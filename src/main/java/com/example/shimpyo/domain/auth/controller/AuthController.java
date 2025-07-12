@@ -1,6 +1,5 @@
 package com.example.shimpyo.domain.auth.controller;
 
-import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
 import com.example.shimpyo.domain.auth.dto.UserLoginDto;
 import com.example.shimpyo.domain.auth.service.MailService;
@@ -10,6 +9,7 @@ import com.example.shimpyo.domain.auth.dto.RegisterUserRequest;
 import com.example.shimpyo.domain.auth.service.OAuth2Service;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,6 @@ public class AuthController {
 
     private final OAuth2Service oAuth2Service;
     private final AuthService  authService;
-    private final JwtTokenProvider jwtTokenProvider;
     private final MailService mailService;
 
     @PostMapping("/social/login")
@@ -33,10 +32,9 @@ public class AuthController {
 
     // [#MOO3] 유저 로그인 시작
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDto dto) throws JsonProcessingException {
-        LoginResponseDto loginResponseDto = authService.login(dto);
+    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) throws JsonProcessingException {
+        LoginResponseDto loginResponseDto = authService.login(dto, response);
 
-        String jwtToken = jwtTokenProvider.createToken(dto.getUsername());
         return ResponseEntity.ok(loginResponseDto);
     }
     // [#MOO3] 유저 로그인 끝
