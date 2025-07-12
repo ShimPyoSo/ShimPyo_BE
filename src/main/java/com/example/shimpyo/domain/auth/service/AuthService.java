@@ -1,37 +1,30 @@
-package com.example.shimpyo.domain.user.service;
+package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.UserLoginDto;
-import com.example.shimpyo.domain.user.dto.LoginResponseDto;
-import com.example.shimpyo.domain.user.dto.RegisterUserRequest;
+import com.example.shimpyo.domain.auth.dto.LoginResponseDto;
+import com.example.shimpyo.domain.auth.dto.RegisterUserRequest;
 import com.example.shimpyo.domain.user.entity.User;
-import com.example.shimpyo.domain.user.entity.UserAuth;
-import com.example.shimpyo.domain.user.oauth.NicknamePrefixLoader;
-import com.example.shimpyo.domain.user.repository.UserAuthRepository;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
+import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
+import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.global.exceptionType.MemberExceptionType;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.PASSWORD_NOT_MATCHED;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;

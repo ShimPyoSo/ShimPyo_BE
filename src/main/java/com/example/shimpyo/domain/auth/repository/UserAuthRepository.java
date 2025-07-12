@@ -1,8 +1,8 @@
-package com.example.shimpyo.domain.user.repository;
+package com.example.shimpyo.domain.auth.repository;
 
 import com.example.shimpyo.domain.user.entity.SocialType;
-import com.example.shimpyo.domain.user.entity.UserAuth;
 import io.lettuce.core.dynamic.annotation.Param;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

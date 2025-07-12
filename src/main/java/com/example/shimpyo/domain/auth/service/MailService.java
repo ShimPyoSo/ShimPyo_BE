@@ -1,11 +1,14 @@
 package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
+import com.example.shimpyo.domain.auth.dto.MailCodeSendDto;
+import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,6 +18,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.MAIL_CODE_NOT_MATCHED;
+import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;
+import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_NOT_FOUNDED;
 
 @Transactional
 @RequiredArgsConstructor
@@ -22,10 +27,29 @@ import static com.example.shimpyo.global.exceptionType.AuthException.MAIL_CODE_N
 public class MailService {
 
     private final JavaMailSender mailSender;
+    @Qualifier("1")
     private final RedisTemplate<String, Object> redisTemplate;
+    private final UserRepository userRepository;
     
     // [#MOO4] 메일 전송 시작 
-    public void authEmail(String email) {
+    public void authEmail(MailCodeSendDto dto) {
+        String email = "";
+        
+        /*
+        * 메일 전송 타입 : register 인 경우 메일이 존재할 경우 : "이미 가입된 이메일 입니다." 예외 처리
+        * 메일 전송 타입 : find 인 경우 메일이 존재하지 않을 경우 : "해당 이메일이 존재하지 않습니다." 예외 처리
+         */
+        if(dto.getType().equals("register")){
+            if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+                throw new BaseException(EMAIL_DUPLICATION);
+            }else{
+                email = dto.getEmail();
+            }
+        }else if(dto.getType().equals("find")){
+            email = userRepository.findByEmail(dto.getEmail())
+                    .orElseThrow(() -> new BaseException(EMAIL_NOT_FOUNDED)).getEmail();
+        }
+
         Random random = new Random();
 
         StringBuilder authkey = new StringBuilder();
