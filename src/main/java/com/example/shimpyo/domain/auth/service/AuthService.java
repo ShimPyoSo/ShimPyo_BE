@@ -1,9 +1,7 @@
 package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
-import com.example.shimpyo.domain.auth.dto.UserLoginDto;
-import com.example.shimpyo.domain.auth.dto.LoginResponseDto;
-import com.example.shimpyo.domain.auth.dto.RegisterUserRequest;
+import com.example.shimpyo.domain.auth.dto.*;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
@@ -27,8 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
-import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;
-import static com.example.shimpyo.global.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
+import static com.example.shimpyo.global.exceptionType.MemberExceptionType.*;
 import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
 import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN;
 
@@ -186,5 +183,25 @@ public class AuthService {
             .ifPresent(user -> {
                 throw new BaseException(LOGIN_ID_DUPLICATION);
             });
+    }
+
+    // 유저 아이디 찾는 로직
+    public FindUsernameResponseDto findUsername(FindUsernameRequestDto dto) {
+        String email = dto.getEmail();
+
+        if(email == null || email.isBlank()){
+            throw new BaseException(INVALID_EMAIL_REQUEST);
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BaseException(EMAIL_NOT_FOUNDED));
+
+        UserAuth userAuth = userAuthRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        return FindUsernameResponseDto.builder()
+                .username(userAuth.getUserLoginId())
+                .createdAt(userAuth.getCreatedAt())
+                .build();
     }
 }

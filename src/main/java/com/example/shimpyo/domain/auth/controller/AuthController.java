@@ -1,14 +1,11 @@
 package com.example.shimpyo.domain.auth.controller;
 
-import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
-import com.example.shimpyo.domain.auth.dto.UserLoginDto;
+import com.example.shimpyo.domain.auth.dto.*;
 import com.example.shimpyo.domain.auth.service.MailService;
-import com.example.shimpyo.domain.auth.dto.LoginResponseDto;
-import com.example.shimpyo.domain.auth.dto.MailCodeSendDto;
-import com.example.shimpyo.domain.auth.dto.RegisterUserRequest;
 import com.example.shimpyo.domain.auth.service.OAuth2Service;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -73,10 +70,20 @@ public class AuthController {
     // [#MOO5] 이메일 인증 코드 검증 끝
 
     // 아이디 중복 검사 로직
+    @Operation(summary = "아이디 중복 검사", description = "사용자 로그인 아이디를 기반으로 중복 검사.")
     @GetMapping("/duplicate/username")
     public ResponseEntity<?> getDuplicate(@RequestParam String username){
         authService.validateDuplicateUsername(username);
 
         return ResponseEntity.ok("사용 가능한 아이디입니다.");
+    }
+
+    // 아이디 찾기 로직 구현
+    @Operation(summary = "아이디 찾기", description = "이메일을 기반으로 사용자의 아이디를 조회합니다.")
+    @PostMapping("/username")
+    public ResponseEntity<?> getUsername(@RequestBody FindUsernameRequestDto requestDto){
+        FindUsernameResponseDto responseDto = authService.findUsername(requestDto);
+
+        return ResponseEntity.ok(responseDto);
     }
 }
