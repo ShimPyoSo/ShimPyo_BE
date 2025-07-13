@@ -71,4 +71,12 @@ public class AuthController {
         return ResponseEntity.ok("인증 완료");
     }
     // [#MOO5] 이메일 인증 코드 검증 끝
+
+    // 아이디 중복 검사 로직
+    @GetMapping("/duplicate")
+    public ResponseEntity<?> getDuplicate(@RequestParam String username){
+        authService.validateDuplicateUsername(username);
+
+        return ResponseEntity.ok("사용 가능한 아이디입니다.");
+    }
 }

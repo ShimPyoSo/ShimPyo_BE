@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.shimpyo.global.exceptionType.AuthException.LOGIN_ID_DUPLICATION;
 import static com.example.shimpyo.global.exceptionType.AuthException.PASSWORD_NOT_MATCHED;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
@@ -168,4 +169,12 @@ public class AuthService {
         return null;
     }
     // [#MOO6] access Token 재발급 로직
+
+    // 로그인 아이디가 중복된 아이디인지 아닌지 판별하는 로직
+    public void validateDuplicateUsername(String username){
+        userAuthRepository.findByUserLoginId(username)
+            .ifPresent(user -> {
+                throw new BaseException(LOGIN_ID_DUPLICATION);
+            });
+    }
 }
