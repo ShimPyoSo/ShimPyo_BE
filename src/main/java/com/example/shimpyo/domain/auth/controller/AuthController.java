@@ -73,7 +73,7 @@ public class AuthController {
     // [#MOO5] 이메일 인증 코드 검증 끝
 
     // 아이디 중복 검사 로직
-    @GetMapping("/duplicate")
+    @GetMapping("/duplicate/login/id")
     public ResponseEntity<?> getDuplicate(@RequestParam String username){
         authService.validateDuplicateUsername(username);
 
