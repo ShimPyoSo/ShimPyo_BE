@@ -26,8 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.shimpyo.global.exceptionType.AuthException.LOGIN_ID_DUPLICATION;
-import static com.example.shimpyo.global.exceptionType.AuthException.PASSWORD_NOT_MATCHED;
+import static com.example.shimpyo.global.exceptionType.AuthException.*;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
 import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
@@ -53,6 +52,7 @@ public class AuthService {
 
     // [#MOO1] 사용자 회원가입 시작
     public void registerUser(RegisterUserRequest dto) {
+        validateUsername(dto.getUsername());
         // [#MOO1] 이메일 중복 여부 확인 (deleted_at = null 인 사용자만 대상으로)
         if (userRepository.findByEmailAndDeletedAtIsNull(dto.getEmail()).isPresent()) {
             throw new BaseException(EMAIL_DUPLICATION);
@@ -64,6 +64,16 @@ public class AuthService {
         userAuthRepository.save(dto.toUserAuthEntity(passwordEncoder.encode(dto.getPassword()), user));
     }
     // [#MOO1] 사용자 회원가입 끝
+
+    // 회원가입 시 자체적인 아이디 유효성 검사
+    private void validateUsername(String username) {
+        if( username.length() > 12 || username.length() < 6){
+            throw new BaseException(USERNAME_NOT_VALIDATE);
+        }
+        if( !username.matches("^[a-z0-9]^")){
+            throw new BaseException(USERNAME_NOT_VALIDATE);
+        }
+    }
 
     // [#MOO2] 이메일 인증 시작
     public Map<String, Boolean> emailCheck(String email) {
