@@ -35,7 +35,7 @@ public class SwaggerConfig {
                         .addSchemas("UserLoginRequestDto", createUserLoginRequestDtoSchema())
                         .addSchemas("LoginResponse", createLoginResponseSchema()))
                 .addSecurityItem(new SecurityRequirement().addList("AccessToken"))
-                .path("/users/login", createLoginPath());
+                .path("/api/user/auth/login", createLoginPath());
     }
 
     private PathItem createLoginPath() {
