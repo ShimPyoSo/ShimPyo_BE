@@ -34,10 +34,11 @@ public class UserController {
     }
 
     @GetMapping("/nickname")
-    public ResponseEntity<Boolean> checkNickname(@RequestParam("nickname") String nickname) {
+    public ResponseEntity<Void> checkNickname(@RequestParam("nickname") String nickname) {
         if (!nickname.matches("^[a-zA-Z0-9가-힣_]{2,20}$")) {
             throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
         }
-        return ResponseEntity.ok(userService.checkNickname(nickname));
+        userService.checkNickname(nickname);
+        return ResponseEntity.ok().build();
     }
 }
