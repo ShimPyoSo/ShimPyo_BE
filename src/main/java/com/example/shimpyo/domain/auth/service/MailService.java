@@ -14,6 +14,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +34,12 @@ public class MailService {
     @Qualifier("1")
     private final RedisTemplate<String, Object> redisTemplate;
     private final UserRepository userRepository;
+
+    private static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String NUMBERS = "0123456789";
+    private static final String SPECIALS = "~!@#$%^&*";
+    private static final String ALL = LETTERS + NUMBERS + SPECIALS;
+    private static final SecureRandom random = new SecureRandom();
     
     // [#MOO4] 메일 전송 시작 
     public void authEmail(MailCodeSendDto dto) {
@@ -91,4 +101,36 @@ public class MailService {
         }
     }
     // [#MOO5] 메일 정보와 인증 코드 일치 여부 판단 로직 끝
+
+    // 회원 이메일로 임시 비밀번호 전송
+    public void sendResetPasswordMail(String email) throws MessagingException {
+        String subject = "ShimPyoSo Authorization";
+        String text = "임시 비밀번호는 " + generatePassword() + "입니다.";
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
+
+        helper.setTo(email);
+        helper.setSubject(subject);
+        helper.setText(text, true); // 포함된 텍스트가 HTML이라는 의미로 true.
+        mailSender.send(mimeMessage);
+    }
+
+    private static String generatePassword() {
+        List<Character> passwordChars = new ArrayList<>();
+
+        passwordChars.add(LETTERS.charAt(random.nextInt(LETTERS.length())));
+        passwordChars.add(NUMBERS.charAt(random.nextInt(NUMBERS.length())));
+        passwordChars.add(SPECIALS.charAt(random.nextInt(SPECIALS.length())));
+
+        for (int i = 3; i < 8; i++) {
+            passwordChars.add(ALL.charAt(random.nextInt(ALL.length())));
+        }
+        Collections.shuffle(passwordChars);
+        StringBuilder password = new StringBuilder();
+        for (char ch : passwordChars) {
+            password.append(ch);
+        }
+        return password.toString();
+    }
 }

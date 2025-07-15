@@ -15,14 +15,14 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/user/")
+@RequestMapping("/api/user/mypage")
 @RestController
 @Tag(name = "User", description = "유저 관련 API")
 public class UserController {
 
     private final UserService userService;
 
-    @PatchMapping("/mypage")
+    @PatchMapping("/nickname")
     public ResponseEntity<Void> changeNickname(@AuthenticationPrincipal UserDetails user,
                                                @RequestBody Map<String, String> requestDto) {
         String newNickname = requestDto.get("nickname");

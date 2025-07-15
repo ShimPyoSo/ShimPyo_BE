@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.*;
+import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
@@ -10,6 +11,7 @@ import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +49,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
+    private final MailService mailService;
+    private final OAuth2Service oAuth2Service;
 
     // [#MOO1] 사용자 회원가입 시작
     public void registerUser(RegisterUserRequest dto) {
@@ -193,4 +198,44 @@ public class AuthService {
                 .createdAt(userAuth.getCreatedAt())
                 .build();
     }
+
+    public void sendPasswordResetMail(FindPasswordRequestDto requestDto) throws MessagingException {
+
+        UserAuth user = userAuthRepository.findByUserLoginId(requestDto.getUsername())
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        if (!user.getUser().getEmail().equals(requestDto.getEmail()))
+            throw new BaseException(EMAIL_NOT_FOUNDED);
+
+        mailService.sendResetPasswordMail(requestDto.getEmail());
+    }
+
+    public void resetPassword(String username, ResetPasswordRequestDto requestDto) {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        String nowPW = passwordEncoder.encode(requestDto.getNowPassword());
+        String newPW = requestDto.getNewPassword();
+        String checkNewPW = requestDto.getCheckNewPassword();
+
+        if (!nowPW.equals(userAuth.getPassword()))
+            throw new BaseException(PASSWORD_NOT_MATCHED);
+        if (!newPW.equals(checkNewPW))
+            throw new BaseException(TWO_PASSWORD_NOT_MATCHED);
+
+        newPW = passwordEncoder.encode(newPW);
+        if (nowPW.equals(newPW))
+            throw new BaseException(PASSWORD_DUPLICATED);
+        userAuth.resetPassword(newPW);
+    }
+
+    public void deleteUser(String username) {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        if (userAuth.getDeletedAt() != null)
+            throw new BaseException(MEMBER_NOT_FOUND);
+        if (userAuth.getSocialType().equals(SocialType.KAKAO))
+            oAuth2Service.unlinkKaKao(userAuth);
+        userAuth.delete();
+    }
+
 }

@@ -15,6 +15,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
@@ -27,6 +29,7 @@ public class OAuth2Service {
 
     private final UserRepository userRepository;
     private final UserAuthRepository userAuthRepository;
+    private final OAuth2AuthorizedClientService oauthService;
 
     @Transactional
     public LoginResponseDto kakaoLogin(String accessToken) throws JsonProcessingException {
@@ -72,4 +75,31 @@ public class OAuth2Service {
         return LoginResponseDto.toDto(user);
     }
 
+    public void unlinkKaKao(UserAuth userAuth) {
+        OAuth2AuthorizedClient authorizedClient = oauthService.loadAuthorizedClient(
+                "kakao", // OAuth2 로그인 제공자 이름
+                userAuth.getUserLoginId() // 카카오 사용자의 이메일
+        );
+        String kakaoAccess = null;
+        if (authorizedClient != null) {
+            kakaoAccess = authorizedClient.getAccessToken().getTokenValue();// Access Token 추출
+        }
+        RestTemplate restTemplate = new RestTemplate();
+
+        // POST 요청으로 데이터 전송
+        // HttpHeaders 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + kakaoAccess); // Authorization 헤더 설정
+
+        // HttpEntity에 본문 없이 헤더만 담기
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        // POST 요청 보내기 (request body 없음)
+        restTemplate.exchange(
+                "https://kapi.kakao.com/v1/user/unlink",  // 요청할 URL
+                HttpMethod.POST,                 // HTTP 메서드
+                entity,                          // HttpEntity (본문 없음, 헤더만 있음)
+                String.class                     // 응답 타입
+        );
+    }
 }
