@@ -29,7 +29,7 @@ public class OAuth2Service {
 
     private final UserRepository userRepository;
     private final UserAuthRepository userAuthRepository;
-    private final OAuth2AuthorizedClientService oauthService;
+//    private final OAuth2AuthorizedClientService oauthService;
 
     @Transactional
     public LoginResponseDto kakaoLogin(String accessToken) throws JsonProcessingException {
@@ -75,7 +75,7 @@ public class OAuth2Service {
         return LoginResponseDto.toDto(user);
     }
 
-    public void unlinkKaKao(UserAuth userAuth) {
+    /*public void unlinkKaKao(UserAuth userAuth) {
         OAuth2AuthorizedClient authorizedClient = oauthService.loadAuthorizedClient(
                 "kakao", // OAuth2 로그인 제공자 이름
                 userAuth.getUserLoginId() // 카카오 사용자의 이메일
@@ -101,5 +101,5 @@ public class OAuth2Service {
                 entity,                          // HttpEntity (본문 없음, 헤더만 있음)
                 String.class                     // 응답 타입
         );
-    }
+    }*/
 }

@@ -24,8 +24,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.security.SecureRandom;
+import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.*;
@@ -51,6 +51,12 @@ public class AuthService {
     private final RedisService redisService;
     private final MailService mailService;
     private final OAuth2Service oAuth2Service;
+
+    private static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String NUMBERS = "0123456789";
+    private static final String SPECIALS = "~!@#$%^&*";
+    private static final String ALL = LETTERS + NUMBERS + SPECIALS;
+    private static final SecureRandom random = new SecureRandom();
 
     // [#MOO1] 사용자 회원가입 시작
     public void registerUser(RegisterUserRequest dto) {
@@ -206,7 +212,9 @@ public class AuthService {
         if (!user.getUser().getEmail().equals(requestDto.getEmail()))
             throw new BaseException(EMAIL_NOT_FOUNDED);
 
-        mailService.sendResetPasswordMail(requestDto.getEmail());
+        String tempPW = generatePassword();
+        mailService.sendResetPasswordMail(requestDto.getEmail(),tempPW);
+        user.resetPassword(passwordEncoder.encode(tempPW));
     }
 
     public void resetPassword(String username, ResetPasswordRequestDto requestDto) {
@@ -233,9 +241,27 @@ public class AuthService {
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         if (userAuth.getDeletedAt() != null)
             throw new BaseException(MEMBER_NOT_FOUND);
-        if (userAuth.getSocialType().equals(SocialType.KAKAO))
-            oAuth2Service.unlinkKaKao(userAuth);
+//        if (userAuth.getSocialType().equals(SocialType.KAKAO))
+//            oAuth2Service.unlinkKaKao(userAuth);
         userAuth.delete();
+    }
+
+    private static String generatePassword() {
+        List<Character> passwordChars = new ArrayList<>();
+
+        passwordChars.add(LETTERS.charAt(random.nextInt(LETTERS.length())));
+        passwordChars.add(NUMBERS.charAt(random.nextInt(NUMBERS.length())));
+        passwordChars.add(SPECIALS.charAt(random.nextInt(SPECIALS.length())));
+
+        for (int i = 3; i < 8; i++) {
+            passwordChars.add(ALL.charAt(random.nextInt(ALL.length())));
+        }
+        Collections.shuffle(passwordChars);
+        StringBuilder password = new StringBuilder();
+        for (char ch : passwordChars) {
+            password.append(ch);
+        }
+        return password.toString();
     }
 
 }
