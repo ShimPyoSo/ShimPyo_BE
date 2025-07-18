@@ -241,8 +241,10 @@ public class AuthService {
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         if (userAuth.getDeletedAt() != null)
             throw new BaseException(MEMBER_NOT_FOUND);
-//        if (userAuth.getSocialType().equals(SocialType.KAKAO))
-//            oAuth2Service.unlinkKaKao(userAuth);
+
+        if (userAuth.getSocialType().equals(SocialType.KAKAO))
+            oAuth2Service.unlinkKaKao(userAuth);
+
         userAuth.delete();
     }
 
