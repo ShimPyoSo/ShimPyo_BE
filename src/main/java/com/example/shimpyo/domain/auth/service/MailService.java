@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
 import com.example.shimpyo.domain.auth.dto.MailCodeSendDto;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
 import jakarta.mail.MessagingException;
@@ -14,6 +15,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -91,4 +96,21 @@ public class MailService {
         }
     }
     // [#MOO5] 메일 정보와 인증 코드 일치 여부 판단 로직 끝
+
+    // 회원 이메일로 임시 비밀번호 전송
+    public void sendResetPasswordMail(String email, String tempPW) throws MessagingException {
+
+        String subject = "ShimPyoSo Authorization";
+        String text = "임시 비밀번호는 " + tempPW + "입니다.";
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
+
+        helper.setTo(email);
+        helper.setSubject(subject);
+        helper.setText(text, true); // 포함된 텍스트가 HTML이라는 의미로 true.
+        mailSender.send(mimeMessage);
+    }
+
+
 }

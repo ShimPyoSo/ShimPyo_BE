@@ -21,7 +21,8 @@ public class UserService {
                 .changeNickname(nickname);
     }
 
-    public boolean checkNickname(String nickname) {
-        return userRepository.existsByNickname(nickname);
+    public void checkNickname(String nickname) {
+        if (userRepository.existsByNickname(nickname))
+            throw new BaseException(MemberExceptionType.NICKNAME_DUPLICATED);
     }
 }

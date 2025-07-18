@@ -40,4 +40,8 @@ public class UserAuth extends BaseEntity {
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void resetPassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

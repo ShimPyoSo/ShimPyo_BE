@@ -11,12 +11,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,6 +26,9 @@ public class OAuth2Service {
 
     private final UserRepository userRepository;
     private final UserAuthRepository userAuthRepository;
+
+    @Value("${spring.security.oauth2.client.provider.kakao.admin-key}")
+    private String KAKAO_ADMIN_KEY;
 
     @Transactional
     public LoginResponseDto kakaoLogin(String accessToken) throws JsonProcessingException {
@@ -53,7 +55,8 @@ public class OAuth2Service {
         String id = jsonNode.get("id").asText();
 
         // find로 가져올 데이터가 있으면 기존 회원, 아니면 신규 가입
-        UserAuth user = userAuthRepository.findByUserLoginIdAndSocialType(email, SocialType.KAKAO)
+        // TODO 재가입시 로직
+        UserAuth user = userAuthRepository.findByUserLoginIdAndSocialTypeAndDeletedAtIsNull(email, SocialType.KAKAO)
                 .orElseGet(() -> {
                     User newUSer = userRepository.save(User.builder()
                             .email(email)
@@ -72,4 +75,27 @@ public class OAuth2Service {
         return LoginResponseDto.toDto(user);
     }
 
+    public void unlinkKaKao(UserAuth userAuth) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set(HttpHeaders.AUTHORIZATION, "KakaoAK " + KAKAO_ADMIN_KEY);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        // POST 요청으로 데이터 전송
+        // HttpHeaders 생성
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("target_id_type", "user_id");  // target_id_type
+        params.add("target_id", userAuth.getOauthId());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+
+        ResponseEntity<String> exchange = restTemplate.exchange(
+                "https://kapi.kakao.com/v1/user/unlink",  // 요청할 URL
+                HttpMethod.POST,                 // HTTP 메서드
+                entity,
+                String.class                     // 응답 타입
+        );
+        System.out.println("success : " + exchange.getBody());
+    }
 }

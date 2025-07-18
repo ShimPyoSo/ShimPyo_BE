@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.*;
+import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
@@ -10,6 +11,7 @@ import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,11 +20,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.security.SecureRandom;
+import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.*;
@@ -46,10 +49,17 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
+    private final MailService mailService;
+    private final OAuth2Service oAuth2Service;
+
+    private static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String NUMBERS = "0123456789";
+    private static final String SPECIALS = "~!@#$%^&*";
+    private static final String ALL = LETTERS + NUMBERS + SPECIALS;
+    private static final SecureRandom random = new SecureRandom();
 
     // [#MOO1] 사용자 회원가입 시작
     public void registerUser(RegisterUserRequest dto) {
-        validateUsername(dto.getUsername());
         // [#MOO1] 이메일 중복 여부 확인 (deleted_at = null 인 사용자만 대상으로)
         if (userRepository.findByEmailAndDeletedAtIsNull(dto.getEmail()).isPresent()) {
             throw new BaseException(EMAIL_DUPLICATION);
@@ -61,16 +71,6 @@ public class AuthService {
         userAuthRepository.save(dto.toUserAuthEntity(passwordEncoder.encode(dto.getPassword()), user));
     }
     // [#MOO1] 사용자 회원가입 끝
-
-    // 회원가입 시 자체적인 아이디 유효성 검사
-    private void validateUsername(String username) {
-        if( username.length() > 12 || username.length() < 6){
-            throw new BaseException(USERNAME_NOT_VALIDATE);
-        }
-        if( !username.matches("^[a-z0-9]^")){
-            throw new BaseException(USERNAME_NOT_VALIDATE);
-        }
-    }
 
     // [#MOO2] 이메일 인증 시작
     public Map<String, Boolean> emailCheck(String email) {
@@ -204,4 +204,66 @@ public class AuthService {
                 .createdAt(userAuth.getCreatedAt())
                 .build();
     }
+
+    public void sendPasswordResetMail(FindPasswordRequestDto requestDto) throws MessagingException {
+
+        UserAuth user = userAuthRepository.findByUserLoginId(requestDto.getUsername())
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        if (!user.getUser().getEmail().equals(requestDto.getEmail()))
+            throw new BaseException(EMAIL_NOT_FOUNDED);
+
+        String tempPW = generatePassword();
+        mailService.sendResetPasswordMail(requestDto.getEmail(),tempPW);
+        user.resetPassword(passwordEncoder.encode(tempPW));
+    }
+
+    public void resetPassword(String username, ResetPasswordRequestDto requestDto) {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        String nowPW = passwordEncoder.encode(requestDto.getNowPassword());
+        String newPW = requestDto.getNewPassword();
+        String checkNewPW = requestDto.getCheckNewPassword();
+
+        if (!nowPW.equals(userAuth.getPassword()))
+            throw new BaseException(PASSWORD_NOT_MATCHED);
+        if (!newPW.equals(checkNewPW))
+            throw new BaseException(TWO_PASSWORD_NOT_MATCHED);
+
+        newPW = passwordEncoder.encode(newPW);
+        if (nowPW.equals(newPW))
+            throw new BaseException(PASSWORD_DUPLICATED);
+        userAuth.resetPassword(newPW);
+    }
+
+    public void deleteUser(String username) {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        if (userAuth.getDeletedAt() != null)
+            throw new BaseException(MEMBER_NOT_FOUND);
+
+        if (userAuth.getSocialType().equals(SocialType.KAKAO))
+            oAuth2Service.unlinkKaKao(userAuth);
+
+        userAuth.delete();
+    }
+
+    private static String generatePassword() {
+        List<Character> passwordChars = new ArrayList<>();
+
+        passwordChars.add(LETTERS.charAt(random.nextInt(LETTERS.length())));
+        passwordChars.add(NUMBERS.charAt(random.nextInt(NUMBERS.length())));
+        passwordChars.add(SPECIALS.charAt(random.nextInt(SPECIALS.length())));
+
+        for (int i = 3; i < 8; i++) {
+            passwordChars.add(ALL.charAt(random.nextInt(ALL.length())));
+        }
+        Collections.shuffle(passwordChars);
+        StringBuilder password = new StringBuilder();
+        for (char ch : passwordChars) {
+            password.append(ch);
+        }
+        return password.toString();
+    }
+
 }

@@ -6,9 +6,13 @@ import com.example.shimpyo.domain.auth.service.OAuth2Service;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -38,7 +42,7 @@ public class AuthController {
 
     // [#MOO1] 사용자 회원가입 시작
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterUserRequest dto){
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequest dto){
         authService.registerUser(dto);
         return ResponseEntity.ok("회원가입 완료");
     }
@@ -85,5 +89,28 @@ public class AuthController {
         FindUsernameResponseDto responseDto = authService.findUsername(requestDto);
 
         return ResponseEntity.ok(responseDto);
+    }
+
+    @Operation(summary = "비밀번호 찾기")
+    @PatchMapping("/password")
+    public ResponseEntity<Void> sendPasswordMail(@Valid @RequestBody FindPasswordRequestDto requestDto) throws MessagingException {
+        authService.sendPasswordResetMail(requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "비밀번호 변경")
+    @PutMapping("/password")
+    public ResponseEntity<Void> resetPassword(@AuthenticationPrincipal UserDetails user,
+                                              @Valid @RequestBody ResetPasswordRequestDto requestDto) {
+        authService.resetPassword(user.getUsername(), requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser(@RequestParam String username) {//@AuthenticationPrincipal UserDetails user) {
+        authService.deleteUser(username);
+//        authService.deleteUser(user.getUsername());
+        return ResponseEntity.ok().build();
     }
 }
