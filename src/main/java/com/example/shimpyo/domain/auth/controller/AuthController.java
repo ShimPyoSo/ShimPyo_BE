@@ -7,11 +7,13 @@ import com.example.shimpyo.domain.auth.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,17 +102,16 @@ public class AuthController {
 
     @Operation(summary = "비밀번호 변경")
     @PutMapping("/password")
-    public ResponseEntity<Void> resetPassword(@AuthenticationPrincipal UserDetails user,
-                                              @Valid @RequestBody ResetPasswordRequestDto requestDto) {
-        authService.resetPassword(user.getUsername(), requestDto);
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto requestDto) {
+        SecurityContextHolder.getContext().getAuthentication();
+        authService.resetPassword(requestDto);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(@RequestParam String username) {//@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<Void> deleteUser(@RequestParam String username) {
         authService.deleteUser(username);
-//        authService.deleteUser(user.getUsername());
         return ResponseEntity.ok().build();
     }
 }
