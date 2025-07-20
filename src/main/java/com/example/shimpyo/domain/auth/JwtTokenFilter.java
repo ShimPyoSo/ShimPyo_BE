@@ -2,8 +2,11 @@ package com.example.shimpyo.domain.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.*;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,40 +17,67 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Component
 @Slf4j
-public class JwtTokenFilter extends GenericFilter {
+public class JwtTokenFilter extends OncePerRequestFilter {
+
     @Value("${jwt.secretKey}")
     private String secretKey;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String bearerToken = ((HttpServletRequest) request).getHeader("Authorization");
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-        if(bearerToken != null){
-            if(!bearerToken.startsWith("Bearer ")){
-                throw new AuthenticationException("Bearer 형식이 아닙니다.");
+        String token = extractAccessToken(request);
+
+        if (token != null) {
+            try {
+                Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+                Claims claims = Jwts.parserBuilder()
+                        .setSigningKey(key)
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody();
+
+                // 이건 로그인 ID
+                String loginId = claims.getSubject();
+                // 이건 pk 값
+                Long userId = claims.get("id", Number.class).longValue();
+
+                List<GrantedAuthority> authorities = new ArrayList<>();
+
+                authorities.add(new SimpleGrantedAuthority("ID_" + userId));
+                UserDetails userDetails = new User(loginId, "", authorities);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, "", userDetails.getAuthorities());
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (Exception e) {
+                log.error("JWT 인증 실패: {}", e.getMessage());
+                // 예외를 터뜨릴 수도 있고 무시할 수도 있음 (401 처리 여부에 따라)
             }
-
-            String token = bearerToken.substring(7);
-
-            log.info("JWT TOKEN {}", token);
-
-            // 다시 암호화해 토큰 검증과 동시에 사용자 정보 페이로드 입력
-            Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ID_"+claims.get("id")));
-            UserDetails userDetails = new User(claims.getSubject(),"",authorities);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        chain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
+
+    private String extractAccessToken(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if ("access_token".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
 }
