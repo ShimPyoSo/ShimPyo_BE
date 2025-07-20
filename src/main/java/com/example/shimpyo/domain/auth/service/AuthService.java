@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -268,6 +269,36 @@ public class AuthService {
             password.append(ch);
         }
         return password.toString();
+    }
+
+    // 로그아웃 메서드
+    public void logout(String username, String accessToken, HttpServletResponse response){
+        // 1. AccessToken 블랙리스트 등록
+        long expiration = jwtTokenProvider.getRemainingExpiration(accessToken);
+        redisService.tokenBlackList(accessToken, expiration);
+
+        // 2. redis 의 refresh_token 삭제
+        redisService.deleteRefreshToken("refresh_token" + username);
+
+        // 3. AccessToken/RefreshToken 을 쿠키에서 삭제
+        ResponseCookie expiredAccessToken = ResponseCookie.from("access_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        ResponseCookie expiredRefreshToken = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader("Set-Cookie", expiredAccessToken.toString());
+        response.addHeader("Set-cookie", expiredRefreshToken.toString());
     }
 
 }

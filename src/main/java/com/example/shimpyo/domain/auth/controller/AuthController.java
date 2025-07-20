@@ -115,4 +115,13 @@ public class AuthController {
         authService.deleteUser(authentication.getName());
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "로그 아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Authentication authentication,
+                                    @CookieValue("access_token") String accessToken,
+                                    HttpServletResponse response) {
+        authService.logout(authentication.getName(), accessToken, response);
+        return ResponseEntity.ok().build();
+    }
 }
