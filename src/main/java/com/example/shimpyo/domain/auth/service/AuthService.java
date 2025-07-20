@@ -96,8 +96,8 @@ public class AuthService {
         }
 
         // 3. 토큰 발급
-        String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
-        String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername(), dto.getIsRememberMe());
+        String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername(), userAuth.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername(), userAuth.getId(), dto.getIsRememberMe());
 
         // 4. RefreshToken Redis 저장.
         redisService.saveRefreshToken(userAuth.getUserLoginId(), refreshToken);
@@ -143,16 +143,17 @@ public class AuthService {
             throw new BaseException(INVALID_REFRESH_TOKEN);
         }
 
-        String userId = jwtTokenProvider.getUserIdToRefresh(refreshToken);
+        String userName = jwtTokenProvider.getUserNameToRefresh(refreshToken);
+        long userId = jwtTokenProvider.getUserIdToRefresh(refreshToken);
 
         // 3. redis에 저장된 토큰과 비교
-        String savedToken = redisService.getRefreshToken(userId);
+        String savedToken = redisService.getRefreshToken(userName);
         if(!refreshToken.equals(savedToken)) {
             throw new BaseException(NOT_MATCHED_REFRESH_TOKEN);
         }
 
         // 4. 새 AccessToken 발급
-        String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+        String newAccessToken = jwtTokenProvider.createAccessToken(userName, userId);
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", newAccessToken)
                 .httpOnly(true)
