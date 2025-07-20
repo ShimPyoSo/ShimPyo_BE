@@ -11,11 +11,11 @@ import java.util.Optional;
 
 public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
 
-    Optional<UserAuth> findByUserLoginIdAndSocialTypeAndDeletedAtIsNull(String userLoginId, SocialType socialType);
+    Optional<UserAuth> findByUserLoginIdAndSocialType(String userLoginId, SocialType socialType);
 
-    Optional<UserAuth> findByUserLoginIdAndDeletedAtIsNull(String userLoginId);
+    Optional<UserAuth> findByUserLoginId(String userLoginId);
 
-    Optional<UserAuth> findByUserIdAndDeletedAtIsNull(Long userId);
+    Optional<UserAuth> findByUserId(Long userId);
 
     @Modifying
     @Query("UPDATE UserAuth ua SET ua.lastLogin = CURRENT_TIMESTAMP WHERE ua.userLoginId = :loginId")
