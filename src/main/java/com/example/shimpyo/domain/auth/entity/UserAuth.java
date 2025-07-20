@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -17,13 +19,15 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 @Getter
+@SQLDelete(sql = "UPDATE user_auth SET deleted_at = now(),oauthId = null, password = null, user_login_id = UUID() WHERE user_id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class UserAuth extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(nullable = false, unique = true)
     private String userLoginId;
 
     private String password;

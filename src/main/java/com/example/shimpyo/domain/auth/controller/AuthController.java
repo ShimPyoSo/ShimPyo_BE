@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -110,8 +111,8 @@ public class AuthController {
 
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(@RequestParam String username) {
-        authService.deleteUser(username);
+    public ResponseEntity<Void> deleteUser(Authentication authentication) {
+        authService.deleteUser(authentication.getName());
         return ResponseEntity.ok().build();
     }
 }

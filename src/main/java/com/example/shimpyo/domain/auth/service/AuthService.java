@@ -86,7 +86,7 @@ public class AuthService {
     public LoginResponseDto login(UserLoginDto dto, HttpServletResponse response) {
 
         // 1. 사용자 검증
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(dto.getUsername())
+        UserAuth userAuth = userAuthRepository.findByUserLoginIdAndDeletedAtIsNull(dto.getUsername())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
         // [#MOO5] 토큰 발급 로직 수정 시작
@@ -180,7 +180,7 @@ public class AuthService {
 
     // 로그인 아이디가 중복된 아이디인지 아닌지 판별하는 로직
     public void validateDuplicateUsername(String username){
-        userAuthRepository.findByUserLoginId(username)
+        userAuthRepository.findByUserLoginIdAndDeletedAtIsNull(username)
             .ifPresent(user -> {
                 throw new BaseException(LOGIN_ID_DUPLICATION);
             });
@@ -197,7 +197,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BaseException(EMAIL_NOT_FOUNDED));
 
-        UserAuth userAuth = userAuthRepository.findByUserId(user.getId())
+        UserAuth userAuth = userAuthRepository.findByUserIdAndDeletedAtIsNull(user.getId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
         return FindUsernameResponseDto.builder()
@@ -208,7 +208,7 @@ public class AuthService {
 
     public void sendPasswordResetMail(FindPasswordRequestDto requestDto) throws MessagingException {
 
-        UserAuth user = userAuthRepository.findByUserLoginId(requestDto.getUsername())
+        UserAuth user = userAuthRepository.findByUserLoginIdAndDeletedAtIsNull(requestDto.getUsername())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         if (!user.getUser().getEmail().equals(requestDto.getEmail()))
             throw new BaseException(EMAIL_NOT_FOUNDED);
@@ -219,7 +219,7 @@ public class AuthService {
     }
 
     public void resetPassword(ResetPasswordRequestDto requestDto) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(requestDto.getNowPassword())
+        UserAuth userAuth = userAuthRepository.findByUserLoginIdAndDeletedAtIsNull(requestDto.getNowPassword())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
         String nowPW = passwordEncoder.encode(requestDto.getNowPassword());
@@ -238,7 +238,9 @@ public class AuthService {
     }
 
     public void deleteUser(String username) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+        UserAuth userAuth = userAuthRepository.findByUserLoginIdAndDeletedAtIsNull(username)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        User user = userRepository.findByUserAuth(userAuth)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         if (userAuth.getDeletedAt() != null)
             throw new BaseException(MEMBER_NOT_FOUND);
@@ -246,7 +248,8 @@ public class AuthService {
         if (userAuth.getSocialType().equals(SocialType.KAKAO))
             oAuth2Service.unlinkKaKao(userAuth);
 
-        userAuth.delete();
+        userAuthRepository.delete(userAuth);
+        userRepository.delete(user);
     }
 
     private static String generatePassword() {

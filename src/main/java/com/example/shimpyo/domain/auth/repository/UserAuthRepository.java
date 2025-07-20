@@ -13,9 +13,9 @@ public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
 
     Optional<UserAuth> findByUserLoginIdAndSocialTypeAndDeletedAtIsNull(String userLoginId, SocialType socialType);
 
-    Optional<UserAuth> findByUserLoginId(String userLoginId);
+    Optional<UserAuth> findByUserLoginIdAndDeletedAtIsNull(String userLoginId);
 
-    Optional<UserAuth> findByUserId(Long userId);
+    Optional<UserAuth> findByUserIdAndDeletedAtIsNull(Long userId);
 
     @Modifying
     @Query("UPDATE UserAuth ua SET ua.lastLogin = CURRENT_TIMESTAMP WHERE ua.userLoginId = :loginId")
