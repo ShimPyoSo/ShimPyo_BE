@@ -36,10 +36,10 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @NotNull
+    @Column(unique = true, nullable = false)
     private String nickname;
 
     // 이거 왜 있을까요??
