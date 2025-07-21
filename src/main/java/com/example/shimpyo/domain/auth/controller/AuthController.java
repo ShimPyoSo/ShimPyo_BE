@@ -124,4 +124,11 @@ public class AuthController {
         authService.logout(authentication.getName(), accessToken, response);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "토큰 재발급")
+    @PostMapping("/reissue")
+    public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
+        authService.refreshToken(request, response);
+        return ResponseEntity.ok().build();
+    }
 }
