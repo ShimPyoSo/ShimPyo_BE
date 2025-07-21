@@ -45,7 +45,7 @@ public class RedisService {
         redisBlackListTemplate.opsForValue().set("tokenBlackList" + token, "logout", expired, TimeUnit.MILLISECONDS);
     }
 
-    public String isBlackList(String token){
-        return Objects.requireNonNull(redisBlackListTemplate.opsForValue().get("tokenBlackList" + token)).toString();
+    public boolean isBlackList(String token){
+        return redisBlackListTemplate.hasKey("tokenBlackList:" + token);
     }
 }

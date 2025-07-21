@@ -50,11 +50,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         if (token != null) {
             try {
+                // 로그아웃 되는 시점 토큰 탈취해 접근 권한 취득을 방지하는 코드
                 if(!request.getRequestURI().equals("/api/user/auth/logout")
-                        && redisService.isBlackList(token) != null){
+                        && redisService.isBlackList(token)){
                     throw new BaseException(TOKEN_IS_BLACKLISTED);
                 }
-
                 Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
                 Claims claims = Jwts.parserBuilder()
                         .setSigningKey(key)
