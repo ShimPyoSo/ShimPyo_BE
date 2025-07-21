@@ -137,7 +137,7 @@ public class AuthService {
     // [#MOO3] 유저 로그인 끝
 
     // [#MOO6] access Token 재발급 로직
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         // 1. 쿠키에서 refresh_token 추출
         String refreshToken = extractCookie(request, "refresh_token");
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
