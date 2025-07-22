@@ -267,4 +267,7 @@ public class AuthService {
         return password.toString();
     }
 
+    public UserAuth findUser(String username) {
+        return userAuthRepository.findByUserLoginId(username).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+    }
 }
