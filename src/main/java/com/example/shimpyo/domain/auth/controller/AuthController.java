@@ -103,9 +103,9 @@ public class AuthController {
 
     @Operation(summary = "비밀번호 변경")
     @PutMapping("/password")
-    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto requestDto) {
-        SecurityContextHolder.getContext().getAuthentication();
-        authService.resetPassword(requestDto);
+    public ResponseEntity<Void> resetPassword(Authentication user,
+                                              @Valid @RequestBody ResetPasswordRequestDto requestDto) {
+        authService.resetPassword(user.getName(), requestDto);
         return ResponseEntity.ok().build();
     }
 

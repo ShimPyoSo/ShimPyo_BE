@@ -219,8 +219,8 @@ public class AuthService {
         user.resetPassword(passwordEncoder.encode(tempPW));
     }
 
-    public void resetPassword(ResetPasswordRequestDto requestDto) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(requestDto.getNowPassword())
+    public void resetPassword(String username, ResetPasswordRequestDto requestDto) {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
         String nowPW = passwordEncoder.encode(requestDto.getNowPassword());
