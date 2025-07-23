@@ -26,27 +26,24 @@ public class TouristService {
     private final AuthService authService;
 
     public List<RecommendsResponseDto> getRecommendTourists() {
-        String username = SecurityUtils.getLoginId();
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
                 .map(RecommendsResponseDto::toDto).toList();
 
-        if (username != null) {
-            UserAuth user = authService.findUser(username);
+        UserAuth user = authService.findUser();
 
-            Set<Long> likedTouristIds = user.getUser().getLikes().stream()
-                    .map(like -> like.getTourist().getId())
-                    .collect(Collectors.toSet());
+        Set<Long> likedTouristIds = user.getUser().getLikes().stream()
+                .map(like -> like.getTourist().getId())
+                .collect(Collectors.toSet());
 
-            for (RecommendsResponseDto dto : responseDto) {
-                if (likedTouristIds.contains(dto.getId()))
-                    dto.isLiked = true;
-            }
+        for (RecommendsResponseDto dto : responseDto) {
+            if (likedTouristIds.contains(dto.getId()))
+                dto.isLiked = true;
         }
         return responseDto;
     }
 
-    public List<LikesResponseDto> getLikesTourists(String name) {
-        User user = authService.findUser(name).getUser();
+    public List<LikesResponseDto> getLikesTourists() {
+        User user = authService.findUser().getUser();
         return user.getLikes().stream().map(el ->
                 LikesResponseDto.toDto(el.getTourist())).collect(Collectors.toList());
     }

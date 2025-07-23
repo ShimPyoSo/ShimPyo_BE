@@ -30,7 +30,7 @@ public class MainController {
 
     @GetMapping("/likes")
     @Operation(summary = "찜한 장소")
-    public ResponseEntity<List<LikesResponseDto>> getLikesTourists(Authentication authentication) {
-        return ResponseEntity.ok(touristService.getLikesTourists(authentication.getName()));
+    public ResponseEntity<List<LikesResponseDto>> getLikesTourists() {
+        return ResponseEntity.ok(touristService.getLikesTourists());
     }
 }
