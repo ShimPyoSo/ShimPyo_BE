@@ -14,21 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.TokenException.TOKEN_IS_BLACKLISTED;
 
@@ -67,12 +60,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 // 이건 pk 값
                 Long userId = claims.get("id", Number.class).longValue();
 
-                List<GrantedAuthority> authorities = new ArrayList<>();
-
-                authorities.add(new SimpleGrantedAuthority("ID_" + userId));
-                UserDetails userDetails = new User(loginId, "", authorities);
+//                List<GrantedAuthority> authorities = new ArrayList<>();
+//
+//                authorities.add(new SimpleGrantedAuthority("ID_" + userId));
+//                UserDetails userDetails = new User(loginId, "", authorities);
+                Map<String, Object> principal = new HashMap<>();
+                principal.put("loginId", loginId);
+                principal.put("userId", userId);
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, "", userDetails.getAuthorities());
+                        principal, "", Collections.emptyList());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
