@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 @Getter
-@SQLDelete(sql = "UPDATE user_auth SET deleted_at = now(),oauthId = null, password = null, user_login_id = UUID() WHERE user_id = ?")
+@SQLDelete(sql = "UPDATE user_auth SET deleted_at = now(),oauth_id = null, password = null, user_login_id = UUID() WHERE user_id = ?")
 @SQLRestriction("deleted_at IS NULL")
 public class UserAuth extends BaseEntity {
 

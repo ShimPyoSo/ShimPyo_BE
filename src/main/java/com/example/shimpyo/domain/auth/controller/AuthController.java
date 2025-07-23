@@ -110,8 +110,8 @@ public class AuthController {
 
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(Authentication authentication) {
-        authService.deleteUser(authentication.getName());
+    public ResponseEntity<Void> deleteUser() {
+        authService.deleteUser();
         return ResponseEntity.ok().build();
     }
 

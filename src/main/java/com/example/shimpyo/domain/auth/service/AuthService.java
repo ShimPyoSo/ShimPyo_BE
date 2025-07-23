@@ -240,8 +240,8 @@ public class AuthService {
         userAuth.resetPassword(passwordEncoder.encode(newPW));
     }
 
-    public void deleteUser(String username) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+    public void deleteUser() {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         User user = userRepository.findByUserAuth(userAuth)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
