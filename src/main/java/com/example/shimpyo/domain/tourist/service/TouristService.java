@@ -8,6 +8,7 @@ import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.service.UserService;
+import com.example.shimpyo.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,8 @@ public class TouristService {
     private final TouristRepository touristRepository;
     private final AuthService authService;
 
-    public List<RecommendsResponseDto> getRecommendTourists(String username) {
+    public List<RecommendsResponseDto> getRecommendTourists() {
+        String username = SecurityUtils.getLoginId();
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
                 .map(RecommendsResponseDto::toDto).toList();
 

@@ -10,6 +10,10 @@ import static com.example.shimpyo.global.exceptionType.AuthException.AUTHENTICAT
 
 public class SecurityUtils {
 
+    /**
+     * 유저의 로그인 ID를 반환하는 메서드
+     * 사용법 String username = SecurityUtils.getLoginId();
+     */
     public static String getLoginId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -17,7 +21,10 @@ public class SecurityUtils {
         }
         return authentication.getName();
     }
-
+    /**
+     * 유저의 로그인 ID를 반환하는 메서드
+     * 사용법 String userId = SecurityUtils.getUserId();
+     */
     public static long getUserId(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {

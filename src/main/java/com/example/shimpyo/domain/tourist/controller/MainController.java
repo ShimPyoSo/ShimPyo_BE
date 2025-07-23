@@ -23,9 +23,9 @@ public class MainController {
 
     @GetMapping("/recommends")
     @Operation(summary = "추천 장소")
-    public ResponseEntity<List<RecommendsResponseDto>> getRecommendTourists(Authentication authentication) {
+    public ResponseEntity<List<RecommendsResponseDto>> getRecommendTourists() {
         return ResponseEntity.ok(
-                touristService.getRecommendTourists(authentication == null? null : authentication.getName()));
+                touristService.getRecommendTourists());
     }
 
     @GetMapping("/likes")
