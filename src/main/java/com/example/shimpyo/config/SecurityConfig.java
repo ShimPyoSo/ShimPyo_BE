@@ -4,6 +4,7 @@ import com.example.shimpyo.domain.auth.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,7 +34,10 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/user/auth").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/user/auth/password").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/user/auth/password").permitAll()
+                        .requestMatchers("/api/user/auth/**", "/api/main/recommends").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

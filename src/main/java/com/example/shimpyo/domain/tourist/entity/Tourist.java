@@ -48,7 +48,7 @@ public class Tourist extends BaseEntity {
     private Long content_id;
 
     @Column
-    private String destription;
+    private String description;
 
     @Column
     private String operationTime;
@@ -56,7 +56,14 @@ public class Tourist extends BaseEntity {
     @Column
     private String homepageUrl;
 
-    @Column String reservationUrl;
+    @Column
+    private String reservationUrl;
+
+    @Column
+    private String dayOff;
+
+    @Column
+    private String breakTime;
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TouristCategory> touristCategories = new ArrayList<>();

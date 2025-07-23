@@ -301,4 +301,7 @@ public class AuthService {
         response.addHeader("Set-cookie", expiredRefreshToken.toString());
     }
 
+    public UserAuth findUser(String username) {
+        return userAuthRepository.findByUserLoginId(username).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+    }
 }
