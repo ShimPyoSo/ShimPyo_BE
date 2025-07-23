@@ -237,7 +237,7 @@ public class AuthService {
 
         if (passwordEncoder.matches(newPW, userAuth.getPassword()))
             throw new BaseException(PASSWORD_DUPLICATED);
-        userAuth.resetPassword(newPW);
+        userAuth.resetPassword(passwordEncoder.encode(newPW));
     }
 
     public void deleteUser(String username) {
