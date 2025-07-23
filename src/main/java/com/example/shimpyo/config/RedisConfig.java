@@ -41,6 +41,7 @@ public class RedisConfig {
     // [#MOO4] 이메일 인증 레디스 DB 1번 사용 끝
 
     // [#MOO5] 토큰 발급 로직 수정 시작 (DB 2번 사용 )
+    @Bean
     @Qualifier("2")
     public RedisConnectionFactory redisTokenConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
@@ -50,13 +51,32 @@ public class RedisConfig {
 
     @Bean
     @Qualifier("2")
-    public RedisTemplate<String, Object> redisTokenTemplate(RedisConnectionFactory redisTokenConnectionFactory) {
+    public RedisTemplate<String, Object> redisTokenTemplate(@Qualifier("2") RedisConnectionFactory redisTokenConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisTokenConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return redisTemplate;
     }
+    // [#MOO5] 토큰 발급 로직 수정 끝
 
+    // [#MOO5] 토큰 발급 로직 수정 시작 (DB 2번 사용 )
+    @Bean
+    @Qualifier("3")
+    public RedisConnectionFactory redisBlackListConnectionFactory() {
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
+        redisStandaloneConfiguration.setDatabase(3);
+        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+    }
+
+    @Bean
+    @Qualifier("3")
+    public RedisTemplate<String, Object> redisBlackListTemplate(@Qualifier("3") RedisConnectionFactory redisBlackListConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisBlackListConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return redisTemplate;
+    }
     // [#MOO5] 토큰 발급 로직 수정 끝
 }

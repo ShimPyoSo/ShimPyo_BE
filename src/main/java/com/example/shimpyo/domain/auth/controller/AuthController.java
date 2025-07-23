@@ -7,11 +7,14 @@ import com.example.shimpyo.domain.auth.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,17 +103,32 @@ public class AuthController {
 
     @Operation(summary = "비밀번호 변경")
     @PutMapping("/password")
-    public ResponseEntity<Void> resetPassword(@AuthenticationPrincipal UserDetails user,
+    public ResponseEntity<Void> resetPassword(Authentication user,
                                               @Valid @RequestBody ResetPasswordRequestDto requestDto) {
-        authService.resetPassword(user.getUsername(), requestDto);
+        authService.resetPassword(user.getName(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(@RequestParam String username) {//@AuthenticationPrincipal UserDetails user) {
-        authService.deleteUser(username);
-//        authService.deleteUser(user.getUsername());
+    public ResponseEntity<Void> deleteUser(Authentication authentication) {
+        authService.deleteUser(authentication.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "로그 아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Authentication authentication,
+                                    @CookieValue("access_token") String accessToken,
+                                    HttpServletResponse response) {
+        authService.logout(authentication.getName(), accessToken, response);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "토큰 재발급")
+    @PostMapping("/reissue")
+    public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
+        authService.refreshToken(request, response);
         return ResponseEntity.ok().build();
     }
 }

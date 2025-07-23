@@ -79,4 +79,16 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token).getBody().get("id");
     }
 
+    // JWT 남은 만료 시간을 추출하는 메서드
+    public long getRemainingExpiration(String token){
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Date expiration = claims.getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
 }
