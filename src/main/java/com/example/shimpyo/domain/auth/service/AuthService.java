@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,10 @@ public class AuthService {
     private static final String SPECIALS = "~!@#$%^&*";
     private static final String ALL = LETTERS + NUMBERS + SPECIALS;
     private static final SecureRandom random = new SecureRandom();
+
+    public String getUserLoginId(){
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
 
     // [#MOO1] 사용자 회원가입 시작
     public void registerUser(RegisterUserRequest dto) {
@@ -219,8 +224,8 @@ public class AuthService {
         user.resetPassword(passwordEncoder.encode(tempPW));
     }
 
-    public void resetPassword(String username, ResetPasswordRequestDto requestDto) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+    public void resetPassword(ResetPasswordRequestDto requestDto) {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(getUserLoginId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
         String nowPW = passwordEncoder.encode(requestDto.getNowPassword());
