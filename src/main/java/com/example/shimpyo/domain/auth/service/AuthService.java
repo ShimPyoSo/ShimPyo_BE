@@ -10,7 +10,7 @@ import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.shimpyo.utils.SecurityUtils;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,10 +59,6 @@ public class AuthService {
     private static final String SPECIALS = "~!@#$%^&*";
     private static final String ALL = LETTERS + NUMBERS + SPECIALS;
     private static final SecureRandom random = new SecureRandom();
-
-    public String getUserLoginId(){
-        return SecurityContextHolder.getContext().getAuthentication().getName();
-    }
 
     // [#MOO1] 사용자 회원가입 시작
     public void registerUser(RegisterUserRequest dto) {
@@ -225,20 +221,21 @@ public class AuthService {
     }
 
     public void resetPassword(ResetPasswordRequestDto requestDto) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(getUserLoginId())
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
-        String nowPW = passwordEncoder.encode(requestDto.getNowPassword());
+        String nowPW = requestDto.getNowPassword();
         String newPW = requestDto.getNewPassword();
         String checkNewPW = requestDto.getCheckNewPassword();
 
-        if (!nowPW.equals(userAuth.getPassword()))
+        // 2. 현재 비밀번호 일치 확인
+        if (!passwordEncoder.matches(nowPW, userAuth.getPassword())) {
             throw new BaseException(PASSWORD_NOT_MATCHED);
+        }
         if (!newPW.equals(checkNewPW))
             throw new BaseException(TWO_PASSWORD_NOT_MATCHED);
 
-        newPW = passwordEncoder.encode(newPW);
-        if (nowPW.equals(newPW))
+        if (passwordEncoder.matches(newPW, userAuth.getPassword()))
             throw new BaseException(PASSWORD_DUPLICATED);
         userAuth.resetPassword(newPW);
     }
