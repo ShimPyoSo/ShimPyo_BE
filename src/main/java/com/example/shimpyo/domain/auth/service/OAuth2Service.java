@@ -56,7 +56,7 @@ public class OAuth2Service {
 
         // find로 가져올 데이터가 있으면 기존 회원, 아니면 신규 가입
         // TODO 재가입시 로직
-        UserAuth user = userAuthRepository.findByUserLoginIdAndSocialTypeAndDeletedAtIsNull(email, SocialType.KAKAO)
+        UserAuth user = userAuthRepository.findByUserLoginIdAndSocialType(email, SocialType.KAKAO)
                 .orElseGet(() -> {
                     User newUSer = userRepository.save(User.builder()
                             .email(email)

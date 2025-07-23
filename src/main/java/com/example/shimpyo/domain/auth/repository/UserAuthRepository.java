@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
 
-    Optional<UserAuth> findByUserLoginIdAndSocialTypeAndDeletedAtIsNull(String userLoginId, SocialType socialType);
+    Optional<UserAuth> findByUserLoginIdAndSocialType(String userLoginId, SocialType socialType);
 
     Optional<UserAuth> findByUserLoginId(String userLoginId);
 

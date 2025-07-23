@@ -1,6 +1,8 @@
 package com.example.shimpyo.domain.user.utils;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -8,10 +10,19 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 public class RedisService {
 
+    @Qualifier("2")
     private final RedisTemplate<String, Object> redisTokenTemplate;
+    @Qualifier("3")
+    private final RedisTemplate<String, Object> redisBlackListTemplate;
+
+    public RedisService(@Qualifier("2") RedisTemplate<String, Object> redisTokenTemplate,
+                        @Qualifier("3") RedisTemplate<String, Object> redisBlackListTemplate) {
+        this.redisTokenTemplate = redisTokenTemplate;
+        this.redisBlackListTemplate = redisBlackListTemplate;
+    }
+
 
     // [#MOO5] 레디스 refresh-token 저장 로직
     public void saveRefreshToken(String userId, String refreshToken) {
@@ -29,4 +40,12 @@ public class RedisService {
         redisTokenTemplate.delete("refresh_token" + userId);
     }
     // [#MOO6] 레디스 refresh-token 재발급 로직
+
+    public void tokenBlackList(String token, long expired){
+        redisBlackListTemplate.opsForValue().set("tokenBlackList" + token, "logout", expired, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean isBlackList(String token){
+        return redisBlackListTemplate.hasKey("tokenBlackList:" + token);
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.shimpyo.domain.auth;
 
+import com.example.shimpyo.domain.user.utils.RedisService;
+import com.example.shimpyo.global.BaseException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -7,6 +9,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,12 +30,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static com.example.shimpyo.global.exceptionType.TokenException.TOKEN_IS_BLACKLISTED;
+
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
+
+    private final RedisService redisService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -42,6 +50,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         if (token != null) {
             try {
+                // 로그아웃 되는 시점 토큰 탈취해 접근 권한 취득을 방지하는 코드
+                if(!request.getRequestURI().equals("/api/user/auth/logout")
+                        && redisService.isBlackList(token)){
+                    throw new BaseException(TOKEN_IS_BLACKLISTED);
+                }
                 Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
                 Claims claims = Jwts.parserBuilder()
                         .setSigningKey(key)

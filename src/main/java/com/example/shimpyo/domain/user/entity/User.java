@@ -22,7 +22,12 @@ import java.util.List;
 @Entity
 @Builder
 @Getter
-@SQLDelete(sql = "UPDATE \"user\" SET deleted_at = now() WHERE id = ?")
+/** JPA 의 delete 문이 실행되는 순간 애가 그 요청을 받아와 다음과 같이 설정함
+    deleted_at = 삭제 시각
+    email = uuid -> not null 이기 때문에
+    nickname = uuid -> not null 이므로
+ **/
+@SQLDelete(sql = "UPDATE `user` SET deleted_at = now(), email = UUID(), nickname = UUID() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
 @Table(name = "\"user\"")
 public class User extends BaseEntity {
@@ -31,10 +36,10 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @NotNull
+    @Column(unique = true, nullable = false)
     private String nickname;
 
     // 이거 왜 있을까요??
