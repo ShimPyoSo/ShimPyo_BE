@@ -274,13 +274,13 @@ public class AuthService {
     }
 
     // 로그아웃 메서드
-    public void logout(String username, String accessToken, HttpServletResponse response){
+    public void logout(String accessToken, HttpServletResponse response){
         // 1. AccessToken 블랙리스트 등록
         long expiration = jwtTokenProvider.getRemainingExpiration(accessToken);
         redisService.tokenBlackList(accessToken, expiration);
 
         // 2. redis 의 refresh_token 삭제
-        redisService.deleteRefreshToken("refresh_token" + username);
+        redisService.deleteRefreshToken("refresh_token" + SecurityUtils.getLoginId());
 
         // 3. AccessToken/RefreshToken 을 쿠키에서 삭제
         ResponseCookie expiredAccessToken = ResponseCookie.from("access_token", "")
