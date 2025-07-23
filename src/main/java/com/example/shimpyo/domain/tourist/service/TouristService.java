@@ -2,9 +2,11 @@ package com.example.shimpyo.domain.tourist.service;
 
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
+import com.example.shimpyo.domain.tourist.dto.LikesResponseDto;
 import com.example.shimpyo.domain.tourist.dto.RecommendsResponseDto;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
+import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,5 +45,11 @@ public class TouristService {
             }
         }
         return responseDto;
+    }
+
+    public List<LikesResponseDto> getLikesTourists(String name) {
+        User user = authService.findUser(name).getUser();
+        return user.getLikes().stream().map(el ->
+                LikesResponseDto.toDto(el.getTourist())).collect(Collectors.toList());
     }
 }
