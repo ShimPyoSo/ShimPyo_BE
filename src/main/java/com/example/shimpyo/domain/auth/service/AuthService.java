@@ -10,7 +10,7 @@ import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.shimpyo.utils.SecurityUtils;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -219,27 +220,28 @@ public class AuthService {
         user.resetPassword(passwordEncoder.encode(tempPW));
     }
 
-    public void resetPassword(String username, ResetPasswordRequestDto requestDto) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+    public void resetPassword(ResetPasswordRequestDto requestDto) {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
-        String nowPW = passwordEncoder.encode(requestDto.getNowPassword());
+        String nowPW = requestDto.getNowPassword();
         String newPW = requestDto.getNewPassword();
         String checkNewPW = requestDto.getCheckNewPassword();
 
-        if (!nowPW.equals(userAuth.getPassword()))
+        // 2. 현재 비밀번호 일치 확인
+        if (!passwordEncoder.matches(nowPW, userAuth.getPassword())) {
             throw new BaseException(PASSWORD_NOT_MATCHED);
+        }
         if (!newPW.equals(checkNewPW))
             throw new BaseException(TWO_PASSWORD_NOT_MATCHED);
 
-        newPW = passwordEncoder.encode(newPW);
-        if (nowPW.equals(newPW))
+        if (passwordEncoder.matches(newPW, userAuth.getPassword()))
             throw new BaseException(PASSWORD_DUPLICATED);
-        userAuth.resetPassword(newPW);
+        userAuth.resetPassword(passwordEncoder.encode(newPW));
     }
 
-    public void deleteUser(String username) {
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
+    public void deleteUser() {
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
         User user = userRepository.findByUserAuth(userAuth)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
@@ -272,13 +274,13 @@ public class AuthService {
     }
 
     // 로그아웃 메서드
-    public void logout(String username, String accessToken, HttpServletResponse response){
+    public void logout(String accessToken, HttpServletResponse response){
         // 1. AccessToken 블랙리스트 등록
         long expiration = jwtTokenProvider.getRemainingExpiration(accessToken);
         redisService.tokenBlackList(accessToken, expiration);
 
         // 2. redis 의 refresh_token 삭제
-        redisService.deleteRefreshToken("refresh_token" + username);
+        redisService.deleteRefreshToken("refresh_token" + SecurityUtils.getLoginId());
 
         // 3. AccessToken/RefreshToken 을 쿠키에서 삭제
         ResponseCookie expiredAccessToken = ResponseCookie.from("access_token", "")
@@ -301,7 +303,7 @@ public class AuthService {
         response.addHeader("Set-cookie", expiredRefreshToken.toString());
     }
 
-    public UserAuth findUser(String username) {
-        return userAuthRepository.findByUserLoginId(username).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+    public UserAuth findUser() {
+        return userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId()).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
     }
 }

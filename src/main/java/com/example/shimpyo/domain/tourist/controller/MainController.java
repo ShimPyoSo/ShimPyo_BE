@@ -23,14 +23,14 @@ public class MainController {
 
     @GetMapping("/recommends")
     @Operation(summary = "추천 장소")
-    public ResponseEntity<List<RecommendsResponseDto>> getRecommendTourists(Authentication authentication) {
+    public ResponseEntity<List<RecommendsResponseDto>> getRecommendTourists() {
         return ResponseEntity.ok(
-                touristService.getRecommendTourists(authentication == null? null : authentication.getName()));
+                touristService.getRecommendTourists());
     }
 
     @GetMapping("/likes")
     @Operation(summary = "찜한 장소")
-    public ResponseEntity<List<LikesResponseDto>> getLikesTourists(Authentication authentication) {
-        return ResponseEntity.ok(touristService.getLikesTourists(authentication.getName()));
+    public ResponseEntity<List<LikesResponseDto>> getLikesTourists() {
+        return ResponseEntity.ok(touristService.getLikesTourists());
     }
 }

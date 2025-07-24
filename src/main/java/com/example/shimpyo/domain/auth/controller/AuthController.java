@@ -103,25 +103,23 @@ public class AuthController {
 
     @Operation(summary = "비밀번호 변경")
     @PutMapping("/password")
-    public ResponseEntity<Void> resetPassword(Authentication user,
-                                              @Valid @RequestBody ResetPasswordRequestDto requestDto) {
-        authService.resetPassword(user.getName(), requestDto);
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto requestDto) {
+        authService.resetPassword(requestDto);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(Authentication authentication) {
-        authService.deleteUser(authentication.getName());
+    public ResponseEntity<Void> deleteUser() {
+        authService.deleteUser();
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "로그 아웃")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(Authentication authentication,
-                                    @CookieValue("access_token") String accessToken,
+    public ResponseEntity<?> logout(@CookieValue("access_token") String accessToken,
                                     HttpServletResponse response) {
-        authService.logout(authentication.getName(), accessToken, response);
+        authService.logout(accessToken, response);
         return ResponseEntity.ok().build();
     }
 
