@@ -19,7 +19,8 @@ public class SecurityUtils {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new BaseException(AUTHENTICATION_GET_FAILED);
         }
-        return authentication.getName();
+        Map<?, ?> principalMap = (Map<?, ?>) authentication.getPrincipal();
+        return principalMap.get("loginId").toString();
     }
     /**
      * 유저의 로그인 ID를 반환하는 메서드
