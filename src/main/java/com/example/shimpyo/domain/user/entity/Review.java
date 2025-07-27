@@ -27,7 +27,7 @@ public class Review extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String title;
+    private String content;
 
     @Column
     // 이미지 여러개 넣는 경우가 있을 수 있으니 List 로 설정함
