@@ -3,6 +3,7 @@ package com.example.shimpyo.domain.tourist.controller;
 import com.example.shimpyo.domain.tourist.dto.ReviewResponseDto;
 import com.example.shimpyo.domain.tourist.dto.ReviewRequestDto;
 import com.example.shimpyo.domain.tourist.service.TouristService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class TouristController {
     }
 
     @PostMapping("/reviews")
-    public ResponseEntity<Void> createReview(@RequestBody ReviewRequestDto requestDto) {
+    public ResponseEntity<Void> createReview(@Valid @RequestBody ReviewRequestDto requestDto) {
         touristService.createReview(requestDto);
         return ResponseEntity.ok().build();
     }

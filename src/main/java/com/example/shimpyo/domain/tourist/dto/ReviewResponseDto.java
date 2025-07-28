@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Builder
 public class ReviewResponseDto {
+    private Long reviewId;
     private String nickname;
     private String createdAt;
     private String contents;
@@ -17,10 +18,11 @@ public class ReviewResponseDto {
 
     public static ReviewResponseDto toDto(Review review, User user) {
         return ReviewResponseDto.builder()
+                .reviewId(review.getId())
                 .nickname(user.getNickname())
                 .createdAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
                 .contents(review.getContent())
-                .images(String.join(", ", review.getImage()))
+                .images(review.getImage() == null? null : String.join(", ", review.getImage()))
                 .build();
     }
 }
