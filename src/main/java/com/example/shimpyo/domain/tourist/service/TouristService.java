@@ -16,6 +16,8 @@ import com.example.shimpyo.global.exceptionType.TouristException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,16 +38,19 @@ public class TouristService {
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
                 .map(RecommendsResponseDto::toDto).toList();
 
-        UserAuth user = authService.findUser();
+        if (!(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
+            UserAuth user = authService.findUser();
 
-        Set<Long> likedTouristIds = user.getUser().getLikes().stream()
-                .map(like -> like.getTourist().getId())
-                .collect(Collectors.toSet());
+            Set<Long> likedTouristIds = user.getUser().getLikes().stream()
+                    .map(like -> like.getTourist().getId())
+                    .collect(Collectors.toSet());
 
-        for (RecommendsResponseDto dto : responseDto) {
-            if (likedTouristIds.contains(dto.getId()))
-                dto.isLiked = true;
+            for (RecommendsResponseDto dto : responseDto) {
+                if (likedTouristIds.contains(dto.getId()))
+                    dto.isLiked = true;
+            }
         }
+
         return responseDto;
     }
 

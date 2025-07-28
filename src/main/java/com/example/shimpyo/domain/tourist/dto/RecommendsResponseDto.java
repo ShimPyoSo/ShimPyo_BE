@@ -17,7 +17,7 @@ public class RecommendsResponseDto {
     private String region;
     private List<Category> category;
     private String title;
-    public boolean isLiked;
+    public Boolean isLiked;
 
     public static RecommendsResponseDto toDto(Tourist tourist) {
         return RecommendsResponseDto.builder()
