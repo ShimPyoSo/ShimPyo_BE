@@ -16,18 +16,19 @@ public class RecommendsResponseDto {
     private String images;
     private String region;
     private List<Category> category;
-    private String description;
-    public boolean isLiked;
+    private String title;
+    public Boolean isLiked;
 
     public static RecommendsResponseDto toDto(Tourist tourist) {
         return RecommendsResponseDto.builder()
                 .id(tourist.getId())
-                .images(tourist.getImage())
+                .images(null) // 임시 값
+                //.images(tourist.getImage())  // 원래 값
                 .region(tourist.getAddress())
                 .category(tourist.getTouristCategories().stream()
                         .map(TouristCategory::getCategory)
                         .collect(Collectors.toList()))
-                .description(tourist.getDescription())
+                .title(tourist.getName())
                 .isLiked(false)
                 .build();
     }
