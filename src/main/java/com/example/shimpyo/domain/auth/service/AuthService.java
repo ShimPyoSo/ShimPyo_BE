@@ -2,13 +2,13 @@ package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.*;
+import com.example.shimpyo.domain.auth.entity.UserAuth;
+import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
-import com.example.shimpyo.domain.auth.entity.UserAuth;
-import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
-import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.domain.user.utils.RedisService;
+import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.utils.SecurityUtils;
 import jakarta.mail.MessagingException;
@@ -18,11 +18,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +28,7 @@ import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.*;
-import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
-import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN;
+import static com.example.shimpyo.global.exceptionType.TokenException.*;
 
 @Service
 @Slf4j
@@ -94,7 +90,7 @@ public class AuthService {
         // [#MOO5] 토큰 발급 로직 수정 시작
         // 2. 비밀번호 검증
         if (!passwordEncoder.matches(dto.getPassword(), userAuth.getPassword())) {
-            throw new BaseException(PASSWORD_NOT_MATCHED);
+            throw new BaseException(MEMBER_INFO_NOT_MATCHED);
         }
 
         // 3. 토큰 발급
