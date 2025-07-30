@@ -24,6 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
@@ -198,9 +201,16 @@ public class AuthService {
         UserAuth userAuth = userAuthRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
+        String username = userAuth.getUserLoginId();
+        int length = username.length();
+        int half = length/2+1;
+
+        String masked = username.substring(0,half) + "*".repeat(length-half);
+
+
         return FindUsernameResponseDto.builder()
-                .username(userAuth.getUserLoginId())
-                .createdAt(userAuth.getCreatedAt())
+                .username(masked)
+                .createdAt(LocalDate.parse(userAuth.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
                 .build();
     }
 
