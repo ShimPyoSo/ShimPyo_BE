@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Builder
 @AllArgsConstructor
@@ -13,5 +13,5 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class FindUsernameResponseDto {
     private String username;
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 }
