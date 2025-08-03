@@ -1,9 +1,9 @@
 package com.example.shimpyo.domain.auth.controller;
 
 import com.example.shimpyo.domain.auth.dto.*;
+import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.auth.service.MailService;
 import com.example.shimpyo.domain.auth.service.OAuth2Service;
-import com.example.shimpyo.domain.auth.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.mail.MessagingException;
@@ -12,10 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -36,7 +32,7 @@ public class AuthController {
 
     // [#MOO3] 유저 로그인 시작
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) throws JsonProcessingException {
+    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
         LoginResponseDto loginResponseDto = authService.login(dto, response);
 
         return ResponseEntity.ok(loginResponseDto);

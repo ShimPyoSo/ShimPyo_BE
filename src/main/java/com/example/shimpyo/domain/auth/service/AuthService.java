@@ -25,13 +25,13 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.*;
-import static com.example.shimpyo.global.exceptionType.TokenException.*;
+import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
+import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN;
 
 @Service
 @Slf4j
