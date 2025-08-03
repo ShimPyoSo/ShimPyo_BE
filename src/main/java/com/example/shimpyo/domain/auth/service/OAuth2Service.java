@@ -79,7 +79,7 @@ public class OAuth2Service {
                             .socialType(SocialType.KAKAO)
                             .build());
                 });
-
+        createToken(email, user.getUser().getId(), responseCookie);
         return LoginResponseDto.toDto(user);
 
         // 카카오 유저가 없다면 회원가입, 기존 회원이라면 로그인 로직
