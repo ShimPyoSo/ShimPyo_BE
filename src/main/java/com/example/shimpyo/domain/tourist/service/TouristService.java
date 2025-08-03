@@ -2,11 +2,11 @@ package com.example.shimpyo.domain.tourist.service;
 
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
-import com.example.shimpyo.domain.tourist.dto.LikesResponseDto;
-import com.example.shimpyo.domain.tourist.dto.RecommendsResponseDto;
-import com.example.shimpyo.domain.tourist.dto.ReviewRequestDto;
-import com.example.shimpyo.domain.tourist.dto.ReviewResponseDto;
+import com.example.shimpyo.domain.tourist.dto.*;
+import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
+import com.example.shimpyo.domain.tourist.entity.TouristCategory;
+import com.example.shimpyo.domain.tourist.repository.TouristCategoryRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
 import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
@@ -21,9 +21,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.example.shimpyo.global.exceptionType.TouristCategoryException.TOURIST_CATEGORY_EXCEPTION;
 
 @Service
 @Transactional
@@ -33,6 +36,7 @@ public class TouristService {
     private final AuthService authService;
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
+    private final TouristCategoryRepository touristCategoryRepository;
 
     public List<RecommendsResponseDto> getRecommendTourists() {
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
@@ -83,5 +87,32 @@ public class TouristService {
             result = reviewRepository.findByTouristAndIdLessThanOrderByIdDesc(tourist, reviewId, pageable);
         }
         return result.stream().map(r -> ReviewResponseDto.toDto(r, r.getUser())).collect(Collectors.toList());
+    }
+
+    // 카테고리와 filter 를 동시에 수행
+    public FilterTouristByCategoryResponseDto filteredTouristByCategory(String category, String filter){
+
+
+        List<TouristCategory> touristCategories =
+                touristCategoryRepository.findByCategory(toCategory(category));
+
+        List<Tourist> tourists = new ArrayList<>();
+
+        for(TouristCategory touristCategory : touristCategories){
+
+        }
+
+        return null;
+    }
+
+    private Category toCategory(String category){
+        return switch (category) {
+            case "MEDITATION" -> Category.MEDITATION;
+            case "SPA" -> Category.SPA;
+            case "BEAUTY" -> Category.BEAUTY;
+            case "NATURE" -> Category.NATURE;
+            case "FOOD" -> Category.FOOD;
+            default -> throw new BaseException(TOURIST_CATEGORY_EXCEPTION);
+        };
     }
 }

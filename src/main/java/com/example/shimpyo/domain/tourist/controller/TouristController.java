@@ -1,5 +1,6 @@
 package com.example.shimpyo.domain.tourist.controller;
 
+import com.example.shimpyo.domain.tourist.dto.FilterTouristByCategoryResponseDto;
 import com.example.shimpyo.domain.tourist.dto.ReviewResponseDto;
 import com.example.shimpyo.domain.tourist.dto.ReviewRequestDto;
 import com.example.shimpyo.domain.tourist.service.TouristService;
@@ -28,6 +29,15 @@ public class TouristController {
     public ResponseEntity<Void> createReview(@Valid @RequestBody ReviewRequestDto requestDto) {
         touristService.createReview(requestDto);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<?> filterTouristByCategory(@RequestParam("category")  String category,
+                                                     @RequestParam("filter") String filter) {
+        FilterTouristByCategoryResponseDto responseDto =
+                touristService.filteredTouristByCategory(category, filter);
+
+        return ResponseEntity.ok(responseDto);
     }
 
 }
