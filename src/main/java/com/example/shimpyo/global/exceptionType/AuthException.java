@@ -16,6 +16,7 @@ public enum AuthException implements ExceptionType{
     TWO_PASSWORD_NOT_MATCHED(HttpStatus.BAD_REQUEST, "새로 입력한 비밀번호가 일치하지 않습니다."),
     PASSWORD_DUPLICATED(HttpStatus.BAD_REQUEST, "기존 비밀번호와 동일한 비밀번호입니다."),
     AUTHENTICATION_GET_FAILED(HttpStatus.CONFLICT, "사용자 인증 정보가 없습니다."),
+    EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
     SOCIAL_USER_CANT_CHANGE_PASSWORD(HttpStatus.FORBIDDEN, "소셜 유저는 패스워드 변경이 불가능합니다.");
 
     private final HttpStatus status;
