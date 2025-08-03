@@ -27,7 +27,7 @@ public class UserController {
     @PatchMapping("/nickname")
     public ResponseEntity<Void> changeNickname(@RequestBody Map<String, String> requestDto) {
         String newNickname = requestDto.get("nickname");
-        if (!newNickname.matches("^[a-zA-Z0-9가-힣_]{2,20}$")) {
+        if (!newNickname.matches("^[a-zA-Z0-9가-힣_]{2,8}$")) {
             throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
         }
         userService.changeNickname(newNickname);
@@ -36,7 +36,7 @@ public class UserController {
 
     @GetMapping("/duplicate/nickname")
     public ResponseEntity<Void> checkNickname(@RequestParam("nickname") String nickname) {
-        if (!nickname.matches("^[a-zA-Z0-9가-힣_]{2,20}$")) {
+        if (!nickname.matches("^[a-zA-Z0-9가-힣_]{2,8}$")) {
             throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
         }
         userService.checkNickname(nickname);
