@@ -329,6 +329,7 @@ public class AuthService {
     }
 
 
+    // 토큰 정보를 통해 user 정보 받는 로직
     public UserAuth findUser() {
         return userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId()).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
     }
