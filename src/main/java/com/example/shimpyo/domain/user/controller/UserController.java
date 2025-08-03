@@ -1,5 +1,7 @@
 package com.example.shimpyo.domain.user.controller;
 
+import com.example.shimpyo.domain.likes.service.LikesService;
+import com.example.shimpyo.domain.user.dto.TouristLikesResponseDto;
 import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
@@ -9,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -19,6 +22,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final LikesService likesService;
 
     @PatchMapping("/nickname")
     public ResponseEntity<Void> changeNickname(@RequestBody Map<String, String> requestDto) {
@@ -37,5 +41,11 @@ public class UserController {
         }
         userService.checkNickname(nickname);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/likes")
+    public ResponseEntity<List<TouristLikesResponseDto>> getTouristLikes(@RequestParam("category") String category,
+                                                                         @RequestParam("likesId") Long id) {
+        return ResponseEntity.ok(likesService.getTouristLikes(category, id));
     }
 }
