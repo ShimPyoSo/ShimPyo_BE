@@ -114,7 +114,7 @@ public class AuthService {
                 .maxAge(1800)// 30분
                 // 타사이트 요청시 쿠키 전송 X
                 // Lax : 안정한 타사이트 요청 (GET)에만 허용
-                .sameSite("Lex")
+                .sameSite("Lax")
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
@@ -123,7 +123,7 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(refreshTokenExpire) // 30일
-                .sameSite("Lex")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -162,7 +162,7 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(1800)
-                .sameSite("Lex")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -294,7 +294,7 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lex")
+                .sameSite("Lax")
                 .build();
 
         ResponseCookie expiredRefreshToken = ResponseCookie.from("refresh_token", "")
@@ -302,7 +302,7 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lex")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", expiredAccessToken.toString());
