@@ -129,4 +129,11 @@ public class AuthController {
         authService.refreshToken(request, response);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "자동 로그인")
+    @PostMapping("/relogin")
+    public ResponseEntity<Void> relogin(HttpServletRequest request, HttpServletResponse response){
+        authService.refreshToken(request, response);
+        return ResponseEntity.ok().build();
+    }
 }

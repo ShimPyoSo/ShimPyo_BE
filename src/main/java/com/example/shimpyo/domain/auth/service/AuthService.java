@@ -114,7 +114,7 @@ public class AuthService {
                 .maxAge(1800)// 30분
                 // 타사이트 요청시 쿠키 전송 X
                 // Lax : 안정한 타사이트 요청 (GET)에만 허용
-                .sameSite("Strict")
+                .sameSite("Lex")
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
@@ -123,11 +123,11 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(refreshTokenExpire) // 30일
-                .sameSite("Strict")
+                .sameSite("Lex")
                 .build();
 
-        response.addHeader("Set-cookie", accessCookie.toString());
-        response.addHeader("Set-cookie", refreshCookie.toString());
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
 
         // [#MOO5] 토큰 발급 로직 수정 끝
 
@@ -162,10 +162,10 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(1800)
-                .sameSite("Strict")
+                .sameSite("Lex")
                 .build();
 
-        response.addHeader("Set-cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", accessCookie.toString());
     }
 
     private String extractCookie(HttpServletRequest request, String name) {
@@ -294,7 +294,7 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("Lex")
                 .build();
 
         ResponseCookie expiredRefreshToken = ResponseCookie.from("refresh_token", "")
@@ -302,11 +302,11 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("Lex")
                 .build();
 
         response.addHeader("Set-Cookie", expiredAccessToken.toString());
-        response.addHeader("Set-cookie", expiredRefreshToken.toString());
+        response.addHeader("Set-Cookie", expiredRefreshToken.toString());
     }
 
     public UserAuth findUser() {
