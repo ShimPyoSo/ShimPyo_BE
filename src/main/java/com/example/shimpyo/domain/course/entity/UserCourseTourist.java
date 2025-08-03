@@ -16,21 +16,21 @@ import org.hibernate.annotations.SQLRestriction;
 @Builder
 @Getter
 // Hibernate 구현체가 delete를 수행하는 경우 soft delete 로 수행하도록 하는 명령어
-@SQLDelete(sql = "UPDATE user_course_list SET deleted_at = now() WHERE id = ?")
+@SQLDelete(sql = "UPDATE user_course_tourist SET deleted_at = now() WHERE id = ?")
 // 조회 하는 경우 deleted_at 이 null 인 데이터만 조회
 @SQLRestriction("deleted_at IS NULL")
-public class UserCourseList extends BaseEntity {
+public class UserCourseTourist extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_course_id", nullable = false)
-    private UserCourse userCourse;
+    @JoinColumn(name= "user_course_detail_id")
+    private UserCourseDetail userCourseDetail;
 
-    @ManyToOne
+
+    @ManyToOne()
     @JoinColumn(name = "tourist_id", nullable = false)
     private Tourist tourist;
-
 }

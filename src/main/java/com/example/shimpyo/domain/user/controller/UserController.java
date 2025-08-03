@@ -5,6 +5,7 @@ import com.example.shimpyo.domain.user.dto.TouristLikesResponseDto;
 import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,5 +48,11 @@ public class UserController {
     public ResponseEntity<List<TouristLikesResponseDto>> getTouristLikes(@RequestParam("category") String category,
                                                                          @RequestParam("likesId") Long id) {
         return ResponseEntity.ok(likesService.getTouristLikes(category, id));
+    }
+
+    @Operation(summary = "유저가 생성한 코스의 상세보기")
+    @GetMapping("/likes/detail")
+    public ResponseEntity<List<?>> getCourseLikes(@RequestParam("courseId") Long courseId) {
+        return ResponseEntity.ok(likesService.getCourseLikes(courseId));
     }
 }
