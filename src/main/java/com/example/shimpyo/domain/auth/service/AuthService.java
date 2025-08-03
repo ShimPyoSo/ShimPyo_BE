@@ -218,6 +218,11 @@ public class AuthService {
 
         UserAuth user = userAuthRepository.findByUserLoginId(requestDto.getUsername())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        if(user.getOauthId() != null){
+            throw new BaseException(SOCIAL_USER_CANT_CHANGE_PASSWORD);
+        }
+
         if (!user.getUser().getEmail().equals(requestDto.getEmail()))
             throw new BaseException(EMAIL_NOT_FOUNDED);
 
@@ -229,6 +234,10 @@ public class AuthService {
     public void resetPassword(ResetPasswordRequestDto requestDto) {
         UserAuth userAuth = userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        if(userAuth.getOauthId() != null){
+            throw new BaseException(SOCIAL_USER_CANT_CHANGE_PASSWORD);
+        }
 
         String nowPW = requestDto.getNowPassword();
         String newPW = requestDto.getNewPassword();
