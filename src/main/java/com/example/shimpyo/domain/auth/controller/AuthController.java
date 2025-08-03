@@ -30,8 +30,9 @@ public class AuthController {
     private final MailService mailService;
 
     @PostMapping("/social/login")
-    public ResponseEntity<LoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto) throws JsonProcessingException {
-        return ResponseEntity.ok(oAuth2Service.kakaoLogin(requestDto.get("accessToken")));
+    public ResponseEntity<LoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto,
+                                                          HttpServletResponse response) throws JsonProcessingException {
+        return ResponseEntity.ok(oAuth2Service.kakaoLogin(requestDto.get("accessToken"),response));
     }
 
     // [#MOO3] 유저 로그인 시작
