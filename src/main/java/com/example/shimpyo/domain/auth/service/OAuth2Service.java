@@ -64,30 +64,49 @@ public class OAuth2Service {
         String id = jsonNode.get("id").asText();
 
         // find로 가져올 데이터가 있으면 기존 회원, 아니면 신규 가입
-        Optional<UserAuth> optionalUserAuth = userAuthRepository.findByUserLoginIdAndSocialType(email, SocialType.KAKAO);
+        UserAuth user = userAuthRepository.findByUserLoginIdAndSocialType(email, SocialType.KAKAO)
+                .orElseGet(() -> {
+                    User newUSer = userRepository.save(User.builder()
+                            .email(email)
+                            .nickname(NicknamePrefixLoader.generateNickNames())
+                            .build());
 
-        UserAuth user;
-        if(optionalUserAuth.isPresent()){
-            user = optionalUserAuth.get();
-            createToken(email, user.getId(), responseCookie);
-        }else{
-            User newUser = userRepository.save(User.builder()
-                    .email(email)
-                    .nickname(NicknamePrefixLoader.generateNickNames())
-                    .build());
-
-            userAuthRepository.save(UserAuth.builder()
-                    .user(newUser)
-                    .userLoginId(email)
-                    .password(null)
-                    .oauthId(id)
-                    .socialType(SocialType.KAKAO)
-                    .build());
-
-            return null;
-        }
+                    return userAuthRepository.save(UserAuth.builder()
+                            .user(newUSer)
+                            .userLoginId(email)
+                            .password(null)
+                            .oauthId(id)
+                            .socialType(SocialType.KAKAO)
+                            .build());
+                });
 
         return LoginResponseDto.toDto(user);
+
+        // 카카오 유저가 없다면 회원가입, 기존 회원이라면 로그인 로직
+//        Optional<UserAuth> optionalUserAuth = userAuthRepository.findByUserLoginIdAndSocialType(email, SocialType.KAKAO);
+//
+//        UserAuth user;
+//        if(optionalUserAuth.isPresent()){
+//            user = optionalUserAuth.get();
+//            createToken(email, user.getId(), responseCookie);
+//        }else{
+//            User newUser = userRepository.save(User.builder()
+//                    .email(email)
+//                    .nickname(NicknamePrefixLoader.generateNickNames())
+//                    .build());
+//
+//            userAuthRepository.save(UserAuth.builder()
+//                    .user(newUser)
+//                    .userLoginId(email)
+//                    .password(null)
+//                    .oauthId(id)
+//                    .socialType(SocialType.KAKAO)
+//                    .build());
+//
+//            return null;
+//        }
+//
+//        return LoginResponseDto.toDto(user);
     }
 
     // 소셜 로그인 시 토큰 생성
