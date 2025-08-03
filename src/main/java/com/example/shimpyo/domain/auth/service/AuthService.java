@@ -309,6 +309,17 @@ public class AuthService {
         response.addHeader("Set-Cookie", expiredRefreshToken.toString());
     }
 
+    // 자동 로그인 반환 값
+    public LoginResponseDto reLoginResponse(HttpServletRequest request) {
+        String token = extractCookie(request);
+        long userId = jwtTokenProvider.getUserIdToRefresh(token);
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        return LoginResponseDto.toDto(user);
+    }
+
+
     public UserAuth findUser() {
         return userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId()).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
     }
