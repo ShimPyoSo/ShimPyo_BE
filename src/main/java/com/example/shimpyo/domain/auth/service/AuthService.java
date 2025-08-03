@@ -139,7 +139,7 @@ public class AuthService {
     // [#MOO6] access Token 재발급 로직
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         // 1. 쿠키에서 refresh_token 추출
-        String refreshToken = extractCookie(request, "refresh_token");
+        String refreshToken = extractCookie(request);
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             throw new BaseException(INVALID_REFRESH_TOKEN);
         }
@@ -168,10 +168,10 @@ public class AuthService {
         response.addHeader("Set-Cookie", accessCookie.toString());
     }
 
-    private String extractCookie(HttpServletRequest request, String name) {
+    private String extractCookie(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         for(Cookie cookie : request.getCookies()){
-            if(cookie.getName().equals(name)){
+            if(cookie.getName().equals("refresh_token")){
                 return cookie.getValue();
             }
         }
