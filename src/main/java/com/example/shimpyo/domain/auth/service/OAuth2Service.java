@@ -129,6 +129,5 @@ public class OAuth2Service {
                 entity,
                 String.class                     // 응답 타입
         );
-        System.out.println("success : " + exchange.getBody());
     }
 }

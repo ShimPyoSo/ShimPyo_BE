@@ -1,7 +1,7 @@
-package com.example.shimpyo.domain.likes.service;
+package com.example.shimpyo.domain.course.service;
 
 import com.example.shimpyo.domain.auth.service.AuthService;
-import com.example.shimpyo.domain.likes.controller.repository.LikesRepository;
+import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.service.TouristService;
@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
