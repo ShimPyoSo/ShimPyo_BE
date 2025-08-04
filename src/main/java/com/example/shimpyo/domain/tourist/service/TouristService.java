@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,13 +93,19 @@ public class TouristService {
     public FilterTouristByCategoryResponseDto filteredTouristByCategory(String category, String filter){
         List<TouristCategory> touristCategories = touristCategoryRepository.findByCategory(Category.fromCode(category));
 
-        List<Tourist> tourists = new ArrayList<>();
-
-//        for(TouristCategory touristCategory : touristCategories){
-//
-//        }
-
+        List<Tourist> tourists = touristCategories.stream()
+                .map(TouristCategory::getTourist)
+                .filter(t -> applyFilters(t, filter))
+                .toList();
         return null;
+    }
+
+    private boolean applyFilters(Tourist tourist, String filterJson){
+        FilterRequest filter = parseFilter(filterJson);
+
+        // 지역 필터
+        if (filter.getRegion() != null) {
+        }
     }
 
     public Tourist findTourist(Long id) {
