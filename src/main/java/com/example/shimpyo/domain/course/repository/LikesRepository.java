@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.likes.controller.repository;
+package com.example.shimpyo.domain.course.repository;
 
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
