@@ -1,5 +1,7 @@
 package com.example.shimpyo.domain.user.controller;
 
+import com.example.shimpyo.domain.likes.service.LikesService;
+import com.example.shimpyo.domain.user.dto.TouristLikesResponseDto;
 import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.SwaggerErrorApi;
@@ -11,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -21,13 +24,14 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final LikesService likesService;
 
     @Operation(summary = "닉네임 변경")
     @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"NICKNAME_NOT_VALID", "MEMBER_NOT_FOUND"})
     @PatchMapping("/nickname")
     public ResponseEntity<Void> changeNickname(@RequestBody Map<String, String> requestDto) {
         String newNickname = requestDto.get("nickname");
-        if (!newNickname.matches("^[a-zA-Z0-9가-힣_]{2,20}$")) {
+        if (!newNickname.matches("^[a-zA-Z0-9가-힣_]{2,8}$")) {
             throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
         }
         userService.changeNickname(newNickname);
@@ -35,13 +39,20 @@ public class UserController {
     }
 
     @Operation(summary = "닉네임 중복 검사")
-    @GetMapping("/nickname")
     @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"NICKNAME_NOT_VALID", "NICKNAME_DUPLICATED"})
+    @GetMapping("/duplicate/nickname")
     public ResponseEntity<Void> checkNickname(@RequestParam("nickname") String nickname) {
-        if (!nickname.matches("^[a-zA-Z0-9가-힣_]{2,20}$")) {
+        if (!nickname.matches("^[a-zA-Z0-9가-힣_]{2,8}$")) {
             throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
         }
         userService.checkNickname(nickname);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "찜한 관광지 목록")
+    @GetMapping("/likes")
+    public ResponseEntity<List<TouristLikesResponseDto>> getTouristLikes(@RequestParam("category") String category,
+                                                                         @RequestParam("likesId") Long id) {
+        return ResponseEntity.ok(likesService.getTouristLikes(category, id));
     }
 }

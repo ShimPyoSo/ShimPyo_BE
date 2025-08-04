@@ -16,12 +16,14 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.shimpyo.global.exceptionType.AuthException.EMAIL_NOT_VERIFIED;
 import static com.example.shimpyo.global.exceptionType.AuthException.MAIL_CODE_NOT_MATCHED;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_DUPLICATION;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_NOT_FOUNDED;
@@ -91,14 +93,20 @@ public class MailService {
         String storedAuthKey =  (String) redisTemplate.opsForValue().get(dto.getEmail());
         if(!dto.getAuthKey().equals(storedAuthKey))
             throw new BaseException(MAIL_CODE_NOT_MATCHED);
-        else{
-            redisTemplate.delete(dto.getEmail());
-        }
+
+        redisTemplate.delete(dto.getEmail());
+        redisTemplate.opsForValue().set("verified:email" + dto.getEmail(), "true", Duration.ofMinutes(10));
+
     }
     // [#MOO5] 메일 정보와 인증 코드 일치 여부 판단 로직 끝
 
     // 회원 이메일로 임시 비밀번호 전송
     public void sendResetPasswordMail(String email, String tempPW) throws MessagingException {
+        Object verified = redisTemplate.opsForValue().get("verified:email" + email);
+
+        if(verified == null || !"true".equals(verified.toString())){
+            throw new BaseException(EMAIL_NOT_VERIFIED);
+        }
 
         String subject = "ShimPyoSo Authorization";
         String text = "임시 비밀번호는 " + tempPW + "입니다.";

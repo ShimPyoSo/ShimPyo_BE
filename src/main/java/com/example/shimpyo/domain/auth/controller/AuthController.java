@@ -1,9 +1,9 @@
 package com.example.shimpyo.domain.auth.controller;
 
 import com.example.shimpyo.domain.auth.dto.*;
+import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.auth.service.MailService;
 import com.example.shimpyo.domain.auth.service.OAuth2Service;
-import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.AuthException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
@@ -31,9 +31,11 @@ public class AuthController {
     private final AuthService  authService;
     private final MailService mailService;
 
+    @Operation(summary = "소셜 회원가입")
     @PostMapping("/social/login")
-    public ResponseEntity<LoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto) throws JsonProcessingException {
-        return ResponseEntity.ok(oAuth2Service.kakaoLogin(requestDto.get("accessToken")));
+    public ResponseEntity<LoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto,
+                                                          HttpServletResponse response) throws JsonProcessingException {
+        return ResponseEntity.ok(oAuth2Service.kakaoLogin(requestDto.get("accessToken"),response));
     }
 
     // [#MOO3] 유저 로그인 시작
@@ -148,6 +150,14 @@ public class AuthController {
     public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
         authService.refreshToken(request, response);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "자동 로그인")
+    @PostMapping("/relogin")
+    public ResponseEntity<?> relogin(HttpServletRequest request, HttpServletResponse response){
+        authService.refreshToken(request, response);
+        LoginResponseDto dto = authService.reLoginResponse(request);
+        return ResponseEntity.ok(dto);
     }
 
     @Tag(name = "ZToken", description = "토큰 관련 예외 목록")

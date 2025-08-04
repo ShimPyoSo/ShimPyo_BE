@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -66,13 +68,13 @@ public class TouristService {
                 .image(List.of(requestDto.getImages().split(", ")))
                 .user(authService.findUser().getUser())
                 .tourist(touristRepository.findById(requestDto.getId())
-                        .orElseThrow(() -> new BaseException(TouristException.TOURIST_NOT_FOUND)))
+                        .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND)))
                 .build());
     }
 
     public List<ReviewResponseDto> getTouristReview(Long touristId, int limit, Long reviewId) {
         Tourist tourist = touristRepository.findById(touristId)
-                .orElseThrow(() -> new BaseException(TouristException.TOURIST_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
 
         List<Review> result;
         Pageable pageable = PageRequest.of(0, limit);
@@ -83,5 +85,9 @@ public class TouristService {
             result = reviewRepository.findByTouristAndIdLessThanOrderByIdDesc(tourist, reviewId, pageable);
         }
         return result.stream().map(r -> ReviewResponseDto.toDto(r, r.getUser())).collect(Collectors.toList());
+    }
+
+    public Tourist findTourist(Long id) {
+        return touristRepository.findById(id).orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
     }
 }

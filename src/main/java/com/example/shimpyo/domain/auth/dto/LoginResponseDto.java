@@ -1,6 +1,7 @@
 package com.example.shimpyo.domain.auth.dto;
 
 import com.example.shimpyo.domain.auth.entity.UserAuth;
+import com.example.shimpyo.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,6 +16,13 @@ public class LoginResponseDto {
         return LoginResponseDto.builder()
                 .userId(user.getUser().getId())
                 .nickname(user.getUser().getNickname())
+                .build();
+    }
+
+    public static LoginResponseDto toDto(User user) {
+        return LoginResponseDto.builder()
+                .userId(user.getId())
+                .nickname(user.getNickname())
                 .build();
     }
 }
