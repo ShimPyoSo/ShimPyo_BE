@@ -24,11 +24,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.*;
-import static com.example.shimpyo.global.exceptionType.TokenException.*;
+import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
+import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN;
 
 @Service
 @Slf4j
@@ -111,7 +114,7 @@ public class AuthService {
                 .maxAge(1800)// 30분
                 // 타사이트 요청시 쿠키 전송 X
                 // Lax : 안정한 타사이트 요청 (GET)에만 허용
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
@@ -120,11 +123,11 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(refreshTokenExpire) // 30일
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
-        response.addHeader("Set-cookie", accessCookie.toString());
-        response.addHeader("Set-cookie", refreshCookie.toString());
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
 
         // [#MOO5] 토큰 발급 로직 수정 끝
 
@@ -136,7 +139,7 @@ public class AuthService {
     // [#MOO6] access Token 재발급 로직
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         // 1. 쿠키에서 refresh_token 추출
-        String refreshToken = extractCookie(request, "refresh_token");
+        String refreshToken = extractCookie(request);
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             throw new BaseException(INVALID_REFRESH_TOKEN);
         }
@@ -159,16 +162,16 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(1800)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
-        response.addHeader("Set-cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", accessCookie.toString());
     }
 
-    private String extractCookie(HttpServletRequest request, String name) {
+    private String extractCookie(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         for(Cookie cookie : request.getCookies()){
-            if(cookie.getName().equals(name)){
+            if(cookie.getName().equals("refresh_token")){
                 return cookie.getValue();
             }
         }
@@ -198,9 +201,16 @@ public class AuthService {
         UserAuth userAuth = userAuthRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
+        String username = userAuth.getUserLoginId();
+        int length = username.length();
+        int half = length/2+1;
+
+        String masked = username.substring(0,half) + "*".repeat(length-half);
+
+
         return FindUsernameResponseDto.builder()
-                .username(userAuth.getUserLoginId())
-                .createdAt(userAuth.getCreatedAt())
+                .username(masked)
+                .createdAt(LocalDate.parse(userAuth.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
                 .build();
     }
 
@@ -208,6 +218,11 @@ public class AuthService {
 
         UserAuth user = userAuthRepository.findByUserLoginId(requestDto.getUsername())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        if(user.getOauthId() != null){
+            throw new BaseException(SOCIAL_USER_CANT_CHANGE_PASSWORD);
+        }
+
         if (!user.getUser().getEmail().equals(requestDto.getEmail()))
             throw new BaseException(EMAIL_NOT_FOUNDED);
 
@@ -219,6 +234,10 @@ public class AuthService {
     public void resetPassword(ResetPasswordRequestDto requestDto) {
         UserAuth userAuth = userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId())
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        if(userAuth.getOauthId() != null){
+            throw new BaseException(SOCIAL_USER_CANT_CHANGE_PASSWORD);
+        }
 
         String nowPW = requestDto.getNowPassword();
         String newPW = requestDto.getNewPassword();
@@ -284,7 +303,7 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         ResponseCookie expiredRefreshToken = ResponseCookie.from("refresh_token", "")
@@ -292,12 +311,23 @@ public class AuthService {
                 .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", expiredAccessToken.toString());
-        response.addHeader("Set-cookie", expiredRefreshToken.toString());
+        response.addHeader("Set-Cookie", expiredRefreshToken.toString());
     }
+
+    // 자동 로그인 반환 값
+    public LoginResponseDto reLoginResponse(HttpServletRequest request) {
+        String token = extractCookie(request);
+        long userId = jwtTokenProvider.getUserIdToRefresh(token);
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+
+        return LoginResponseDto.toDto(user);
+    }
+
 
     public UserAuth findUser() {
         return userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId()).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));

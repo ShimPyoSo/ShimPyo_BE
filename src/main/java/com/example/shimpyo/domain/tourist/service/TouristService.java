@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
+
 import static com.example.shimpyo.global.exceptionType.TouristCategoryException.TOURIST_CATEGORY_EXCEPTION;
 
 @Service
@@ -70,13 +72,13 @@ public class TouristService {
                 .image(List.of(requestDto.getImages().split(", ")))
                 .user(authService.findUser().getUser())
                 .tourist(touristRepository.findById(requestDto.getId())
-                        .orElseThrow(() -> new BaseException(TouristException.TOURIST_NOT_FOUND)))
+                        .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND)))
                 .build());
     }
 
     public List<ReviewResponseDto> getTouristReview(Long touristId, int limit, Long reviewId) {
         Tourist tourist = touristRepository.findById(touristId)
-                .orElseThrow(() -> new BaseException(TouristException.TOURIST_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
 
         List<Review> result;
         Pageable pageable = PageRequest.of(0, limit);
@@ -91,7 +93,9 @@ public class TouristService {
 
     // 카테고리와 filter 를 동시에 수행
     public FilterTouristByCategoryResponseDto filteredTouristByCategory(String category, String filter){
-        List<TouristCategory> touristCategories = touristCategoryRepository.findByCategory();
+        List<TouristCategory> touristCategories = touristCategoryRepository.findByCategory(Category.fromCode(category));
+
+
 
         List<Tourist> tourists = new ArrayList<>();
 
@@ -100,5 +104,9 @@ public class TouristService {
         }
 
         return null;
+    }
+
+    public Tourist findTourist(Long id) {
+        return touristRepository.findById(id).orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
     }
 }

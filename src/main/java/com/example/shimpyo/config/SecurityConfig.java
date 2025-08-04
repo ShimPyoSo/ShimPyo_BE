@@ -38,7 +38,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/user/auth/password").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/tourlist/reviews").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/user/auth/password").permitAll()
-                        .requestMatchers("/api/user/auth/**", "/api/main/recommends", "/api/tourlist/reviews").permitAll()
+                        .requestMatchers(
+                                "/api/user/auth/**",
+                                "/api/main/recommends",
+                                "/api/tourlist/reviews",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
@@ -49,7 +55,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.shimpyo.co.kr"));
         config.setAllowedMethods(List.of("*"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(List.of("*"));
