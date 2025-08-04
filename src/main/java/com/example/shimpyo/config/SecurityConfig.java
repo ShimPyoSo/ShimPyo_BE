@@ -44,7 +44,7 @@ public class SecurityConfig {
                                 "/api/tourlist/reviews",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/").permitAll()
+                                "/api/tourlist/category").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
