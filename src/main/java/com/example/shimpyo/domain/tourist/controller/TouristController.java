@@ -42,7 +42,8 @@ public class TouristController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "관광지 id 를 통한 관광지 상세보기 API")
+    @Operation(summary = "관광지 상세 정보", description = "관광지 id 를 기반으로 관광지 상세정보 출력")
+    @SwaggerErrorApi(type = {TouristException.class}, codes = {"TOURIST_NOT_FOUND"})
     @GetMapping("/detail")
     public ResponseEntity<?> detailTourist(@RequestParam("id") Long touristId) {
         TouristDetailResponseDto responseDto = touristService.getTouristDetail(touristId);
