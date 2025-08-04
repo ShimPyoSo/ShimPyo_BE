@@ -12,7 +12,6 @@ import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.ReviewRepository;
 import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.global.exceptionType.TouristException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +26,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
-
-import static com.example.shimpyo.global.exceptionType.TouristCategoryException.TOURIST_CATEGORY_EXCEPTION;
 
 @Service
 @Transactional
@@ -95,13 +92,11 @@ public class TouristService {
     public FilterTouristByCategoryResponseDto filteredTouristByCategory(String category, String filter){
         List<TouristCategory> touristCategories = touristCategoryRepository.findByCategory(Category.fromCode(category));
 
-
-
         List<Tourist> tourists = new ArrayList<>();
 
-        for(TouristCategory touristCategory : touristCategories){
-
-        }
+//        for(TouristCategory touristCategory : touristCategories){
+//
+//        }
 
         return null;
     }
