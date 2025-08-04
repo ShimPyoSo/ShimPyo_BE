@@ -2,17 +2,13 @@ package com.example.shimpyo.domain.tourist.service;
 
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
-import com.example.shimpyo.domain.tourist.dto.LikesResponseDto;
-import com.example.shimpyo.domain.tourist.dto.RecommendsResponseDto;
-import com.example.shimpyo.domain.tourist.dto.ReviewRequestDto;
-import com.example.shimpyo.domain.tourist.dto.ReviewResponseDto;
+import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
 import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.ReviewRepository;
 import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.global.exceptionType.TouristException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -89,5 +85,25 @@ public class TouristService {
 
     public Tourist findTourist(Long id) {
         return touristRepository.findById(id).orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
+    }
+
+    public TouristDetailResponseDto getTouristDetail(Long touristId){
+
+        Tourist tourist = touristRepository.findById(touristId)
+                .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
+
+        return TouristDetailResponseDto.toDto(tourist, extractRegion(tourist.getAddress()));
+
+    }
+
+    private static String extractRegion(String address) {
+        List<String> regions = List.of(
+                "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+                "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주");
+
+        return regions.stream()
+                .filter(address::contains)
+                .findFirst()
+                .orElse("전국");
     }
 }
