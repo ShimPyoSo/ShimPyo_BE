@@ -4,6 +4,7 @@ import com.example.shimpyo.domain.tourist.dto.ReviewResponseDto;
 import com.example.shimpyo.domain.tourist.dto.ReviewRequestDto;
 import com.example.shimpyo.domain.tourist.dto.TouristDetailResponseDto;
 import com.example.shimpyo.domain.tourist.service.TouristService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class TouristController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "관광지 id 를 통한 관광지 상세보기 API")
     @GetMapping("/detail")
     public ResponseEntity<?> detailTourist(@RequestParam("id") Long touristId) {
         TouristDetailResponseDto responseDto = touristService.getTouristDetail(touristId);
