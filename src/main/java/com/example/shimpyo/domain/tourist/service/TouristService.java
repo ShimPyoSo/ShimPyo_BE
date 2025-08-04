@@ -91,10 +91,7 @@ public class TouristService {
 
     // 카테고리와 filter 를 동시에 수행
     public FilterTouristByCategoryResponseDto filteredTouristByCategory(String category, String filter){
-
-
-        List<TouristCategory> touristCategories =
-                touristCategoryRepository.findByCategory(toCategory(category));
+        List<TouristCategory> touristCategories = touristCategoryRepository.findByCategory();
 
         List<Tourist> tourists = new ArrayList<>();
 
@@ -103,16 +100,5 @@ public class TouristService {
         }
 
         return null;
-    }
-
-    private Category toCategory(String category){
-        return switch (category) {
-            case "MEDITATION" -> Category.MEDITATION;
-            case "SPA" -> Category.SPA;
-            case "BEAUTY" -> Category.BEAUTY;
-            case "NATURE" -> Category.NATURE;
-            case "FOOD" -> Category.FOOD;
-            default -> throw new BaseException(TOURIST_CATEGORY_EXCEPTION);
-        };
     }
 }
