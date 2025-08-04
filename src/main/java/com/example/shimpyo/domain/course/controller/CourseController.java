@@ -17,13 +17,13 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/course")
-public class LikesController {
+public class CourseController {
     private final LikesService likesService;
 
     @Operation(summary = "관광지 찜 추가/삭제")
     @SwaggerErrorApi(type = {TouristException.class, MemberExceptionType.class},
             codes = {"TOURIST_NOT_FOUND", "MEMBER_NOT_FOUND"})
-    @PatchMapping
+    @PatchMapping("/tourist")
     public ResponseEntity<Void> toggleLikeTourist(@RequestBody Map<String, Long> requestDto) {
         likesService.toggleLikeTourist(requestDto.get("id"));
         return ResponseEntity.ok().build();
