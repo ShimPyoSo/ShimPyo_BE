@@ -41,7 +41,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/user/auth/**",
                                 "/api/main/recommends",
-                                "/api/tourlist/reviews")
+                                "/api/tourlist/reviews",
+                                "/api/tourlist/detail")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

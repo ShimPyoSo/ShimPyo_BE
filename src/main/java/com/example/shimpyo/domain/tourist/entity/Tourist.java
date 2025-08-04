@@ -65,6 +65,9 @@ public class Tourist extends BaseEntity {
     @Column
     private String breakTime;
 
+    @Column
+    private String telNum;
+
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TouristCategory> touristCategories = new ArrayList<>();
 
