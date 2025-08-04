@@ -123,7 +123,8 @@ public class AuthController {
 
     @Operation(summary = "비밀번호 변경")
     @SwaggerErrorApi(type = {AuthException.class, MemberExceptionType.class},
-            codes = {"PASSWORD_NOT_MATCHED", "TWO_PASSWORD_NOT_MATCHED", "PASSWORD_DUPLICATED", "MEMBER_NOT_FOUND"})
+            codes = {"PASSWORD_NOT_MATCHED", "TWO_PASSWORD_NOT_MATCHED", "PASSWORD_DUPLICATED", "MEMBER_NOT_FOUND",
+            "SOCIAL_USER_CANT_CHANGE_PASSWORD"})
     @PutMapping("/password")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto requestDto) {
         authService.resetPassword(requestDto);
