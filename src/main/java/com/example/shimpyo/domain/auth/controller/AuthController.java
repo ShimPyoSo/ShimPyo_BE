@@ -162,6 +162,14 @@ public class AuthController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "추가 정보 입력")
+    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @PostMapping("/info")
+    public ResponseEntity<Void> getMoreInfo(@Valid @RequestBody InfoRequestDto requestDto) {
+        authService.setMoreInfo(requestDto);
+        return ResponseEntity.ok().build();
+    }
+
     @Tag(name = "ZToken", description = "토큰 관련 예외 목록")
     @Operation(summary = "토큰 관련 예외 목록")
     @SwaggerErrorApi(type = {TokenException.class},

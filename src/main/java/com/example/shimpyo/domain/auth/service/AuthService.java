@@ -339,4 +339,10 @@ public class AuthService {
     public UserAuth findUser() {
         return userAuthRepository.findByUserLoginId(SecurityUtils.getLoginId()).orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
     }
+
+    public void setMoreInfo(InfoRequestDto requestDto) {
+        User user = findUser().getUser();
+        user.changeGender(requestDto.getGender());
+        user.changeBirthYear(requestDto.getBirthYear());
+    }
 }

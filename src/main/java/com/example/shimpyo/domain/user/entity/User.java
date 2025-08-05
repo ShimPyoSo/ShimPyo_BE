@@ -42,6 +42,12 @@ public class User extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String nickname;
 
+    @Column
+    private String gender;
+
+    @Column
+    private Integer birthYear;
+
     // 이거 왜 있을까요??
     private Long survey;
 
@@ -62,5 +68,12 @@ public class User extends BaseEntity {
 
     public void changeNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void changeGender(String gender) {
+        this.gender = gender;
+    }
+    public void changeBirthYear(Integer year) {
+        this.birthYear = year;
     }
 }
