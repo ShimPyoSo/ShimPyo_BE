@@ -39,7 +39,6 @@ public class AuthController {
     }
 
     // [#MOO3] 유저 로그인 시작
-    //TODO 미사용
     @SwaggerErrorApi(type = AuthException.class, codes = {"MEMBER_NOT_FOUND", "MEMBER_INFO_NOT_MATCHED"})
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
@@ -53,8 +52,9 @@ public class AuthController {
     @Operation(summary = "회원가입")
     @SwaggerErrorApi(type = AuthException.class, codes = {"EMAIL_DUPLICATION"})
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequest dto){
-        authService.registerUser(dto);
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequest dto,
+                                          HttpServletResponse response){
+        authService.registerUser(dto, response);
         return ResponseEntity.ok("회원가입 완료");
     }
     // [#MOO1] 사용자 회원가입 끝N

@@ -60,7 +60,7 @@ public class AuthService {
     private static final SecureRandom random = new SecureRandom();
 
     // [#MOO1] 사용자 회원가입 시작
-    public void registerUser(RegisterUserRequest dto) {
+    public void registerUser(RegisterUserRequest dto, HttpServletResponse response) {
         // [#MOO1] 이메일 중복 여부 확인 (deleted_at = null 인 사용자만 대상으로)
         if (userRepository.findByEmailAndDeletedAtIsNull(dto.getEmail()).isPresent()) {
             throw new BaseException(EMAIL_DUPLICATION);
@@ -69,7 +69,8 @@ public class AuthService {
 
         // [#MOO1] 회원 등록 (비밀번호는 인코딩해서 저장)
         User user = userRepository.save(dto.toUserEntity(NicknamePrefixLoader.generateNickNames()));
-        userAuthRepository.save(dto.toUserAuthEntity(passwordEncoder.encode(dto.getPassword()), user));
+        UserAuth userAuth = userAuthRepository.save(dto.toUserAuthEntity(passwordEncoder.encode(dto.getPassword()), user));
+        setTokenCookie(response, dto.getUsername(), userAuth, false);
     }
     // [#MOO1] 사용자 회원가입 끝
 
@@ -85,9 +86,10 @@ public class AuthService {
 
     // [#MOO3] 유저 로그인 시작
     public LoginResponseDto login(UserLoginDto dto, HttpServletResponse response) {
+        String username = dto.getUsername();
 
         // 1. 사용자 검증
-        UserAuth userAuth = userAuthRepository.findByUserLoginId(dto.getUsername())
+        UserAuth userAuth = userAuthRepository.findByUserLoginId(username)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
 
         // [#MOO5] 토큰 발급 로직 수정 시작
@@ -96,15 +98,21 @@ public class AuthService {
             throw new BaseException(MEMBER_INFO_NOT_MATCHED);
         }
 
+        setTokenCookie(response, username, userAuth, dto.getIsRememberMe());
+        return LoginResponseDto.toDto(userAuth);
+    }
+
+    // 토큰 발급 후 last login 시각까지 업데이트
+    private void setTokenCookie(HttpServletResponse response, String username, UserAuth userAuth, boolean isRememberMe) {
         // 3. 토큰 발급
-        String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername(), userAuth.getId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername(), userAuth.getId(), dto.getIsRememberMe());
+        String accessToken = jwtTokenProvider.createAccessToken(username, userAuth.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(username, userAuth.getId(), isRememberMe);
 
         // 4. RefreshToken Redis 저장.
         redisService.saveRefreshToken(userAuth.getUserLoginId(), refreshToken);
 
         // 리프레시 토큰 유효시간
-        long refreshTokenExpire = dto.getIsRememberMe() ? expirationALRT / 1000L : expirationRT / 1000L;
+        long refreshTokenExpire = isRememberMe ? expirationALRT / 1000L : expirationRT / 1000L;
         // 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true)
@@ -131,8 +139,7 @@ public class AuthService {
 
         // [#MOO5] 토큰 발급 로직 수정 끝
 
-        userAuthRepository.updateLastLogin(dto.getUsername());
-        return LoginResponseDto.toDto(userAuth);
+        userAuthRepository.updateLastLogin(username);
     }
     // [#MOO3] 유저 로그인 끝
 
