@@ -31,9 +31,9 @@ public class AuthController {
     private final AuthService  authService;
     private final MailService mailService;
 
-    @Operation(summary = "소셜 회원가입")
+    @Operation(summary = "소셜 로그인/회원가입")
     @PostMapping("/social/login")
-    public ResponseEntity<LoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto,
+    public ResponseEntity<SocialLoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto,
                                                           HttpServletResponse response) throws JsonProcessingException {
         return ResponseEntity.ok(oAuth2Service.kakaoLogin(requestDto.get("accessToken"),response));
     }

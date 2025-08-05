@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.LoginResponseDto;
+import com.example.shimpyo.domain.auth.dto.SocialLoginResponseDto;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.entity.SocialType;
@@ -40,7 +41,7 @@ public class OAuth2Service {
     long expirationRT;
 
     @Transactional
-    public LoginResponseDto kakaoLogin(String accessToken, HttpServletResponse responseCookie) throws JsonProcessingException {
+    public SocialLoginResponseDto kakaoLogin(String accessToken, HttpServletResponse responseCookie) throws JsonProcessingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -64,23 +65,27 @@ public class OAuth2Service {
         String id = jsonNode.get("id").asText();
 
         // find로 가져올 데이터가 있으면 기존 회원, 아니면 신규 가입
-        UserAuth user = userAuthRepository.findByUserLoginIdAndSocialType(email, SocialType.KAKAO)
-                .orElseGet(() -> {
-                    User newUSer = userRepository.save(User.builder()
+        boolean isSignUp = false;
+        Optional<UserAuth> userAuth = userAuthRepository.findByUserLoginIdAndSocialType(email, SocialType.KAKAO);
+        UserAuth user;
+        if (userAuth.isEmpty()) {
+            isSignUp = true;
+            user = userAuthRepository.save(UserAuth.builder()
+                    .user(userRepository.save(User.builder()
                             .email(email)
                             .nickname(NicknamePrefixLoader.generateNickNames())
-                            .build());
-
-                    return userAuthRepository.save(UserAuth.builder()
-                            .user(newUSer)
-                            .userLoginId(email)
-                            .password(null)
-                            .oauthId(id)
-                            .socialType(SocialType.KAKAO)
-                            .build());
-                });
+                            .build()))
+                    .userLoginId(email)
+                    .password(null)
+                    .oauthId(id)
+                    .socialType(SocialType.KAKAO)
+                    .build());
+        } else {
+            user = userAuth.get();
+        }
         createToken(email, user.getUser().getId(), responseCookie);
-        return LoginResponseDto.toDto(user);
+
+        return SocialLoginResponseDto.toDto(user, isSignUp);
     }
 
     // 소셜 로그인 시 토큰 생성
@@ -101,7 +106,7 @@ public class OAuth2Service {
     private ResponseCookie createCookie(String name, String value, long maxAgeSeconds){
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
-                .secure(false) // 운영 환경에서는 true 권장
+                .secure(true) // 운영 환경에서는 true 권장
                 .path("/")
                 .maxAge(maxAgeSeconds)
                 .sameSite("Lax")
