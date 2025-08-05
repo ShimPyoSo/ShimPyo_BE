@@ -28,7 +28,7 @@ import java.util.List;
     nickname = uuid -> not null 이므로
  **/
 @SQLDelete(sql = "UPDATE `user` SET deleted_at = now(), email = UUID(), nickname = UUID() WHERE id = ?")
-@SQLRestriction("deleted_at IS NULL")
+//@SQLRestriction("deleted_at IS NULL")
 @Table(name = "\"user\"")
 public class User extends BaseEntity {
 
