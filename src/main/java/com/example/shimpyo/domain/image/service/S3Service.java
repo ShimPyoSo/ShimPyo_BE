@@ -1,6 +1,7 @@
 package com.example.shimpyo.domain.image.service;
 
 import com.example.shimpyo.domain.image.dto.ImageRequestDto;
+import com.example.shimpyo.global.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,8 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.time.Duration;
+
+import static com.example.shimpyo.global.exceptionType.AuthException.FILE_SIZE_OVER;
 
 @Service
 @RequiredArgsConstructor
