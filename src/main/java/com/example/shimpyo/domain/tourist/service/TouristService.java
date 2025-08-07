@@ -5,6 +5,9 @@ import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
+import com.example.shimpyo.domain.user.dto.MyReviewDetailResponseDto;
+import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
+import com.example.shimpyo.domain.user.dto.ReviewDetailDto;
 import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.ReviewRepository;
@@ -105,5 +108,9 @@ public class TouristService {
                 .filter(address::contains)
                 .findFirst()
                 .orElse("전국");
+    }
+
+    public List<MyReviewListResponseDto> getMyReviewLists() {
+        return reviewRepository.countReviewsByTouristForUser(authService.findUser().getUser().getId());
     }
 }
