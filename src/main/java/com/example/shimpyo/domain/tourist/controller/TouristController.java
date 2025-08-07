@@ -56,6 +56,7 @@ public class TouristController {
         List<FilterTouristByCategoryResponseDto> responseDto =
                 touristService.filteredTouristByCategory(category, filter, pageable);
 
+
         return ResponseEntity.ok(responseDto);
     }
 
