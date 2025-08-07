@@ -1,11 +1,16 @@
 package com.example.shimpyo.domain.user.controller;
 
 import com.example.shimpyo.domain.course.service.LikesService;
+import com.example.shimpyo.domain.tourist.service.TouristService;
+import com.example.shimpyo.domain.user.dto.MyReviewDetailResponseDto;
+import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
+import com.example.shimpyo.domain.user.dto.SeenTouristResponseDto;
 import com.example.shimpyo.domain.user.dto.TouristLikesResponseDto;
 import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
+import com.example.shimpyo.global.exceptionType.TouristException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +30,7 @@ public class UserController {
 
     private final UserService userService;
     private final LikesService likesService;
+    private final TouristService touristService;
 
     @Operation(summary = "닉네임 변경")
     @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"NICKNAME_NOT_VALID", "MEMBER_NOT_FOUND"})
@@ -55,5 +61,27 @@ public class UserController {
     public ResponseEntity<List<TouristLikesResponseDto>> getTouristLikes(@RequestParam("category") String category,
                                                                          @RequestParam("likesId") Long id) {
         return ResponseEntity.ok(likesService.getTouristLikes(category, id));
+    }
+
+    @Operation(summary = "최근 본 관광지")
+    @SwaggerErrorApi(type = {TouristException.class}, codes = {"TOURIST_NOT_FOUND"})
+    @GetMapping("/tourist")
+    public ResponseEntity<List<SeenTouristResponseDto>> getLastSeenTourists(@RequestBody List<Long> touristIds){//SeenTouristRequestDto requestDto) {
+        return ResponseEntity.ok(userService.getLastSeenTourists(touristIds));
+    }
+
+    @Operation(summary = "내가 쓴 후기 목록")
+    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @GetMapping("/review")
+    public ResponseEntity<List<MyReviewListResponseDto>> getMyReviewList() {
+        return ResponseEntity.ok(touristService.getMyReviewTourists());
+    }
+
+    @Operation(summary = "내가 쓴 후기 상세")
+    @SwaggerErrorApi(type = {MemberExceptionType.class, TouristException.class},
+            codes = {"MEMBER_NOT_FOUND", "TOURIST_NOT_FOUND", "REVIEW_NOT_FOUND"})
+    @GetMapping("/review-detail")
+    public ResponseEntity<MyReviewDetailResponseDto> getMyReviewDetail(@RequestParam("touristId") Long touristId) {
+        return ResponseEntity.ok(userService.getMyReviewTourists(touristId));
     }
 }

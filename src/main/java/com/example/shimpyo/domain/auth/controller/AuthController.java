@@ -31,15 +31,14 @@ public class AuthController {
     private final AuthService  authService;
     private final MailService mailService;
 
-    @Operation(summary = "소셜 회원가입")
+    @Operation(summary = "소셜 로그인/회원가입")
     @PostMapping("/social/login")
-    public ResponseEntity<LoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto,
+    public ResponseEntity<SocialLoginResponseDto> getKaKaoToken(@RequestBody Map<String, String> requestDto,
                                                           HttpServletResponse response) throws JsonProcessingException {
         return ResponseEntity.ok(oAuth2Service.kakaoLogin(requestDto.get("accessToken"),response));
     }
 
     // [#MOO3] 유저 로그인 시작
-    //TODO 미사용
     @SwaggerErrorApi(type = AuthException.class, codes = {"MEMBER_NOT_FOUND", "MEMBER_INFO_NOT_MATCHED"})
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
@@ -53,8 +52,9 @@ public class AuthController {
     @Operation(summary = "회원가입")
     @SwaggerErrorApi(type = AuthException.class, codes = {"EMAIL_DUPLICATION"})
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequest dto){
-        authService.registerUser(dto);
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequest dto,
+                                          HttpServletResponse response){
+        authService.registerUser(dto, response);
         return ResponseEntity.ok("회원가입 완료");
     }
     // [#MOO1] 사용자 회원가입 끝N
@@ -160,6 +160,14 @@ public class AuthController {
         authService.refreshToken(request, response);
         LoginResponseDto dto = authService.reLoginResponse(request);
         return ResponseEntity.ok(dto);
+    }
+
+    @Operation(summary = "추가 정보 입력")
+    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @PostMapping("/info")
+    public ResponseEntity<Void> getMoreInfo(@Valid @RequestBody InfoRequestDto requestDto) {
+        authService.setMoreInfo(requestDto);
+        return ResponseEntity.ok().build();
     }
 
     @Tag(name = "ZToken", description = "토큰 관련 예외 목록")
