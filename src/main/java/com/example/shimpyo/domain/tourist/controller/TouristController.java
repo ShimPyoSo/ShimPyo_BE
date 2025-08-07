@@ -51,9 +51,10 @@ public class TouristController {
 
     @GetMapping("/category")
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category")  String category,
-                                                     @ModelAttribute  FilterRequestDto filter) {
-        FilterTouristByCategoryResponseDto responseDto =
-                touristService.filteredTouristByCategory(category, filter);
+                                                     @ModelAttribute  FilterRequestDto filter,
+                                                     @PageableDefault(size = 8) Pageable pageable) {
+        List<FilterTouristByCategoryResponseDto> responseDto =
+                touristService.filteredTouristByCategory(category, filter, pageable);
 
         return ResponseEntity.ok(responseDto);
     }

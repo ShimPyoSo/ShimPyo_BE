@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
@@ -92,7 +89,7 @@ public class TouristService {
     }
 
     // 카테고리와 filter 를 동시에 수행
-    public List<FilterTouristByCategoryResponseDto> filteredTouristByCategory(String category, FilterRequestDto dto){
+    public List<FilterTouristByCategoryResponseDto> filteredTouristByCategory(String category, FilterRequestDto dto, Pageable pageable){
         List<TouristCategory> touristCategories = touristCategoryRepository.findByCategory(Category.fromCode(category));
 
         List<Tourist> filteredTourists= touristCategories.stream()
@@ -100,12 +97,15 @@ public class TouristService {
                 .filter(tourist -> applyFilters(tourist, dto))
                 .toList();
 
-        List<FilterTouristByCategoryResponseDto> responseDtos = new ArrayList<>();
-        for(Tourist tourist : filteredTourists){
-            responseDtos.add(FilterTouristByCategoryResponseDto.from(tourist, true, dto.getRegion()));
-        }
+        List<FilterTouristByCategoryResponseDto> responseDtos = filteredTourists.stream()
+                .map(tourist -> FilterTouristByCategoryResponseDto.from(tourist, true, dto.getRegion()))
+                .toList();
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), responseDtos.size());
 
-        return responseDtos;
+        if(start > end) return Collections.emptyList();
+
+        return responseDtos.subList(start, end);
     }
 
     private boolean applyFilters(Tourist tourist, FilterRequestDto filter) {
