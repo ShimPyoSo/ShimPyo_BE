@@ -50,6 +50,7 @@ public class TouristController {
     }
 
     @GetMapping("/category")
+    @SwaggerErrorApi(type = {TouristException.class}, codes = {"ILLEGAL_CATEGORY"})
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category")  String category,
                                                      @ModelAttribute  FilterRequestDto filter,
                                                      @PageableDefault(size = 8) Pageable pageable) {
