@@ -100,14 +100,25 @@ public class TouristService {
             String category, FilterRequestDto dto, Pageable pageable) {
 
         // 1) 카테고리 → 관광지 필터 + 중복 제거
-        List<Tourist> filtered = touristCategoryRepository.findByCategory(Category.fromCode(category)).stream()
-                .map(TouristCategory::getTourist)
-                .filter(t -> applyFilters(t, dto))
-                // id 기준 distinct (순서 보존)
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(Tourist::getId, t -> t, (a, b) -> a, LinkedHashMap::new),
-                        m -> new ArrayList<>(m.values())
-                ));
+        List<Tourist> filtered;
+        if ( "all".equalsIgnoreCase(category)){
+            filtered = touristRepository.findAll().stream()
+                    .filter(t -> applyFilters(t, dto))
+                    // id 기준으로 distinct (순서 또한 보존)
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.toMap(Tourist::getId, t-> t, (a,b) -> a, LinkedHashMap::new),
+                            m -> new ArrayList<>(m.values())
+                    ));
+        }else {
+            filtered = touristCategoryRepository.findByCategory(Category.fromCode(category)).stream()
+                    .map(TouristCategory::getTourist)
+                    .filter(t -> applyFilters(t, dto))
+                    // id 기준 distinct (순서 보존)
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.toMap(Tourist::getId, t -> t, (a, b) -> a, LinkedHashMap::new),
+                            m -> new ArrayList<>(m.values())
+                    ));
+        }
 
         // 2) 페이징 슬라이싱 먼저
         int size = filtered.size();
