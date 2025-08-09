@@ -39,6 +39,9 @@ public class TouristService {
     private final TouristCategoryRepository touristCategoryRepository;
     private final LikesRepository likesRepository;
 
+    // 오차 방지
+    private static final double EPS = 1e-9;
+
     public List<RecommendsResponseDto> getRecommendTourists() {
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
                 .map(RecommendsResponseDto::toDto).toList();
@@ -196,16 +199,47 @@ public class TouristService {
         }
 
         // 6. 연령대
-//        if (filter.getAgeGroup() != null) {
-//            if (tourist.getTargetAge() == null) {
-//                return false;
-//            }
-//        }
-
+        if (filter.getAgeGroup() != null && !filter.getAgeGroup().isBlank()) {
+            if (!matchAgeGroup(tourist, filter.getAgeGroup())) {
+                return false;
+            }
+        }
         return true;
     }
 
+    private static boolean nearlyEqual(double a, double b) {
+        return Math.abs(a - b) <= EPS;
+    }
 
+    private boolean matchAgeGroup(Tourist t, String ageGroup) {
+        if (ageGroup == null) return true;
+
+        // 각 연령대 비율 중 최대값 찾기
+        double maxRatio = Collections.max(Arrays.asList(
+                t.getAge20EarlyRatio(),
+                t.getAge20MidRatio(),
+                t.getAge20LateRatio(),
+                t.getAge30EarlyRatio(),
+                t.getAge30MidRatio(),
+                t.getAge30LateRatio(),
+                t.getAge40Ratio(),
+                t.getAge50Ratio(),
+                t.getAge60PlusRatio()
+        ));
+
+        return switch (ageGroup) {
+            case "20대 초반" -> nearlyEqual(t.getAge20EarlyRatio(),  maxRatio);
+            case "20대 중반" -> nearlyEqual(t.getAge20MidRatio(),    maxRatio);
+            case "20대 후반" -> nearlyEqual(t.getAge20LateRatio(),   maxRatio);
+            case "30대 초반" -> nearlyEqual(t.getAge30EarlyRatio(),  maxRatio);
+            case "30대 중반" -> nearlyEqual(t.getAge30MidRatio(),    maxRatio);
+            case "30대 후반" -> nearlyEqual(t.getAge30LateRatio(),   maxRatio);
+            case "40대"      -> nearlyEqual(t.getAge40Ratio(),       maxRatio);
+            case "50대"      -> nearlyEqual(t.getAge50Ratio(),       maxRatio);
+            case "60대 이상"  -> nearlyEqual(t.getAge60PlusRatio(),   maxRatio);
+            default -> true; // 알 수 없는 라벨이면 스킵
+        };
+    }
 
     public Tourist findTourist(Long id) {
         return touristRepository.findById(id).orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));

@@ -87,6 +87,25 @@ public class Tourist extends BaseEntity {
     @Column
     private Double femaleRatio;
 
+    @Column(name = "age20_early_ratio")   // 20대 초반
+    private double age20EarlyRatio;
+    @Column(name = "age20_mid_ratio")     // 20대 중반
+    private double age20MidRatio;
+    @Column(name = "age20_late_ratio")    // 20대 후반
+    private double age20LateRatio;
+    @Column(name = "age30_early_ratio")   // 30대 초반
+    private double age30EarlyRatio;
+    @Column(name = "age30_mid_ratio")     // 30대 중반
+    private double age30MidRatio;
+    @Column(name = "age30_late_ratio")    // 30대 후반
+    private double age30LateRatio;
+    @Column(name = "age40_ratio")         // 40대 (단일)
+    private double age40Ratio;
+    @Column(name = "age50_ratio")         // 50대 (단일)
+    private double age50Ratio;
+    @Column(name = "age60plus_ratio")     // 60대 이상
+    private double age60PlusRatio;
+
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TouristCategory> touristCategories = new ArrayList<>();
 
