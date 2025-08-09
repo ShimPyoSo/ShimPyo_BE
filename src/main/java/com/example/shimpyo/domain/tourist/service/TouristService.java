@@ -26,6 +26,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
 
@@ -94,63 +95,63 @@ public class TouristService {
         return result.stream().map(r -> ReviewResponseDto.toDto(r, r.getUser())).collect(Collectors.toList());
     }
 
-    // 관광지 카테고리 및 조건 별 필터링
+    // 공개 메서드: 파라미터만 바꿔 재사용
     @Transactional(readOnly = true)
     public List<FilterTouristByCategoryResponseDto> filteredTouristByCategory(
             String category, FilterRequestDto dto, Pageable pageable) {
 
-        // 1) 카테고리 → 관광지 필터 + 중복 제거
-        List<Tourist> filtered;
-        if ( "all".equalsIgnoreCase(category)){
-            filtered = touristRepository.findAll().stream()
-                    .filter(t -> applyFilters(t, dto))
-                    // id 기준으로 distinct (순서 또한 보존)
-                    .collect(Collectors.collectingAndThen(
-                            Collectors.toMap(Tourist::getId, t-> t, (a,b) -> a, LinkedHashMap::new),
-                            m -> new ArrayList<>(m.values())
-                    ));
-        }else {
-            filtered = touristCategoryRepository.findByCategory(Category.fromCode(category)).stream()
-                    .map(TouristCategory::getTourist)
-                    .filter(t -> applyFilters(t, dto))
-                    // id 기준 distinct (순서 보존)
-                    .collect(Collectors.collectingAndThen(
-                            Collectors.toMap(Tourist::getId, t -> t, (a, b) -> a, LinkedHashMap::new),
-                            m -> new ArrayList<>(m.values())
-                    ));
-        }
+        List<Tourist> filtered = filterAndDistinct(touristSource(category), dto);
+        List<Tourist> pageSlice = slice(filtered, pageable);
 
-        // 2) 페이징 슬라이싱 먼저
-        int size = filtered.size();
+        Long userId = authService.findUserAuth()
+                .map(UserAuth::getUser).map(User::getId).orElse(null);
+
+        Set<Long> likedIds = findLikedIdsForSlice(userId, pageSlice);
+
+        return toResponse(pageSlice, likedIds, dto);
+    }
+    // 0) 소스 스트림: all 이면 전체, 아니면 카테고리에서 Tourist로
+    private Stream<Tourist> touristSource(String category) {
+        if ("all".equalsIgnoreCase(category)) {
+            return touristRepository.findAll().stream();
+        }
+        return touristCategoryRepository.findByCategory(Category.fromCode(category)).stream()
+                .map(TouristCategory::getTourist);
+    }
+    // 1) 공통 필터 + id 기준 distinct
+    private List<Tourist> filterAndDistinct(Stream<Tourist> source, FilterRequestDto dto) {
+        return source
+                .filter(t -> applyFilters(t, dto))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(Tourist::getId, t -> t, (a, b) -> a, LinkedHashMap::new),
+                        m -> new ArrayList<>(m.values())
+                ));
+    }
+    // 2) 공통 페이징 슬라이싱
+    private List<Tourist> slice(List<Tourist> list, Pageable pageable) {
+        int size = list.size();
         int start = (int) pageable.getOffset();
         if (start >= size) return Collections.emptyList();
         int end = Math.min(start + pageable.getPageSize(), size);
-        List<Tourist> pageSlice = filtered.subList(start, end);
-
-        // 3) 로그인 유저 (없어도 통과)
-        Long userId = authService.findUserAuth()
-                .map(UserAuth::getUser)
-                .map(User::getId)
-                .orElse(null);
-
-        // 4) 현재 페이지에 한해 좋아요 배치 조회
-        Set<Long> likedIds = Collections.emptySet();
-        if (userId != null && !pageSlice.isEmpty()) {
-            List<Long> pageIds = pageSlice.stream()
-                    .map(Tourist::getId)
-                    .toList();
-            likedIds = likesRepository.findLikedTouristIds(userId, pageIds);
-        }
-
-        // 5) DTO 매핑 (for문)
-        List<FilterTouristByCategoryResponseDto> response = new ArrayList<>(pageSlice.size());
-        for (Tourist t : pageSlice) {
-            boolean isLiked = (userId != null) && likedIds.contains(t.getId());
-            response.add(FilterTouristByCategoryResponseDto.from(t, isLiked, (dto.getRegion()==null)?extractRegion(t.getAddress()) : dto.getRegion()));
-        }
-        return response;
+        return list.subList(start, end);
     }
-
+    // 3) 공통 좋아요 배치 조회
+    private Set<Long> findLikedIdsForSlice(Long userId, List<Tourist> slice) {
+        if (userId == null || slice.isEmpty()) return Collections.emptySet();
+        List<Long> ids = slice.stream().map(Tourist::getId).toList();
+        return likesRepository.findLikedTouristIds(userId, ids);
+    }
+    // 4) 최종 매핑
+    private List<FilterTouristByCategoryResponseDto> toResponse(
+            List<Tourist> slice, Set<Long> likedIds, FilterRequestDto dto) {
+        List<FilterTouristByCategoryResponseDto> res = new ArrayList<>(slice.size());
+        for (Tourist t : slice) {
+            boolean isLiked = likedIds.contains(t.getId());
+            String region = (dto.getRegion() == null) ? extractRegion(t.getAddress()) : dto.getRegion();
+            res.add(FilterTouristByCategoryResponseDto.from(t, isLiked, region));
+        }
+        return res;
+    }
     private boolean applyFilters(Tourist tourist, FilterRequestDto filter) {
         // 1. 지역
             if (filter.getRegion() != null && !filter.getRegion().isBlank()) {
@@ -228,10 +229,13 @@ public class TouristService {
         return true;
     }
 
+
+
+    // 오차 줄이기
     private static boolean nearlyEqual(double a, double b) {
         return Math.abs(a - b) <= EPS;
     }
-
+    // 연령대 매치를 위한 메서드
     private boolean matchAgeGroup(Tourist t, String ageGroup) {
         if (ageGroup == null) return true;
 
