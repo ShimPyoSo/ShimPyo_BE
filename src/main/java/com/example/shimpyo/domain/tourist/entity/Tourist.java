@@ -81,6 +81,12 @@ public class Tourist extends BaseEntity {
     @Column
     private String requiredService;
 
+    @Column
+    private Double maleRatio;
+
+    @Column
+    private Double femaleRatio;
+
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TouristCategory> touristCategories = new ArrayList<>();
 

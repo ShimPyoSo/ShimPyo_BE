@@ -95,7 +95,7 @@ public class TouristService {
     public List<FilterTouristByCategoryResponseDto> filteredTouristByCategory(
             String category, FilterRequestDto dto, Pageable pageable) {
 
-        // 1) 카테고리 → 관광지 필터 + 중복 제거 + (선택)정렬
+        // 1) 카테고리 → 관광지 필터 + 중복 제거
         List<Tourist> filtered = touristCategoryRepository.findByCategory(Category.fromCode(category)).stream()
                 .map(TouristCategory::getTourist)
                 .filter(t -> applyFilters(t, dto))
@@ -103,11 +103,7 @@ public class TouristService {
                 .collect(Collectors.collectingAndThen(
                         Collectors.toMap(Tourist::getId, t -> t, (a, b) -> a, LinkedHashMap::new),
                         m -> new ArrayList<>(m.values())
-                ))
-                // (선택) 정렬: 최신 id 우선
-                .stream()
-                .sorted(Comparator.comparing(Tourist::getId).reversed())
-                .toList();
+                ));
 
         // 2) 페이징 슬라이싱 먼저
         int size = filtered.size();
@@ -135,7 +131,7 @@ public class TouristService {
         List<FilterTouristByCategoryResponseDto> response = new ArrayList<>(pageSlice.size());
         for (Tourist t : pageSlice) {
             boolean isLiked = (userId != null) && likedIds.contains(t.getId());
-            response.add(FilterTouristByCategoryResponseDto.from(t, isLiked, dto.getRegion()));
+            response.add(FilterTouristByCategoryResponseDto.from(t, isLiked, (dto.getRegion()==null)?extractRegion(t.getAddress()) : dto.getRegion()));
         }
         return response;
     }
@@ -170,7 +166,7 @@ public class TouristService {
             try {
                 LocalTime visit = filter.getVisitTime();
                 LocalTime start = LocalTime.parse(tourist.getOpenTime());
-                LocalTime end = LocalTime.parse(tourist.getCloseTime());
+                LocalTime end = LocalTime.parse(tourist.getCloseTime()).minusHours(1);
 
                 if (visit.isBefore(start) || visit.isAfter(end)) return false;
             } catch (Exception e) {
@@ -197,15 +193,17 @@ public class TouristService {
                     .collect(Collectors.toSet());
 
             // have가 need를 모두 포함하는지 체크
-            if (!have.containsAll(need)) {
+            if (!have.containsAll(need)) {   // ✅ 불일치면 실패로 종료
                 return false;
             }
         }
 
-        // 5. 성별
-//        if (filter.getGender() != null) {
-//
-//        }
+//         5. 성별
+        if (filter.getGender() != null && !"ALL".equalsIgnoreCase(filter.getGender())) {
+            String g = filter.getGender().toLowerCase();
+            if(g.equals("male") && tourist.getMaleRatio() < 0.5) return false;
+            if(g.equals("female") && tourist.getFemaleRatio() < 0.5) return false;
+        }
 
         // 6. 연령대
 //        if (filter.getAgeGroup() != null) {
@@ -235,7 +233,7 @@ public class TouristService {
     private static String extractRegion(String address) {
         List<String> regions = List.of(
                 "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
-                "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주");
+                "경기", "강원", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주");
 
         return regions.stream()
                 .filter(address::contains)
