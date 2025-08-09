@@ -147,16 +147,6 @@ public class TouristService {
         if (filter.isReservationRequired()) {
             if (tourist.getReservationUrl() == null) return false;
             if (tourist.getOpenTime() == null || tourist.getCloseTime() == null) return false;
-
-            try {
-                LocalTime now = LocalTime.now();
-                LocalTime start = LocalTime.parse(tourist.getOpenTime());
-                LocalTime end = LocalTime.parse(tourist.getCloseTime());
-
-                if (now.isBefore(start) || now.isAfter(end)) return false;
-            } catch (Exception e) {
-                return false;
-            }
         }
 
         // 3. 운영 시간
