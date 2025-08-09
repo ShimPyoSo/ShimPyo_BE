@@ -4,6 +4,7 @@ import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.course.entity.SuggestionTourist;
 import com.example.shimpyo.domain.course.entity.UserCourseList;
 import com.example.shimpyo.domain.user.entity.Likes;
+import com.example.shimpyo.domain.user.entity.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,9 @@ public class Tourist extends BaseEntity {
 
     @Column
     private String address;
+
+    @Column
+    private String region;
 
     @Column
     private String image;
@@ -82,6 +86,9 @@ public class Tourist extends BaseEntity {
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Likes> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 }
 
 

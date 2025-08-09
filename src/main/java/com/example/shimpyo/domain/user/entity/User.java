@@ -28,7 +28,7 @@ import java.util.List;
     nickname = uuid -> not null 이므로
  **/
 @SQLDelete(sql = "UPDATE `user` SET deleted_at = now(), email = UUID(), nickname = UUID() WHERE id = ?")
-@SQLRestriction("deleted_at IS NULL")
+//@SQLRestriction("deleted_at IS NULL")
 @Table(name = "\"user\"")
 public class User extends BaseEntity {
 
@@ -41,6 +41,12 @@ public class User extends BaseEntity {
 
     @Column(unique = true, nullable = false)
     private String nickname;
+
+    @Column
+    private String gender;
+
+    @Column
+    private Integer birthYear;
 
     // 이거 왜 있을까요??
     private Long survey;
@@ -60,7 +66,17 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Likes> likes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
     public void changeNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void changeGender(String gender) {
+        this.gender = gender;
+    }
+    public void changeBirthYear(Integer year) {
+        this.birthYear = year;
     }
 }
