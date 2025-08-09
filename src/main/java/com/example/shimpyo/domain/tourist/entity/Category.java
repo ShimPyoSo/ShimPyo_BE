@@ -22,7 +22,8 @@ public enum Category {
 
     public static Category fromCode(String code) {
         return Arrays.stream(Category.values())
-                .filter(c -> c.code.equalsIgnoreCase(code))
+                .filter(c -> c.code.equalsIgnoreCase(code)
+                                   || c.name().equalsIgnoreCase(code))
                 .findFirst()
                 .orElseThrow(() -> new BaseException(TouristException.ILLEGAL_CATEGORY));
     }

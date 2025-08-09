@@ -16,7 +16,7 @@ import java.util.List;
 public class FilterRequestDto {
     private String region;
     private boolean reservationRequired;
-    private LocalTime visitTime;
+    private String visitTime;
     private String requiredService;
     private String gender;
     private String ageGroup;

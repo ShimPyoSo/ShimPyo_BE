@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -152,18 +153,27 @@ public class TouristService {
             if (tourist.getOpenTime() == null || tourist.getCloseTime() == null) return false;
         }
 
-        // 3. 운영 시간
-        if (filter.getVisitTime() != null) {
-            if (tourist.getCloseTime() == null || tourist.getOpenTime() == null) return false;
+        if (filter.getVisitTime() != null && !filter.getVisitTime().isBlank()) {
+            if (tourist.getOpenTime() == null || tourist.getCloseTime() == null) return false;
 
             try {
-                LocalTime visit = filter.getVisitTime();
-                LocalTime start = LocalTime.parse(tourist.getOpenTime());
-                LocalTime end = LocalTime.parse(tourist.getCloseTime()).minusHours(1);
+                // "HH:mm-HH:mm" 형식 파싱 (공백 허용)
+                String[] parts = filter.getVisitTime().split("\\s*-\\s*");
+                if (parts.length != 2) return false;
 
-                if (visit.isBefore(start) || visit.isAfter(end)) return false;
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm");
+                LocalTime reqStart = LocalTime.parse(parts[0], fmt);
+                LocalTime reqEnd   = LocalTime.parse(parts[1], fmt);
+                if (reqEnd.isBefore(reqStart)) return false; // 비정상 구간
+
+                LocalTime open  = LocalTime.parse(tourist.getOpenTime(), fmt);
+                LocalTime close = LocalTime.parse(tourist.getCloseTime(), fmt); // 마감 1시간 전까지 허용
+
+                // 요청 구간이 영업시간 내에 완전히 포함되는지 (동등 허용)
+                if (reqStart.isBefore(open) || reqEnd.isAfter(close)) return false;
+
             } catch (Exception e) {
-                return false;
+                return false; // 포맷 오류 등
             }
         }
 
