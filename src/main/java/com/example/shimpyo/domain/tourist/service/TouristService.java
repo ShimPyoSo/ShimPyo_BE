@@ -2,20 +2,18 @@ package com.example.shimpyo.domain.tourist.service;
 
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
+import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.entity.TouristCategory;
 import com.example.shimpyo.domain.tourist.repository.TouristCategoryRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
-import com.example.shimpyo.domain.user.dto.MyReviewDetailResponseDto;
 import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
-import com.example.shimpyo.domain.user.dto.ReviewDetailDto;
 import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.ReviewRepository;
 import com.example.shimpyo.global.BaseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +37,7 @@ public class TouristService {
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
     private final TouristCategoryRepository touristCategoryRepository;
+    private final LikesRepository likesRepository;
 
     public List<RecommendsResponseDto> getRecommendTourists() {
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
@@ -91,29 +90,59 @@ public class TouristService {
         return result.stream().map(r -> ReviewResponseDto.toDto(r, r.getUser())).collect(Collectors.toList());
     }
 
-    // 카테고리와 filter 를 동시에 수행
-    public List<FilterTouristByCategoryResponseDto> filteredTouristByCategory(String category, FilterRequestDto dto, Pageable pageable){
-        List<TouristCategory> touristCategories = touristCategoryRepository.findByCategory(Category.fromCode(category));
+    // 관광지 카테고리 및 조건 별 필터링
+    @Transactional(readOnly = true)
+    public List<FilterTouristByCategoryResponseDto> filteredTouristByCategory(
+            String category, FilterRequestDto dto, Pageable pageable) {
 
-        List<Tourist> filteredTourists= touristCategories.stream()
+        // 1) 카테고리 → 관광지 필터 + 중복 제거 + (선택)정렬
+        List<Tourist> filtered = touristCategoryRepository.findByCategory(Category.fromCode(category)).stream()
                 .map(TouristCategory::getTourist)
-                .filter(tourist -> applyFilters(tourist, dto))
+                .filter(t -> applyFilters(t, dto))
+                // id 기준 distinct (순서 보존)
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(Tourist::getId, t -> t, (a, b) -> a, LinkedHashMap::new),
+                        m -> new ArrayList<>(m.values())
+                ))
+                // (선택) 정렬: 최신 id 우선
+                .stream()
+                .sorted(Comparator.comparing(Tourist::getId).reversed())
                 .toList();
 
-        List<FilterTouristByCategoryResponseDto> responseDtos = filteredTourists.stream()
-                .map(tourist -> FilterTouristByCategoryResponseDto.from(tourist, true, dto.getRegion()))
-                .toList();
+        // 2) 페이징 슬라이싱 먼저
+        int size = filtered.size();
         int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), responseDtos.size());
+        if (start >= size) return Collections.emptyList();
+        int end = Math.min(start + pageable.getPageSize(), size);
+        List<Tourist> pageSlice = filtered.subList(start, end);
 
-        if(start > end) return Collections.emptyList();
+        // 3) 로그인 유저 (없어도 통과)
+        Long userId = authService.findUserAuth()
+                .map(UserAuth::getUser)
+                .map(User::getId)
+                .orElse(null);
 
-        return responseDtos.subList(start, end);
+        // 4) 현재 페이지에 한해 좋아요 배치 조회
+        Set<Long> likedIds = Collections.emptySet();
+        if (userId != null && !pageSlice.isEmpty()) {
+            List<Long> pageIds = pageSlice.stream()
+                    .map(Tourist::getId)
+                    .toList();
+            likedIds = likesRepository.findLikedTouristIds(userId, pageIds);
+        }
+
+        // 5) DTO 매핑 (for문)
+        List<FilterTouristByCategoryResponseDto> response = new ArrayList<>(pageSlice.size());
+        for (Tourist t : pageSlice) {
+            boolean isLiked = (userId != null) && likedIds.contains(t.getId());
+            response.add(FilterTouristByCategoryResponseDto.from(t, isLiked, dto.getRegion()));
+        }
+        return response;
     }
 
     private boolean applyFilters(Tourist tourist, FilterRequestDto filter) {
         // 1. 지역
-        if (filter.getRegion() != null && !filter.getRegion().isBlank()) {
+            if (filter.getRegion() != null && !filter.getRegion().isBlank()) {
             String region = extractRegion(tourist.getAddress());
             if (!filter.getRegion().equals(region)) return false;
         }
@@ -121,13 +150,12 @@ public class TouristService {
         // 2. 예약 여부
         if (filter.isReservationRequired()) {
             if (tourist.getReservationUrl() == null) return false;
-            if (tourist.getOperationTime() == null || !tourist.getOperationTime().contains("~")) return false;
+            if (tourist.getOpenTime() == null || tourist.getCloseTime() == null) return false;
 
             try {
-                String[] time = tourist.getOperationTime().split("~");
                 LocalTime now = LocalTime.now();
-                LocalTime start = LocalTime.parse(time[0].trim());
-                LocalTime end = LocalTime.parse(time[1].trim());
+                LocalTime start = LocalTime.parse(tourist.getOpenTime());
+                LocalTime end = LocalTime.parse(tourist.getCloseTime());
 
                 if (now.isBefore(start) || now.isAfter(end)) return false;
             } catch (Exception e) {
@@ -137,13 +165,12 @@ public class TouristService {
 
         // 3. 운영 시간
         if (filter.getVisitTime() != null) {
-            if (tourist.getOperationTime() == null || !tourist.getOperationTime().contains("~")) return false;
+            if (tourist.getCloseTime() == null || tourist.getOpenTime() == null) return false;
 
             try {
-                String[] time = tourist.getOperationTime().split("~");
                 LocalTime visit = filter.getVisitTime();
-                LocalTime start = LocalTime.parse(time[0].trim());
-                LocalTime end = LocalTime.parse(time[1].trim());
+                LocalTime start = LocalTime.parse(tourist.getOpenTime());
+                LocalTime end = LocalTime.parse(tourist.getCloseTime());
 
                 if (visit.isBefore(start) || visit.isAfter(end)) return false;
             } catch (Exception e) {
@@ -153,8 +180,24 @@ public class TouristService {
 
         // 4. 제공 서비스
         if (filter.getRequiredService() != null && !filter.getRequiredService().isEmpty()) {
-            if (tourist.getRequiredService() == null ||
-                    !new HashSet<>(tourist.getRequiredService()).containsAll(filter.getRequiredService())) {
+            if (tourist.getRequiredService() == null || tourist.getRequiredService().isBlank()) {
+                return false;
+            }
+
+            // 관광지 제공 서비스 → Set 변환
+            Set<String> have = Arrays.stream(tourist.getRequiredService().split("\\|"))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toSet());
+
+            // 필터에서 요구하는 서비스 → Set 변환
+            Set<String> need = Arrays.stream(filter.getRequiredService().split("\\|"))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toSet());
+
+            // have가 need를 모두 포함하는지 체크
+            if (!have.containsAll(need)) {
                 return false;
             }
         }

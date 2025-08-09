@@ -17,7 +17,7 @@ public class FilterRequestDto {
     private String region;
     private boolean reservationRequired;
     private LocalTime visitTime;
-    private List<String> requiredService;
+    private String requiredService;
     private String gender;
     private String ageGroup;
 }

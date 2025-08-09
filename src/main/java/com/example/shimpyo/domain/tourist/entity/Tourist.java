@@ -55,9 +55,6 @@ public class Tourist extends BaseEntity {
     private String description;
 
     @Column
-    private String operationTime;
-
-    @Column
     private String homepageUrl;
 
     @Column
@@ -66,14 +63,23 @@ public class Tourist extends BaseEntity {
     @Column
     private String dayOff;
 
+    // 오픈 시간
+    @Column
+    private String openTime;
+
+    // 마감 시간
+    @Column
+    private String closeTime;
+
+    // 휴계시간
     @Column
     private String breakTime;
-
+    // 전화번호
     @Column
     private String telNum;
-
+    // 제공 서비스
     @Column
-    private List<String> requiredService;
+    private String requiredService;
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TouristCategory> touristCategories = new ArrayList<>();

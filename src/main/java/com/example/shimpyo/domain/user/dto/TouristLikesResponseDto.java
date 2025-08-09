@@ -12,6 +12,7 @@ public class TouristLikesResponseDto {
     private String title;
     private String region;
     private String address;
-    private String operationTime;
+    private String openTime;
+    private String closeTime;
     private String images;
 }

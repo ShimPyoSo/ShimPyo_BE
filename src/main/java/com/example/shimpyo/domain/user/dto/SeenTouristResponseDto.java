@@ -12,7 +12,8 @@ public class SeenTouristResponseDto {
     private String title;
     private String region;
     private String address;
-    private String operationTime;
+    private String openTime;
+    private String closeTime;
     private String images;
 
     public static SeenTouristResponseDto toDto(Tourist tourist) {
@@ -20,7 +21,8 @@ public class SeenTouristResponseDto {
                 .id(tourist.getId())
                 .region(tourist.getAddress())
                 .address(tourist.getAddress())
-                .operationTime(tourist.getOperationTime())
+                .openTime(tourist.getOpenTime())
+                .closeTime(tourist.getCloseTime())
                 .images(tourist.getImage())
                 .build();
     }

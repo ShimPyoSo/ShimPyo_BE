@@ -15,17 +15,19 @@ public class FilterTouristByCategoryResponseDto {
     private String title;
     private String type;
     private String region;
-    private String operationTime;
+    private String openTime;
+    private String closeTime;
     private String image;
-    private boolean isLiked;
+    private Boolean isLiked;
 
-    public static FilterTouristByCategoryResponseDto from(Tourist tourist, boolean isLiked, String region) {
+    public static FilterTouristByCategoryResponseDto from(Tourist tourist, Boolean isLiked, String region) {
         return FilterTouristByCategoryResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
 //                .type(tourist)
                 .region(region)
-                .operationTime(tourist.getOperationTime())
+                .openTime(tourist.getOpenTime())
+                .closeTime(tourist.getCloseTime())
                 .image(tourist.getImage()) // 또는 getImages().get(0) 등
                 .isLiked(isLiked)
                 .build();

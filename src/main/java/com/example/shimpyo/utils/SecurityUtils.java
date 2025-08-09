@@ -19,6 +19,12 @@ public class SecurityUtils {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new BaseException(AUTHENTICATION_GET_FAILED);
         }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof String) {
+            return null;
+        }
+
         Map<?, ?> principalMap = (Map<?, ?>) authentication.getPrincipal();
         return principalMap.get("loginId").toString();
     }
