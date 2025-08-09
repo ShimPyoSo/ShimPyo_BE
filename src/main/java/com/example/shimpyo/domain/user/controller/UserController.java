@@ -74,7 +74,7 @@ public class UserController {
     @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
     @GetMapping("/review")
     public ResponseEntity<List<MyReviewListResponseDto>> getMyReviewList() {
-        return ResponseEntity.ok(touristService.getMyReviewTourists());
+        return ResponseEntity.ok(touristService.getMyReviewLists());
     }
 
     @Operation(summary = "내가 쓴 후기 상세")
