@@ -11,8 +11,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface LikesRepository extends JpaRepository<Likes, Long> {
@@ -26,7 +28,8 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
         t.name,
         t.address,
         t.address,
-        t.operationTime,
+        t.openTime,
+        t.closeTime,
         t.image
     )
     FROM Likes l
@@ -50,7 +53,8 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
         t.name,
         t.address,
         t.address,
-        t.operationTime,
+        t.openTime,
+        t.closeTime,
         t.image
     )
     FROM Likes l
@@ -64,4 +68,9 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
             @Param("cursor") Long cursor,
             Pageable pageable
     );
+
+
+    @Query("select l.tourist.id from Likes l where l.user.id = :userId and l.tourist.id in :touristIds")
+    Set<Long> findLikedTouristIds(@Param("userId") Long userId, @Param("touristIds") Collection<Long> touristIds);
+
 }

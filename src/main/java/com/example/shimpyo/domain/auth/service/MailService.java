@@ -1,25 +1,19 @@
 package com.example.shimpyo.domain.auth.service;
 
-import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
 import com.example.shimpyo.domain.auth.dto.MailCodeSendDto;
-import com.example.shimpyo.domain.auth.entity.UserAuth;
+import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +23,6 @@ import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL
 import static com.example.shimpyo.global.exceptionType.MemberExceptionType.EMAIL_NOT_FOUNDED;
 
 @Transactional
-@RequiredArgsConstructor
 @Service
 public class MailService {
 
@@ -37,7 +30,14 @@ public class MailService {
     @Qualifier("1")
     private final RedisTemplate<String, Object> redisTemplate;
     private final UserRepository userRepository;
-    
+
+    public MailService(JavaMailSender mailSender, RedisTemplate<String, Object> redisTemplate, UserRepository userRepository) {
+        this.mailSender = mailSender;
+        this.redisTemplate = redisTemplate;
+        this.userRepository = userRepository;
+    }
+
+
     // [#MOO4] 메일 전송 시작 
     public void authEmail(MailCodeSendDto dto) {
         String email = "";

@@ -23,8 +23,10 @@ public class TouristDetailResponseDto {
     private String region;
     // 주소
     private String address;
-    // 운영 시간
-    private String operationTime;
+    // 오픈 시간
+    private String openTime;
+    // 마감 시간
+    private String closeTime;
     // 전화번호
     private String tel;
     // 홈페이지
@@ -46,7 +48,8 @@ public class TouristDetailResponseDto {
                 .title(tourist.getName())
                 .region(region)
                 .address(tourist.getAddress())
-                .operationTime(tourist.getOperationTime())
+                .openTime(tourist.getOpenTime())
+                .closeTime(tourist.getCloseTime())
                 .tel(tourist.getTelNum())
                 .homepage(tourist.getHomepageUrl())
                 .reservation(tourist.getReservationUrl())
