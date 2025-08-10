@@ -25,5 +25,4 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "GROUP BY r.tourist.id, r.tourist.region, r.tourist.name, r.tourist.image, r.tourist.address")
     List<MyReviewListResponseDto> countReviewsByTouristForUser(@Param("userId") Long userId);
 
-    Long countByTouristId(Long touristId);
 }

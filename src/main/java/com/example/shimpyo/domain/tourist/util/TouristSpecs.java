@@ -2,15 +2,16 @@ package com.example.shimpyo.domain.tourist.util;
 
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
+import com.example.shimpyo.domain.user.entity.Likes;
+import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.global.BaseException;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static com.example.shimpyo.global.exceptionType.TokenException.*;
 
@@ -181,5 +182,40 @@ public final class TouristSpecs {
         var col = root.get(field).as(Double.class);
 
         return cb.function("coalesce", Double.class, col, cb.literal(0.0d));
+    }
+
+    public static Specification<Tourist> orderByLikesCount(Sort.Direction dir) {
+        return (root, query, cb) -> {
+            // count 쿼리일 때는 정렬/그룹 적용하지 않음
+            if (!Long.class.equals(query.getResultType())){
+                var likes = root.join("likes", JoinType.LEFT);
+                var likesCount = cb.count(likes);
+                query.groupBy(root.get("id"));
+                // 동률 이라면
+                if(dir.isAscending()){
+                    query.orderBy(cb.asc(likesCount), cb.asc(root.get("id")));
+                } else{
+                    query.orderBy(cb.desc(likesCount), cb.asc(root.get("id")));
+                }
+                query.distinct(true);
+            }
+            return cb.conjunction();
+        };
+    }
+
+    public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
+        return (root, query, cb) -> {
+            if (!Long.class.equals(query.getResultType())){
+                var review = root.join("review", JoinType.LEFT);
+                var reviewsCount = cb.count(review);
+                query.groupBy(root.get("id"));
+                if(dir.isAscending()){
+                    query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));
+                }else{
+                    query.orderBy(cb.desc(reviewsCount), cb.asc(root.get("id")));
+                }
+            }
+            return cb.conjunction();
+        };
     }
 }

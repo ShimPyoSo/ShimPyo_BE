@@ -16,6 +16,7 @@ import com.example.shimpyo.global.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -105,6 +106,15 @@ public class TouristService {
                 .and(TouristSpecs.genderBias(filter.getGender()))
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()));
 
+        if(filter.getSortBy() == null || "찜 많은순".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
+        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+        }
+
+        //pageable 에서 정렬 빼기
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+
         List<Tourist> pageSlice = slice(specification, pageable);
 
         Long userId = authService.findUserAuth()
@@ -128,6 +138,15 @@ public class TouristService {
                 .and(TouristSpecs.hasAllService(filter.getRequiredService()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()));
+
+        if("찜 많은순".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
+        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+        }
+
+        //pageable 에서 정렬 빼기
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 
         List<Tourist> pageSlice = slice(specification, pageable);
 
@@ -163,9 +182,7 @@ public class TouristService {
         List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());
         for (Tourist t : slice) {
             boolean isLiked = likedIds.contains(t.getId());
-            Long likedCount = likesRepository.countByTouristId(t.getId());
-            Long reviewCount = reviewRepository.countByTouristId(t.getId());
-            res.add(FilterTouristByDataResponseDto.from(t, isLiked, likedCount, reviewCount));
+            res.add(FilterTouristByDataResponseDto.from(t, isLiked));
         }
         return res;
     }

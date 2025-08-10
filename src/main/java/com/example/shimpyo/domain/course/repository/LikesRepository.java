@@ -73,5 +73,4 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     @Query("select l.tourist.id from Likes l where l.user.id = :userId and l.tourist.id in :touristIds")
     Set<Long> findLikedTouristIds(@Param("userId") Long userId, @Param("touristIds") Collection<Long> touristIds);
 
-    long countByTouristId(Long touristId);
 }
