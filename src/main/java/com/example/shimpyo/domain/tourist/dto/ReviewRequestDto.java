@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class ReviewRequestDto {
@@ -11,5 +13,5 @@ public class ReviewRequestDto {
     private Long id;
     @NotBlank(message = "5글자 이상 입력하세요.")
     private String contents;
-    private String images;
+    private List<String> images;
 }

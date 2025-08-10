@@ -22,8 +22,8 @@ public class RecommendsResponseDto {
     public static RecommendsResponseDto toDto(Tourist tourist) {
         return RecommendsResponseDto.builder()
                 .id(tourist.getId())
-                .images(null) // 임시 값
-                //.images(tourist.getImage())  // 원래 값
+                .images(null)  // 임시 값
+//                .images(tourist.getImage() == null? null : tourist.getImage()) // 원래 값
                 .region(tourist.getAddress())
                 .category(tourist.getTouristCategories().stream()
                         .map(TouristCategory::getCategory)
