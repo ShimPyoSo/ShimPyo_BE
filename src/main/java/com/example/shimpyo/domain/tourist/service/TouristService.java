@@ -163,8 +163,7 @@ public class TouristService {
         List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());
         for (Tourist t : slice) {
             boolean isLiked = likedIds.contains(t.getId());
-            String region = (dto.getRegion() == null) ? extractRegion(t.getAddress()) : dto.getRegion();
-            res.add(FilterTouristByDataResponseDto.from(t, isLiked, region));
+            res.add(FilterTouristByDataResponseDto.from(t, isLiked));
         }
         return res;
     }

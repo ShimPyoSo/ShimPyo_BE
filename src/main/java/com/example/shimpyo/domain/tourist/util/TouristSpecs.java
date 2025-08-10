@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.tourist.util;
 
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
+import com.example.shimpyo.global.BaseException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
@@ -9,6 +10,9 @@ import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalTime;
+import java.util.Arrays;
+
+import static com.example.shimpyo.global.exceptionType.TokenException.*;
 
 public final class TouristSpecs {
 
@@ -35,7 +39,21 @@ public final class TouristSpecs {
     // 2) 지역
     public static Specification<Tourist> inRegion(String region){
         if(region == null || region.isBlank()) return null;
-        return (root, query, cb) -> cb.equal(root.get("region"), region.trim());
+
+        var regions = Arrays.stream(region.split("\\|"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList();
+
+        if (regions.isEmpty()) return null;
+
+        return (root, query, cb) -> {
+            var col = root.get("region").as(String.class);
+            var in = cb.in(col);
+            for (var r : regions) in.value(r);
+            return in;
+        };
     }
 
     // 3) 예약 여부
@@ -47,17 +65,28 @@ public final class TouristSpecs {
     // 4) 방문 시간 포함
     public static Specification<Tourist> openWithin(String visitTime){
         if(visitTime == null || !visitTime.contains("-")) return null;
+
+        if (!visitTime.matches("\\s*\\d{2}:\\d{2}\\s*-\\s*\\d{2}:\\d{2}\\s*")) {
+            throw new BaseException(INVALID_VISIT_TIME_FORMAT);
+        }
+
         String[] time = visitTime.split("\\s*-\\s*");
-        if(time.length != 2) return null;
-        LocalTime openTime = LocalTime.parse(time[0].trim());
-        LocalTime closeTime = LocalTime.parse(time[1].trim());
+        if(time.length != 2) {
+            throw new BaseException(INVALID_VISIT_TIME_FORMAT);
+        }
+        String openTime = time[0].trim();
+        String closeTime = time[1].trim();
 
         // 비정상인 시간 선은 스킵
-        if(openTime.isBefore(closeTime)) return null;
+        LocalTime open =  LocalTime.parse(openTime);
+        LocalTime close = LocalTime.parse(closeTime);
+        if(close.isBefore(open)) {
+            throw new BaseException(INVALID_VISIT_TIME_FORMAT);
+        }
 
         return (root, query, cb) -> cb.and(
-                cb.lessThanOrEqualTo(root.get("openTime"), openTime),
-                cb.greaterThanOrEqualTo(root.get("closeTime"), closeTime)
+                cb.lessThanOrEqualTo(root.get("openTime").as(String.class), openTime),
+                cb.greaterThanOrEqualTo(root.get("closeTime").as(String.class), closeTime)
         );
     }
 
@@ -92,7 +121,8 @@ public final class TouristSpecs {
             }else if (gender.equalsIgnoreCase("female")){
                 return cb.greaterThanOrEqualTo(root.get("femaleRatio"), root.get("maleRatio"));
             }
-            return null;
+
+            throw new BaseException(UNSUPPORTED_GENDER);
         };
     }
 
@@ -127,7 +157,7 @@ public final class TouristSpecs {
                 case "40대":      selected = a40;  break;
                 case "50대":      selected = a50;  break;
                 case "60대 이상":  selected = a60p; break;
-                default: return null; // 알 수 없는 라벨이면 필터 미적용
+                default: throw new BaseException(UNSUPPORTED_AGE_GROUP);
             }
 
             var eps = cb.literal(epsilon);

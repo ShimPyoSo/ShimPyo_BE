@@ -21,13 +21,13 @@ public class FilterTouristByDataResponseDto {
     private String image;
     private Boolean isLiked;
 
-    public static FilterTouristByDataResponseDto from(Tourist tourist, Boolean isLiked, String region) {
+    public static FilterTouristByDataResponseDto from(Tourist tourist, Boolean isLiked) {
         return FilterTouristByDataResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
 //                .type(tourist)
                 .address(tourist.getAddress())
-                .region(region)
+                .region(tourist.getRegion())
                 .openTime(tourist.getOpenTime())
                 .closeTime(tourist.getCloseTime())
                 .image(tourist.getImage()) // 또는 getImages().get(0) 등
