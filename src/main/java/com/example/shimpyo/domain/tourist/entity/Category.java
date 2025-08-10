@@ -12,7 +12,8 @@ public enum Category {
     스파("spa"),
     K뷰티("beauty"),
     자연친화("nature"),
-    건강식("food");
+    건강식("food"),
+    전체("all");
 
     private final String code;
 
@@ -22,7 +23,8 @@ public enum Category {
 
     public static Category fromCode(String code) {
         return Arrays.stream(Category.values())
-                .filter(c -> c.code.equalsIgnoreCase(code))
+                .filter(c -> c.code.equalsIgnoreCase(code)
+                                   || c.name().equalsIgnoreCase(code))
                 .findFirst()
                 .orElseThrow(() -> new BaseException(TouristException.ILLEGAL_CATEGORY));
     }

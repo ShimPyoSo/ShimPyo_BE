@@ -42,10 +42,11 @@ public class SecurityConfig {
                                 "/api/user/auth/**",
                                 "/api/main/recommends",
                                 "/api/tourlist/reviews",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/tourlist/category",
                                 "/api/tourlist/detail")
                         .permitAll()
-                        .requestMatchers("/api/user/auth/**", "/api/main/recommends", "/api/tourlist/reviews",
-                                "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

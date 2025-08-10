@@ -1,8 +1,6 @@
 package com.example.shimpyo.domain.tourist.controller;
 
-import com.example.shimpyo.domain.tourist.dto.ReviewResponseDto;
-import com.example.shimpyo.domain.tourist.dto.ReviewRequestDto;
-import com.example.shimpyo.domain.tourist.dto.TouristDetailResponseDto;
+import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.TouristException;
@@ -47,6 +45,18 @@ public class TouristController {
     @GetMapping("/detail")
     public ResponseEntity<?> detailTourist(@RequestParam("id") Long touristId) {
         TouristDetailResponseDto responseDto = touristService.getTouristDetail(touristId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/category")
+    @SwaggerErrorApi(type = {TouristException.class}, codes = {"ILLEGAL_CATEGORY"})
+    public ResponseEntity<?> filterTouristByCategory(@RequestParam("category")  String category,
+                                                     @ModelAttribute  FilterRequestDto filter,
+                                                     @PageableDefault(size = 8) Pageable pageable) {
+        List<FilterTouristByCategoryResponseDto> responseDto =
+                touristService.filteredTouristByCategory(category, filter, pageable);
+
 
         return ResponseEntity.ok(responseDto);
     }
