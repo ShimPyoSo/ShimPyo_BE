@@ -1,8 +1,10 @@
 package com.example.shimpyo.domain.tourist.util;
 
+import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -10,7 +12,7 @@ import java.time.LocalTime;
 
 public final class TouristSpecs {
 
-    public static Specification<Tourist> containsText(String keyword){
+    public static Specification<Tourist> containsSearch(String keyword){
         // 키워드가 없으면 전체 검색
         if(keyword == null || keyword.isBlank()) return null;
         String like = "%" + keyword.toLowerCase().trim() + "%";
@@ -18,6 +20,16 @@ public final class TouristSpecs {
                 cb.like(cb.lower(root.get("name")), like),
                 cb.like(cb.lower(root.get("description")), like)
         );
+    }
+
+    public static Specification<Tourist> byCategory(String category){
+        if(category == null || category.equalsIgnoreCase("all")) return null;
+        Category cate = Category.fromCode(category);
+        return (root, query, cb) -> {
+            query.distinct(true);
+            var join = root.join("touristCategories", JoinType.INNER);
+            return cb.equal(join.get("category"), cate);
+        };
     }
 
     // 2) 지역
