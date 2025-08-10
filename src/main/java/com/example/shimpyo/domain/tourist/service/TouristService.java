@@ -4,9 +4,7 @@ import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
-import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import com.example.shimpyo.domain.tourist.entity.TouristCategory;
 import com.example.shimpyo.domain.tourist.repository.TouristCategoryRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
 import com.example.shimpyo.domain.tourist.util.TouristSpecs;
@@ -24,11 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
 
