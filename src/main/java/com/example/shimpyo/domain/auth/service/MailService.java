@@ -76,7 +76,7 @@ public class MailService {
     }
 
     private void sendAuthEmail(String email, String authKey) throws MessagingException {
-        String subject = "ShimPyoSo Authorization";
+        String subject = "쉼표 인증 메일";
         String text = "인증번호는 " + authKey + "입니다.";
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -108,7 +108,7 @@ public class MailService {
             throw new BaseException(EMAIL_NOT_VERIFIED);
         }
 
-        String subject = "ShimPyoSo Authorization";
+        String subject = "쉼표 인증 메일";
         String text = "임시 비밀번호는 " + tempPW + "입니다.";
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
