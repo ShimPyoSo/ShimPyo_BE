@@ -9,6 +9,7 @@ import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.entity.TouristCategory;
 import com.example.shimpyo.domain.tourist.repository.TouristCategoryRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
+import com.example.shimpyo.domain.tourist.util.TouristSpecs;
 import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
 import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
@@ -17,6 +18,7 @@ import com.example.shimpyo.global.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -97,7 +99,7 @@ public class TouristService {
 
     // 공개 메서드: 파라미터만 바꿔 재사용
     @Transactional(readOnly = true)
-    public List<FilterTouristByCategoryResponseDto> filteredTouristByCategory(
+    public List<FilterTouristByDataResponseDto> filteredTouristByCategory(
             String category, FilterRequestDto dto, Pageable pageable) {
 
         List<Tourist> filtered = filterAndDistinct(touristSource(category), dto);
@@ -110,6 +112,7 @@ public class TouristService {
 
         return toResponse(pageSlice, likedIds, dto);
     }
+
     // 0) 소스 스트림: all 이면 전체, 아니면 카테고리에서 Tourist로
     private Stream<Tourist> touristSource(String category) {
         if ("all".equalsIgnoreCase(category)) {
@@ -118,6 +121,31 @@ public class TouristService {
         return touristCategoryRepository.findByCategory(Category.fromCode(category)).stream()
                 .map(TouristCategory::getTourist);
     }
+
+    @Transactional(readOnly = true)
+    public List<FilterTouristByDataResponseDto> filteredTouristBySearch(
+            String keyword, FilterRequestDto filter, Pageable pageable) {
+
+        Specification<Tourist> specification = Specification
+                .where(TouristSpecs.containsText(keyword))
+                .and(TouristSpecs.inRegion(filter.getRegion()))
+                .and(TouristSpecs.reservationRequired(filter.isReservationRequired()))
+                .and(TouristSpecs.openWithin(filter.getVisitTime()))
+                .and(TouristSpecs.hasAllService(filter.getRequiredService()))
+                .and(TouristSpecs.genderBias(filter.getGender()))
+                .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()));
+
+        List<Tourist> pageSlice = slice(specification, pageable);
+
+        Long userId = authService.findUserAuth()
+                .map(UserAuth::getUser).map(User::getId).orElse(null);
+
+
+        Set<Long> likedIds = findLikedIdsForSlice(userId, pageSlice);
+
+        return toResponse(pageSlice, likedIds, filter);
+    }
+
     // 1) 공통 필터 + id 기준 distinct
     private List<Tourist> filterAndDistinct(Stream<Tourist> source, FilterRequestDto dto) {
         return source
@@ -135,6 +163,18 @@ public class TouristService {
         int end = Math.min(start + pageable.getPageSize(), size);
         return list.subList(start, end);
     }
+    // 2) 슬라이싱
+    private List<Tourist> slice(Specification<Tourist> spec,  Pageable pageable) {
+        var plusOne = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize() + 1,
+                pageable.getSort()
+        );
+        var rows = touristRepository.findAll(spec, plusOne).getContent();
+        return rows.size() > pageable.getPageSize()
+                ? rows.subList(0, pageable.getPageSize() + 1)
+                : rows;
+    }
     // 3) 공통 좋아요 배치 조회
     private Set<Long> findLikedIdsForSlice(Long userId, List<Tourist> slice) {
         if (userId == null || slice.isEmpty()) return Collections.emptySet();
@@ -142,13 +182,13 @@ public class TouristService {
         return likesRepository.findLikedTouristIds(userId, ids);
     }
     // 4) 최종 매핑
-    private List<FilterTouristByCategoryResponseDto> toResponse(
+    private List<FilterTouristByDataResponseDto> toResponse(
             List<Tourist> slice, Set<Long> likedIds, FilterRequestDto dto) {
-        List<FilterTouristByCategoryResponseDto> res = new ArrayList<>(slice.size());
+        List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());
         for (Tourist t : slice) {
             boolean isLiked = likedIds.contains(t.getId());
             String region = (dto.getRegion() == null) ? extractRegion(t.getAddress()) : dto.getRegion();
-            res.add(FilterTouristByCategoryResponseDto.from(t, isLiked, region));
+            res.add(FilterTouristByDataResponseDto.from(t, isLiked, region));
         }
         return res;
     }

@@ -54,11 +54,21 @@ public class TouristController {
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category")  String category,
                                                      @ModelAttribute  FilterRequestDto filter,
                                                      @PageableDefault(size = 8) Pageable pageable) {
-        List<FilterTouristByCategoryResponseDto> responseDto =
+        List<FilterTouristByDataResponseDto> responseDtoList =
                 touristService.filteredTouristByCategory(category, filter, pageable);
 
 
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(responseDtoList);
     }
 
+    @GetMapping("/search")
+    @SwaggerErrorApi(type = {TouristException.class}, codes = {"ILLEGAL_CATEGORY"})
+    public ResponseEntity<?> filterTouristBySearch(@RequestParam("keyword") String keyword,
+                                                   @ModelAttribute FilterRequestDto filter,
+                                                   @PageableDefault(size = 8) Pageable pageable) {
+        List<FilterTouristByDataResponseDto> responseDtoList =
+                touristService.filteredTouristBySearch(keyword, filter, pageable);
+
+        return ResponseEntity.ok(responseDtoList);
+    }
 }

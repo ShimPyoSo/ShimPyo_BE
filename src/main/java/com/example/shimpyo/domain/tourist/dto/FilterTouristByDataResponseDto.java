@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FilterTouristByCategoryResponseDto {
+public class FilterTouristByDataResponseDto {
     private Long id;
     private String title;
     private String type;
@@ -21,8 +21,8 @@ public class FilterTouristByCategoryResponseDto {
     private String image;
     private Boolean isLiked;
 
-    public static FilterTouristByCategoryResponseDto from(Tourist tourist, Boolean isLiked, String region) {
-        return FilterTouristByCategoryResponseDto.builder()
+    public static FilterTouristByDataResponseDto from(Tourist tourist, Boolean isLiked, String region) {
+        return FilterTouristByDataResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
 //                .type(tourist)
