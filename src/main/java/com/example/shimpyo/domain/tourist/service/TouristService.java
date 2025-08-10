@@ -163,7 +163,9 @@ public class TouristService {
         List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());
         for (Tourist t : slice) {
             boolean isLiked = likedIds.contains(t.getId());
-            res.add(FilterTouristByDataResponseDto.from(t, isLiked));
+            Long likedCount = likesRepository.countByTouristId(t.getId());
+            Long reviewCount = reviewRepository.countByTouristId(t.getId());
+            res.add(FilterTouristByDataResponseDto.from(t, isLiked, likedCount, reviewCount));
         }
         return res;
     }
