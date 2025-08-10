@@ -73,7 +73,7 @@ public class TouristService {
     public void createReview(ReviewRequestDto requestDto) {
         reviewRepository.save(Review.builder()
                 .content(requestDto.getContents())
-                .image(List.of(requestDto.getImages().split(", ")))
+                .image(requestDto.getImages())
                 .user(authService.findUser().getUser())
                 .tourist(touristRepository.findById(requestDto.getId())
                         .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND)))
