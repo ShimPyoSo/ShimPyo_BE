@@ -15,6 +15,7 @@ public class FilterTouristByCategoryResponseDto {
     private String title;
     private String type;
     private String region;
+    private String address;
     private String openTime;
     private String closeTime;
     private String image;
@@ -25,6 +26,7 @@ public class FilterTouristByCategoryResponseDto {
                 .id(tourist.getId())
                 .title(tourist.getName())
 //                .type(tourist)
+                .address(tourist.getAddress())
                 .region(region)
                 .openTime(tourist.getOpenTime())
                 .closeTime(tourist.getCloseTime())
