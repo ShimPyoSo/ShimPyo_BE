@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Getter
 @Builder
@@ -15,7 +16,7 @@ public class ReviewResponseDto {
     private String nickname;
     private String createdAt;
     private String contents;
-    private String images;
+    private List<String> images;
 
     public static ReviewResponseDto toDto(Review review, User user) {
         return ReviewResponseDto.builder()
@@ -24,7 +25,7 @@ public class ReviewResponseDto {
                 .nickname(user.getDeletedAt() == null? user.getNickname() : null)
                 .createdAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
                 .contents(review.getContent())
-                .images(review.getImage() == null? null : String.join(", ", review.getImage()))
+                .images(review.getImage() == null? null : review.getImage())
                 .build();
     }
 }
