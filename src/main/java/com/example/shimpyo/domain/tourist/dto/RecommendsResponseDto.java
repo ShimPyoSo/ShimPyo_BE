@@ -24,7 +24,7 @@ public class RecommendsResponseDto {
                 .id(tourist.getId())
                 .images(null)  // 임시 값
 //                .images(tourist.getImage() == null? null : tourist.getImage()) // 원래 값
-                .region(tourist.getAddress())
+                .region(tourist.getRegion())
                 .category(tourist.getTouristCategories().stream()
                         .map(TouristCategory::getCategory)
                         .collect(Collectors.toList()))
