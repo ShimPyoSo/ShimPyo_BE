@@ -7,6 +7,7 @@ import com.example.shimpyo.global.exceptionType.TouristException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -50,15 +51,40 @@ public class TouristController {
     }
 
     @GetMapping("/category")
-    @SwaggerErrorApi(type = {TouristException.class}, codes = {"ILLEGAL_CATEGORY"})
-    public ResponseEntity<?> filterTouristByCategory(@RequestParam("category")  String category,
+    @SwaggerErrorApi(
+        type = {TouristException.class},
+        codes = {
+            "ILLEGAL_CATEGORY",
+            "INVALID_VISIT_TIME_FORMAT",
+            "UNSUPPORTED_GENDER",
+            "UNSUPPORTED_AGE_GROUP"
+        }
+    )
+    public ResponseEntity<?> filterTouristByCategory(@RequestParam("category") @NotBlank String category,
                                                      @ModelAttribute  FilterRequestDto filter,
                                                      @PageableDefault(size = 8) Pageable pageable) {
-        List<FilterTouristByCategoryResponseDto> responseDto =
+        List<FilterTouristByDataResponseDto> responseDtoList =
                 touristService.filteredTouristByCategory(category, filter, pageable);
 
 
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(responseDtoList);
     }
 
+    @GetMapping("/search")
+    @SwaggerErrorApi(
+        type = {TouristException.class},
+        codes = {
+            "INVALID_VISIT_TIME_FORMAT",
+            "UNSUPPORTED_GENDER",
+            "UNSUPPORTED_AGE_GROUP"
+        }
+    )
+    public ResponseEntity<?> filterTouristBySearch(@RequestParam("keyword") String keyword,
+                                                   @ModelAttribute FilterRequestDto filter,
+                                                   @PageableDefault(size = 8) Pageable pageable) {
+        List<FilterTouristByDataResponseDto> responseDtoList =
+                touristService.filteredTouristBySearch(keyword, filter, pageable);
+
+        return ResponseEntity.ok(responseDtoList);
+    }
 }
