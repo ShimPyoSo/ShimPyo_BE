@@ -10,22 +10,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FilterTouristByCategoryResponseDto {
+public class FilterTouristByDataResponseDto {
     private Long id;
     private String title;
     private String type;
     private String region;
+    private String address;
     private String openTime;
     private String closeTime;
     private String image;
     private Boolean isLiked;
 
-    public static FilterTouristByCategoryResponseDto from(Tourist tourist, Boolean isLiked, String region) {
-        return FilterTouristByCategoryResponseDto.builder()
+    public static FilterTouristByDataResponseDto from(Tourist tourist, Boolean isLiked) {
+        return FilterTouristByDataResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
 //                .type(tourist)
-                .region(region)
+                .address(tourist.getAddress())
+                .region(tourist.getRegion())
                 .openTime(tourist.getOpenTime())
                 .closeTime(tourist.getCloseTime())
                 .image(tourist.getImage()) // 또는 getImages().get(0) 등

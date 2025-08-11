@@ -1,6 +1,7 @@
 package com.example.shimpyo.domain.tourist.dto;
 
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,8 @@ public class FilterRequestDto {
     private String requiredService;
     private String gender;
     private String ageGroup;
+
+    @Builder.Default
+    @NotNull
+    private String sortBy = "찜 많은순";
 }
