@@ -84,4 +84,16 @@ public class UserController {
     public ResponseEntity<MyReviewDetailResponseDto> getMyReviewDetail(@RequestParam("touristId") Long touristId) {
         return ResponseEntity.ok(userService.getMyReviewTourists(touristId));
     }
+
+    @Operation(summary = "후기 삭제")
+    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @DeleteMapping("/review")
+    public ResponseEntity<Void> deleteReview(@RequestParam("touristId") Long touristId,
+                                             @RequestParam(name = "reviewId", required = false) Long reviewId) {
+        if (reviewId == null)
+            touristService.deleteReview(touristId);
+        else
+            touristService.deleteOneReview(touristId, reviewId);
+        return ResponseEntity.ok().build();
+    }
 }
