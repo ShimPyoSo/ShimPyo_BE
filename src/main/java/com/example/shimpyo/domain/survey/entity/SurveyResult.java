@@ -1,7 +1,6 @@
 package com.example.shimpyo.domain.survey.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
-import com.example.shimpyo.domain.course.entity.Suggestion;
 import com.example.shimpyo.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -31,14 +30,10 @@ public class SurveyResult extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    @NotNull
-    private byte useCount = 3;
-
     @ManyToOne(optional = false) // 각 surveyResult는 반드시 하나의 User에 속해야 함.
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "surveyResult", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Suggestion> suggestions = new ArrayList<>();
+    @OneToOne
+    private Suggestion suggestion;
 }
