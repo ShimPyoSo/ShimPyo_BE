@@ -14,6 +14,7 @@ import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.ReviewRepository;
 import com.example.shimpyo.global.BaseException;
+import com.example.shimpyo.global.exceptionType.TouristException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.shimpyo.global.exceptionType.TouristException.REVIEW_NOT_FOUND;
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
 
 @Service
@@ -37,7 +39,6 @@ public class TouristService {
     private final AuthService authService;
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
-    private final TouristCategoryRepository touristCategoryRepository;
     private final LikesRepository likesRepository;
 
     // 오차 방지
@@ -227,5 +228,17 @@ public class TouristService {
 
     public List<Tourist> findByRegionsAndCategories(List<String> regions, List<Category> categories) {
         return touristRepository.findByRegionsAndCategories(regions, categories);
+    }
+
+
+    public void deleteOneReview(Long touristId, Long reviewId) {
+        User user = authService.findUser().getUser();
+        reviewRepository.delete(reviewRepository.findByUserAndTouristIdAndId(user, touristId, reviewId)
+                .orElseThrow(() -> new BaseException(REVIEW_NOT_FOUND)));
+}
+
+    public void deleteReview(Long touristId) {
+        User user = authService.findUser().getUser();
+        reviewRepository.deleteAll(reviewRepository.findByUserAndTouristId(user, touristId));
     }
 }
