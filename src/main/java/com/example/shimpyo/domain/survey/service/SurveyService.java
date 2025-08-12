@@ -58,11 +58,6 @@ public class SurveyService {
 
         // 3. 관광지 필터링
         List<Tourist> candidates = touristService.findByRegionsAndCategories(regions, categories);
-        System.out.println("Found Tourists");
-        for (Tourist candidate : candidates) {
-            System.out.println(candidate.getName());
-            System.out.println(candidate.getRegion());
-        }
 
         // 4. 일정 생성
         List<CourseResponseDto.CourseDayDto> dayPlans = new ArrayList<>();
