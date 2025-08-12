@@ -3,6 +3,8 @@ package com.example.shimpyo.domain.survey.controller;
 import com.example.shimpyo.domain.survey.dto.CourseRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.service.SurveyService;
+import com.example.shimpyo.global.SwaggerErrorApi;
+import com.example.shimpyo.global.exceptionType.MemberExceptionType;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ public class SurveyController {
     private final SurveyService surveyService;
 
     @Operation(summary = "코스 확인하기")
+    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
     @PostMapping("/course")
     public ResponseEntity<CourseResponseDto> getCourse(@RequestBody CourseRequestDto requestDto) {
         return ResponseEntity.ok(surveyService.getCourse(requestDto));
