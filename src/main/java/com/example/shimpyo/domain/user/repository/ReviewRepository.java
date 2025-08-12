@@ -2,13 +2,10 @@ package com.example.shimpyo.domain.user.repository;
 
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
-import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
 import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
