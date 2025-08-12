@@ -1,7 +1,6 @@
-package com.example.shimpyo.domain.course.entity;
+package com.example.shimpyo.domain.survey.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
-import com.example.shimpyo.domain.survey.entity.SurveyResult;
 import com.example.shimpyo.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -33,18 +32,28 @@ public class Suggestion extends BaseEntity {
     @NotNull
     private String title;
 
-    private String description;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(optional = false)
+    @OneToOne(optional = false)
     @JoinColumn(name = "survey_id", nullable = false)
     private SurveyResult surveyResult;
 
+    @Builder.Default
     @OneToMany(mappedBy = "suggestion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SuggestionTourist> suggestionTourists = new ArrayList<>();
 
-
+    public void addSuggestionTourist(SuggestionTourist st) {
+        suggestionTourists.add(st);
+        if (st.getSuggestion() != this) {
+            st.addSuggestion(this);
+        }
+    }
+    public void removeSuggestionTourist(SuggestionTourist st) {
+        suggestionTourists.remove(st);
+        if (st.getSuggestion() == this) {
+            st.addSuggestion(null);
+        }
+    }
 }

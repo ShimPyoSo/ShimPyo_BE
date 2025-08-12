@@ -2,7 +2,7 @@ package com.example.shimpyo.domain.user.entity;
 
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.common.BaseEntity;
-import com.example.shimpyo.domain.course.entity.Suggestion;
+import com.example.shimpyo.domain.survey.entity.Suggestion;
 import com.example.shimpyo.domain.course.entity.UserCourse;
 import com.example.shimpyo.domain.survey.entity.SurveyResult;
 import jakarta.persistence.*;
@@ -11,8 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

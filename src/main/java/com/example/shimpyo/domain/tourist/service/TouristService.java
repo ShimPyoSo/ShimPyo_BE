@@ -4,6 +4,7 @@ import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
+import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.TouristCategoryRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
@@ -222,5 +223,9 @@ public class TouristService {
 
     public List<MyReviewListResponseDto> getMyReviewLists() {
         return reviewRepository.countReviewsByTouristForUser(authService.findUser().getUser().getId());
+    }
+
+    public List<Tourist> findByRegionsAndCategories(List<String> regions, List<Category> categories) {
+        return touristRepository.findByRegionsAndCategories(regions, categories);
     }
 }

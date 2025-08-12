@@ -1,7 +1,7 @@
 package com.example.shimpyo.domain.tourist.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
-import com.example.shimpyo.domain.course.entity.SuggestionTourist;
+import com.example.shimpyo.domain.survey.entity.SuggestionTourist;
 import com.example.shimpyo.domain.course.entity.UserCourseList;
 import com.example.shimpyo.domain.user.entity.Likes;
 import com.example.shimpyo.domain.user.entity.Review;
@@ -44,9 +44,10 @@ public class Tourist extends BaseEntity {
     private String image;
 
     @Column
-    private float latitude;
+    private Double latitude;
+
     @Column
-    private float longitude;
+    private Double longitude;
 
     @Column
     private Long content_id;
@@ -120,6 +121,20 @@ public class Tourist extends BaseEntity {
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
+    public void addSuggestionTourist(SuggestionTourist st) {
+        suggestionTourists.add(st);
+        if (st.getTourist() != this) {
+            st.setTourist(this);
+        }
+    }
+
+    public void removeSuggestionTourist(SuggestionTourist st) {
+        suggestionTourists.remove(st);
+        if (st.getTourist() == this) {
+            st.setTourist(null);
+        }
+    }
 }
 
 
