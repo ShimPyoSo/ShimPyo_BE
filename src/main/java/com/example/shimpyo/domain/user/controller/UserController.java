@@ -65,7 +65,7 @@ public class UserController {
 
     @Operation(summary = "최근 본 관광지")
     @SwaggerErrorApi(type = {TouristException.class}, codes = {"TOURIST_NOT_FOUND"})
-    @GetMapping("/tourist")
+    @PostMapping("/tourist")
     public ResponseEntity<List<SeenTouristResponseDto>> getLastSeenTourists(@RequestBody List<Long> touristIds){//SeenTouristRequestDto requestDto) {
         return ResponseEntity.ok(userService.getLastSeenTourists(touristIds));
     }
