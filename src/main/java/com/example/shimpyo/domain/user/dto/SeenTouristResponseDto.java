@@ -19,7 +19,7 @@ public class SeenTouristResponseDto {
     public static SeenTouristResponseDto toDto(Tourist tourist) {
         return SeenTouristResponseDto.builder()
                 .id(tourist.getId())
-                .region(tourist.getAddress())
+                .region(tourist.getRegion())
                 .address(tourist.getAddress())
                 .openTime(tourist.getOpenTime())
                 .closeTime(tourist.getCloseTime())

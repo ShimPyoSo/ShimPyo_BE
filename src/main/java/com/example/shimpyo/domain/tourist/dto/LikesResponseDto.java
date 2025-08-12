@@ -24,7 +24,7 @@ public class LikesResponseDto {
         return LikesResponseDto.builder()
                 .id(tourist.getId())
                 .images(tourist.getImage())
-                .region(tourist.getAddress())
+                .region(tourist.getRegion())
                 .category(tourist.getTouristCategories().stream()
                         .map(TouristCategory::getCategory)
                         .collect(Collectors.toList()))
