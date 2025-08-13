@@ -57,7 +57,6 @@ public class SurveyService {
         WellnessType wellnessType = WellnessType.valueOf(typename.replace(" ", ""));
         List<Category> categories = wellnessType.getCategories();
 
-
         // 3. 관광지 필터링
         List<Tourist> candidates = touristService.findByRegionsAndCategories(regions, categories);
 
@@ -102,16 +101,23 @@ public class SurveyService {
             dayPlans.add(CourseResponseDto.CourseDayDto.toDto(day + "일차", todayList));
         }
         // 5. 응답 생성
-        return CourseResponseDto.builder().courseId(makeCourse(requestDto, user, tourList)).days(dayPlans).build();
+        return CourseResponseDto.builder()
+                .courseId(makeCourse(requestDto.getDuration() == null? "1박 2일" : requestDto.getDuration(),
+                        requestDto.getRegion() == null? "전국" : requestDto.getRegion(),
+                        user, tourList))
+                .days(dayPlans)
+                .build();
     }
 
-    private Long makeCourse(CourseRequestDto requestDto, User user, List<Tourist> tourlist) {
+    private Long makeCourse(String days, String region, User user, List<Tourist> tourlist) {
+        SurveyResult surveyResult = saveSurveyResult(user);
         Suggestion suggestion = suggestionRepository.save(
                 Suggestion.builder()
-                        .title(requestDto.getDuration() + " " + requestDto.getRegion() + " 여행")
-                        .surveyResult(saveSurveyResult(user))
+                        .title(days + " " + region  + " 여행")
+                        .surveyResult(surveyResult)
                         .user(user)
                         .build());
+        surveyResult.setSuggestion(suggestion);
         tourlist.forEach(t -> {
             SuggestionTourist st = stRepository.save(
                     SuggestionTourist.builder().suggestion(suggestion).tourist(t).build());

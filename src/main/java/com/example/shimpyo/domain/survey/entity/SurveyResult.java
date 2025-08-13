@@ -30,6 +30,13 @@ public class SurveyResult extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne
+    @OneToOne(mappedBy = "surveyResult", cascade = CascadeType.ALL, orphanRemoval = true)
     private Suggestion suggestion;
+
+    public void setSuggestion(Suggestion suggestion) {
+        this.suggestion = suggestion;
+        if (suggestion.getSurveyResult() != this) {
+            suggestion.setSurveyResult(this);
+        }
+    }
 }

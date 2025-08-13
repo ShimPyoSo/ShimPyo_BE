@@ -6,6 +6,7 @@ import com.example.shimpyo.domain.survey.service.SurveyService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ public class SurveyController {
     @Operation(summary = "코스 확인하기")
     @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
     @PostMapping("/course")
-    public ResponseEntity<CourseResponseDto> getCourse(@RequestBody CourseRequestDto requestDto) {
+    public ResponseEntity<CourseResponseDto> getCourse(@Valid @RequestBody CourseRequestDto requestDto) {
         return ResponseEntity.ok(surveyService.getCourse(requestDto));
     }
 }
