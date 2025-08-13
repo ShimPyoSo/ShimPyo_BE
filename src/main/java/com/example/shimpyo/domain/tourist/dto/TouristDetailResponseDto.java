@@ -36,9 +36,9 @@ public class TouristDetailResponseDto {
     // 관광지 사진 리스트
     private List<String> images = new ArrayList<>();
     // 경도
-    private float latitude;
+    private Double latitude;
     // 위도
-    private float longitude;
+    private Double longitude;
 
     public static TouristDetailResponseDto toDto(Tourist tourist, String region){
         List<String> image = new ArrayList<>();

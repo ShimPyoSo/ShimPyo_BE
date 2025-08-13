@@ -2,8 +2,6 @@ package com.example.shimpyo.domain.tourist.util;
 
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import com.example.shimpyo.domain.user.entity.Likes;
-import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.global.BaseException;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.Sort;
@@ -11,7 +9,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Objects;
 
 import static com.example.shimpyo.global.exceptionType.TokenException.*;
 

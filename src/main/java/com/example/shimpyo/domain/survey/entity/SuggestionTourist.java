@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.course.entity;
+package com.example.shimpyo.domain.survey.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
@@ -32,4 +32,18 @@ public class SuggestionTourist extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "tourist_id")
     private Tourist tourist;
+
+    public void addSuggestion(Suggestion suggestion) {
+        this.suggestion = suggestion;
+        if (suggestion != null && !suggestion.getSuggestionTourists().contains(this)) {
+            suggestion.getSuggestionTourists().add(this);
+        }
+    }
+
+    public void setTourist(Tourist tourist) {
+        this.tourist = tourist;
+        if (tourist != null && !tourist.getSuggestionTourists().contains(this)) {
+            tourist.getSuggestionTourists().add(this);
+        }
+    }
 }

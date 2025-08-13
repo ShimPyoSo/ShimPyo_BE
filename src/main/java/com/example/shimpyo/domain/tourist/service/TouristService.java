@@ -4,8 +4,8 @@ import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
+import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import com.example.shimpyo.domain.tourist.repository.TouristCategoryRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
 import com.example.shimpyo.domain.tourist.util.TouristSpecs;
 import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.shimpyo.global.exceptionType.TouristException.REVIEW_NOT_FOUND;
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
 
 @Service
@@ -36,7 +37,6 @@ public class TouristService {
     private final AuthService authService;
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
-    private final TouristCategoryRepository touristCategoryRepository;
     private final LikesRepository likesRepository;
 
     // 오차 방지
@@ -222,5 +222,21 @@ public class TouristService {
 
     public List<MyReviewListResponseDto> getMyReviewLists() {
         return reviewRepository.countReviewsByTouristForUser(authService.findUser().getUser().getId());
+    }
+
+    public List<Tourist> findByRegionsAndCategories(List<String> regions, List<Category> categories) {
+        return touristRepository.findByRegionsAndCategories(regions, categories);
+    }
+
+
+    public void deleteOneReview(Long touristId, Long reviewId) {
+        User user = authService.findUser().getUser();
+        reviewRepository.delete(reviewRepository.findByUserAndTouristIdAndId(user, touristId, reviewId)
+                .orElseThrow(() -> new BaseException(REVIEW_NOT_FOUND)));
+}
+
+    public void deleteReview(Long touristId) {
+        User user = authService.findUser().getUser();
+        reviewRepository.deleteAll(reviewRepository.findByUserAndTouristId(user, touristId));
     }
 }

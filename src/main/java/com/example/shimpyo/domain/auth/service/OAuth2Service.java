@@ -1,7 +1,6 @@
 package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.JwtTokenProvider;
-import com.example.shimpyo.domain.auth.dto.LoginResponseDto;
 import com.example.shimpyo.domain.auth.dto.SocialLoginResponseDto;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.repository.UserAuthRepository;

@@ -3,9 +3,6 @@ package com.example.shimpyo.domain.user.service;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.dto.*;
-import com.example.shimpyo.domain.user.entity.Review;
-import com.example.shimpyo.domain.user.entity.User;
-import com.example.shimpyo.domain.user.repository.ReviewRepository;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
@@ -14,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
