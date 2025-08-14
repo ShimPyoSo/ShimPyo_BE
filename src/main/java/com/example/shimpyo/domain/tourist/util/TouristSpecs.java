@@ -186,7 +186,7 @@ public final class TouristSpecs {
             // count 쿼리일 때는 정렬/그룹 적용하지 않음
             if (!Long.class.equals(query.getResultType())){
                 var likes = root.join("likes", JoinType.LEFT);
-                var likesCount = cb.count(likes);
+                var likesCount = cb.countDistinct(likes);
                 query.groupBy(root.get("id"));
                 // 동률 이라면
                 if(dir.isAscending()){
@@ -204,7 +204,7 @@ public final class TouristSpecs {
         return (root, query, cb) -> {
             if (!Long.class.equals(query.getResultType())){
                 var review = root.join("review", JoinType.LEFT);
-                var reviewsCount = cb.count(review);
+                var reviewsCount = cb.countDistinct(review);
                 query.groupBy(root.get("id"));
                 if(dir.isAscending()){
                     query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));

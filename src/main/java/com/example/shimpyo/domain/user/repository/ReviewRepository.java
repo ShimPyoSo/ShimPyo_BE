@@ -34,4 +34,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByUserAndTouristId(@Param("User") User user,
                                         @Param("touristId") Long touristId);
+
+    Long countByTouristId(Long touristId);
 }
