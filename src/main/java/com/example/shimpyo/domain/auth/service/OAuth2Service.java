@@ -8,7 +8,7 @@ import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.domain.user.utils.RedisService;
-import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
+import com.example.shimpyo.utils.NicknamePrefixLoader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
