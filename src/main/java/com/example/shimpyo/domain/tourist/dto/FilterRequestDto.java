@@ -19,7 +19,6 @@ public class FilterRequestDto {
     private String gender;
     private String ageGroup;
 
-    @Builder.Default
     @NotNull
-    private String sortBy = "찜 많은순";
+    private String sortBy;
 }

@@ -70,10 +70,14 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token).getBody().getSubject();
     }
 
-    public long getUserIdToRefresh(String token){
+    public long getUserIdToRefresh(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKeyRT.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
 
-        return (long) Jwts.parserBuilder().setSigningKey(secretKeyRT.getBytes()).build()
-                .parseClaimsJws(token).getBody().get("id");
+        return ((Number) claims.get("id")).longValue();
     }
 
     // JWT 남은 만료 시간을 추출하는 메서드

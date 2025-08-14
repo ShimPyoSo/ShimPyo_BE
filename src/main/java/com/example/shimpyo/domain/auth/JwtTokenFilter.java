@@ -40,8 +40,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = extractAccessToken(request);
+        String refreshToken = extractRefreshToken(request);
 
-        if (token != null) {
+        if (token != null || refreshToken != null) {
             try {
                 // 로그아웃 되는 시점 토큰 탈취해 접근 권한 취득을 방지하는 코드
                 if(!request.getRequestURI().equals("/api/user/auth/logout")
@@ -89,4 +90,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         return null;
     }
 
+    private String extractRefreshToken(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if ("refresh_token".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
 }

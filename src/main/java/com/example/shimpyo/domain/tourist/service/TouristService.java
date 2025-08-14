@@ -123,7 +123,7 @@ public class TouristService {
 
         Set<Long> likedIds = findLikedIdsForSlice(userId, pageSlice);
 
-        return toResponse(pageSlice, likedIds, filter);
+        return toResponse(pageSlice, likedIds);
     }
 
     @Transactional(readOnly = true)
@@ -156,7 +156,7 @@ public class TouristService {
 
         Set<Long> likedIds = findLikedIdsForSlice(userId, pageSlice);
 
-        return toResponse(pageSlice, likedIds, filter);
+        return toResponse(pageSlice, likedIds);
     }
     // 2) 슬라이싱
     private List<Tourist> slice(Specification<Tourist> spec,  Pageable pageable) {
@@ -178,11 +178,13 @@ public class TouristService {
     }
     // 4) 최종 매핑
     private List<FilterTouristByDataResponseDto> toResponse(
-            List<Tourist> slice, Set<Long> likedIds, FilterRequestDto dto) {
+            List<Tourist> slice, Set<Long> likedIds) {
         List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());
         for (Tourist t : slice) {
             boolean isLiked = likedIds.contains(t.getId());
-            res.add(FilterTouristByDataResponseDto.from(t, isLiked));
+            Long likesCount = likesRepository.countLikesByTouristId(t.getId());
+            Long reviewsCount = reviewRepository.countByTouristId(t.getId());
+            res.add(FilterTouristByDataResponseDto.from(t, isLiked, likesCount, reviewsCount));
         }
         return res;
     }
