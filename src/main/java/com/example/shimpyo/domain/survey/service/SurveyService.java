@@ -18,10 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,7 +36,10 @@ public class SurveyService {
             "경상도", List.of("경북", "경남"),
             "전라도", List.of("전북", "전남"),
             "충청도", List.of("충북", "충남"),
-            "수도권", List.of("서울", "경기")
+            "수도권", List.of("서울", "경기"),
+            "강원도", List.of("강원"),
+            "제주도", List.of("제주"),
+            "default", List.of("경북", "경남","전북", "전남","충북", "충남","서울", "경기","강원","제주")
     );
 
     public CourseResponseDto getCourse(CourseRequestDto requestDto) {
@@ -48,13 +48,14 @@ public class SurveyService {
         // 2. 기간, 식사 횟수 파싱
         String typename = requestDto.getTypename();
         int days = requestDto.getDuration() == null? 2 : parseDays(requestDto.getDuration());
-        List<String> regions = regionMapping.getOrDefault(requestDto.getRegion(), List.of(requestDto.getRegion()));  // 매핑 없으면 원래 값 그대로
+        List<String> regions = Optional.ofNullable(requestDto.getRegion())
+                .map(regionMapping::get)
+                .orElse(regionMapping.get("default"));
         int mealCount = requestDto.getMeal() == null? 2 : requestDto.getMeal();
 
         // 1. 유형 → 카테고리
         WellnessType wellnessType = WellnessType.valueOf(typename.replace(" ", ""));
         List<Category> categories = wellnessType.getCategories();
-
 
         // 3. 관광지 필터링
         List<Tourist> candidates = touristService.findByRegionsAndCategories(regions, categories);
@@ -100,16 +101,23 @@ public class SurveyService {
             dayPlans.add(CourseResponseDto.CourseDayDto.toDto(day + "일차", todayList));
         }
         // 5. 응답 생성
-        return CourseResponseDto.builder().courseId(makeCourse(requestDto, user, tourList)).days(dayPlans).build();
+        return CourseResponseDto.builder()
+                .courseId(makeCourse(requestDto.getDuration() == null? "1박 2일" : requestDto.getDuration(),
+                        requestDto.getRegion() == null? "전국" : requestDto.getRegion(),
+                        user, tourList))
+                .days(dayPlans)
+                .build();
     }
 
-    private Long makeCourse(CourseRequestDto requestDto, User user, List<Tourist> tourlist) {
+    private Long makeCourse(String days, String region, User user, List<Tourist> tourlist) {
+        SurveyResult surveyResult = saveSurveyResult(user);
         Suggestion suggestion = suggestionRepository.save(
                 Suggestion.builder()
-                        .title(requestDto.getDuration() + " " + requestDto.getRegion() + " 여행")
-                        .surveyResult(saveSurveyResult(user))
+                        .title(days + " " + region  + " 여행")
+                        .surveyResult(surveyResult)
                         .user(user)
                         .build());
+        surveyResult.setSuggestion(suggestion);
         tourlist.forEach(t -> {
             SuggestionTourist st = stRepository.save(
                     SuggestionTourist.builder().suggestion(suggestion).tourist(t).build());

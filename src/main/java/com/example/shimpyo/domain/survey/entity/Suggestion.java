@@ -56,4 +56,11 @@ public class Suggestion extends BaseEntity {
             st.addSuggestion(null);
         }
     }
+
+    public void setSurveyResult(SurveyResult surveyResult) {
+        this.surveyResult = surveyResult;
+        if (surveyResult.getSuggestion() != this) {
+            surveyResult.setSuggestion(this);
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.utils;
+package com.example.shimpyo.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -44,6 +44,6 @@ public class RedisService {
     }
 
     public boolean isBlackList(String token){
-        return redisBlackListTemplate.hasKey("tokenBlackList:" + token);
+        return redisBlackListTemplate.hasKey("tokenBlackList" + token);
     }
 }
