@@ -61,13 +61,7 @@ public final class TouristSpecs {
         };
     }
 
-    // 3) 예약 여부
-    public static Specification<Tourist> reservationRequired(boolean required){
-        if(!required) return null; // true 일 때만 조건
-        return (root, query, cb) -> cb.isNotNull(root.get("reservationUrl"));
-    }
-
-    // 4) 방문 시간 포함
+    // 3) 방문 시간 포함
     public static Specification<Tourist> openWithin(String visitTime){
         if(visitTime == null || !visitTime.contains("-")) return null;
 
@@ -95,7 +89,7 @@ public final class TouristSpecs {
         );
     }
 
-    // 5) 제공 서비스: 파이프 구분 문자열
+    // 4) 제공 서비스: 파이프 구분 문자열
     public static Specification<Tourist> hasAllService(String requiredServices){
         if(requiredServices == null || requiredServices.isBlank()) return null;
 
@@ -117,7 +111,7 @@ public final class TouristSpecs {
         };
     }
 
-    // 6) 성별 가중: male/female
+    // 5) 성별 가중: male/female
     public static Specification<Tourist> genderBias(String gender){
         if (gender == null || gender.equalsIgnoreCase("ALL")) return null;
         return (root, query, cb) -> {
@@ -131,7 +125,7 @@ public final class TouristSpecs {
         };
     }
 
-    // 7) 연령대
+    // 6) 연령대
     public static Specification<Tourist> matchesAgeGroup(String ageGroup){
         return matchesAgeGroup(ageGroup, 1e-6);
     }

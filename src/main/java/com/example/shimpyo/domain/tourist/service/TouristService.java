@@ -102,7 +102,6 @@ public class TouristService {
         Specification<Tourist> specification = Specification
                 .where(TouristSpecs.byCategory(category))
                 .and(TouristSpecs.inRegion(filter.getRegion()))
-                .and(TouristSpecs.reservationRequired(filter.isReservationRequired()))
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
                 .and(TouristSpecs.hasAllService(filter.getRequiredService()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
@@ -134,7 +133,6 @@ public class TouristService {
         Specification<Tourist> specification = Specification
                 .where(TouristSpecs.containsSearch(keyword))
                 .and(TouristSpecs.inRegion(filter.getRegion()))
-                .and(TouristSpecs.reservationRequired(filter.isReservationRequired()))
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
                 .and(TouristSpecs.hasAllService(filter.getRequiredService()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
