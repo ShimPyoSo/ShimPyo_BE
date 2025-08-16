@@ -14,6 +14,13 @@ import static com.example.shimpyo.global.exceptionType.TokenException.*;
 
 public final class TouristSpecs {
 
+    private TouristSpecs(){}
+
+    public static Specification<Tourist> cursorBeforeId(Long lastId){
+        return (root, query, cb) ->
+                lastId == null ? cb.conjunction() : cb.greaterThan(root.get("id"), lastId);
+    }
+
     public static Specification<Tourist> containsSearch(String keyword){
         // 키워드가 없으면 전체 검색
         if(keyword == null || keyword.isBlank()) return null;
@@ -181,38 +188,38 @@ public final class TouristSpecs {
         return cb.function("coalesce", Double.class, col, cb.literal(0.0d));
     }
 
-    public static Specification<Tourist> orderByLikesCount(Sort.Direction dir) {
-        return (root, query, cb) -> {
-            // count 쿼리일 때는 정렬/그룹 적용하지 않음
-            if (!Long.class.equals(query.getResultType())){
-                var likes = root.join("likes", JoinType.LEFT);
-                var likesCount = cb.countDistinct(likes);
-                query.groupBy(root.get("id"));
-                // 동률 이라면
-                if(dir.isAscending()){
-                    query.orderBy(cb.asc(likesCount), cb.asc(root.get("id")));
-                } else{
-                    query.orderBy(cb.desc(likesCount), cb.asc(root.get("id")));
-                }
-                query.distinct(true);
-            }
-            return cb.conjunction();
-        };
-    }
-
-    public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
-        return (root, query, cb) -> {
-            if (!Long.class.equals(query.getResultType())){
-                var review = root.join("review", JoinType.LEFT);
-                var reviewsCount = cb.countDistinct(review);
-                query.groupBy(root.get("id"));
-                if(dir.isAscending()){
-                    query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));
-                }else{
-                    query.orderBy(cb.desc(reviewsCount), cb.asc(root.get("id")));
-                }
-            }
-            return cb.conjunction();
-        };
-    }
+//    public static Specification<Tourist> orderByLikesCount(Sort.Direction dir) {
+//        return (root, query, cb) -> {
+//            // count 쿼리일 때는 정렬/그룹 적용하지 않음
+//            if (!Long.class.equals(query.getResultType())){
+//                var likes = root.join("likes", JoinType.LEFT);
+//                var likesCount = cb.countDistinct(likes);
+//                query.groupBy(root.get("id"));
+//                // 동률 이라면
+//                if(dir.isAscending()){
+//                    query.orderBy(cb.asc(likesCount), cb.asc(root.get("id")));
+//                } else{
+//                    query.orderBy(cb.desc(likesCount), cb.asc(root.get("id")));
+//                }
+//                query.distinct(true);
+//            }
+//            return cb.conjunction();
+//        };
+//    }
+//
+//    public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
+//        return (root, query, cb) -> {
+//            if (!Long.class.equals(query.getResultType())){
+//                var review = root.join("review", JoinType.LEFT);
+//                var reviewsCount = cb.countDistinct(review);
+//                query.groupBy(root.get("id"));
+//                if(dir.isAscending()){
+//                    query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));
+//                }else{
+//                    query.orderBy(cb.desc(reviewsCount), cb.asc(root.get("id")));
+//                }
+//            }
+//            return cb.conjunction();
+//        };
+//    }
 }

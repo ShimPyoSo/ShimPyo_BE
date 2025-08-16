@@ -39,6 +39,8 @@ public class TouristService {
     private final TouristRepository touristRepository;
     private final LikesRepository likesRepository;
 
+    private final Pageable pageable = PageRequest.of(0, 8);
+
     // 오차 방지
     private static final double EPS = 1e-9;
 
@@ -95,7 +97,7 @@ public class TouristService {
 
     @Transactional(readOnly = true)
     public List<FilterTouristByDataResponseDto> filteredTouristByCategory(
-            String category, FilterRequestDto filter, Pageable pageable) {
+            String category, FilterRequestDto filter) {
 
         Specification<Tourist> specification = Specification
                 .where(TouristSpecs.byCategory(category))
@@ -104,31 +106,30 @@ public class TouristService {
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
                 .and(TouristSpecs.hasAllService(filter.getRequiredService()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
-                .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()));
+                .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
+                .and(TouristSpecs.cursorBeforeId(filter.getId()));
 
-        if(filter.getSortBy() == null || "찜 많은순".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
-        }
+//        if(filter.getSortBy() == null || "찜 많은순".equalsIgnoreCase(filter.getSortBy())){
+//            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
+//        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
+//            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+//        }
 
         //pageable 에서 정렬 빼기
-        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-
-        List<Tourist> pageSlice = slice(specification, pageable);
+        List<Tourist> rows = touristRepository.findAll(specification, pageable).getContent();
 
         Long userId = authService.findUserAuth()
                 .map(UserAuth::getUser).map(User::getId).orElse(null);
 
 
-        Set<Long> likedIds = findLikedIdsForSlice(userId, pageSlice);
+        Set<Long> likedIds = findLikedIdsForSlice(userId, rows);
 
-        return toResponse(pageSlice, likedIds);
+        return toResponse(rows, likedIds);
     }
 
     @Transactional(readOnly = true)
     public List<FilterTouristByDataResponseDto> filteredTouristBySearch(
-            String keyword, FilterRequestDto filter, Pageable pageable) {
+            String keyword, FilterRequestDto filter) {
 
         Specification<Tourist> specification = Specification
                 .where(TouristSpecs.containsSearch(keyword))
@@ -137,46 +138,34 @@ public class TouristService {
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
                 .and(TouristSpecs.hasAllService(filter.getRequiredService()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
-                .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()));
+                .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
+                .and(TouristSpecs.cursorBeforeId(filter.getId()));
 
-        if("찜 많은순".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
-        }
+//        if("찜 많은순".equalsIgnoreCase(filter.getSortBy())){
+//            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
+//        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
+//            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+//        }
 
-        //pageable 에서 정렬 빼기
-        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        Pageable pageable = PageRequest.of(0, 8);
+        List<Tourist> rows = touristRepository.findAll(specification, pageable).getContent();
 
-        List<Tourist> pageSlice = slice(specification, pageable);
 
         Long userId = authService.findUserAuth()
                 .map(UserAuth::getUser).map(User::getId).orElse(null);
 
 
-        Set<Long> likedIds = findLikedIdsForSlice(userId, pageSlice);
+        Set<Long> likedIds = findLikedIdsForSlice(userId, rows);
 
-        return toResponse(pageSlice, likedIds);
+        return toResponse(rows, likedIds);
     }
-    // 2) 슬라이싱
-    private List<Tourist> slice(Specification<Tourist> spec,  Pageable pageable) {
-        var plusOne = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize() + 1,
-                pageable.getSort()
-        );
-        var rows = touristRepository.findAll(spec, plusOne).getContent();
-        return rows.size() > pageable.getPageSize()
-                ? rows.subList(0, pageable.getPageSize() + 1)
-                : rows;
-    }
-    // 3) 공통 좋아요 배치 조회
+    // 2) 공통 좋아요 배치 조회
     private Set<Long> findLikedIdsForSlice(Long userId, List<Tourist> slice) {
         if (userId == null || slice.isEmpty()) return Collections.emptySet();
         List<Long> ids = slice.stream().map(Tourist::getId).toList();
         return likesRepository.findLikedTouristIds(userId, ids);
     }
-    // 4) 최종 매핑
+    // 3) 최종 매핑
     private List<FilterTouristByDataResponseDto> toResponse(
             List<Tourist> slice, Set<Long> likedIds) {
         List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());

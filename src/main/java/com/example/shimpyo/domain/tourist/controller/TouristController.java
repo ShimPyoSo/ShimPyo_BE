@@ -61,10 +61,9 @@ public class TouristController {
         }
     )
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category") @NotBlank String category,
-                                                     @ModelAttribute  FilterRequestDto filter,
-                                                     @PageableDefault(size = 8) Pageable pageable) {
+                                                     @ModelAttribute  FilterRequestDto filter) {
         List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTouristByCategory(category, filter, pageable);
+                touristService.filteredTouristByCategory(category, filter);
 
 
         return ResponseEntity.ok(responseDtoList);
@@ -80,10 +79,9 @@ public class TouristController {
         }
     )
     public ResponseEntity<?> filterTouristBySearch(@RequestParam("keyword") String keyword,
-                                                   @ModelAttribute FilterRequestDto filter,
-                                                   @PageableDefault(size = 8) Pageable pageable) {
+                                                   @ModelAttribute FilterRequestDto filter) {
         List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTouristBySearch(keyword, filter, pageable);
+                touristService.filteredTouristBySearch(keyword, filter);
 
         return ResponseEntity.ok(responseDtoList);
     }

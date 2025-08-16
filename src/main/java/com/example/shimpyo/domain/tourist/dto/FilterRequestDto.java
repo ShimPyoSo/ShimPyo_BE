@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class FilterRequestDto {
+    private Long id;
     private String region;
     private boolean reservationRequired;
     private String visitTime;
