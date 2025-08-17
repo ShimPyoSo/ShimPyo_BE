@@ -32,6 +32,9 @@ public class Suggestion extends BaseEntity {
     @NotNull
     private String title;
 
+    @NotNull
+    private String token;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -1,25 +1,28 @@
 package com.example.shimpyo.domain.survey.service;
 
 import com.example.shimpyo.domain.auth.service.AuthService;
+import com.example.shimpyo.domain.course.entity.UserCourse;
 import com.example.shimpyo.domain.survey.dto.CourseRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
-import com.example.shimpyo.domain.survey.entity.Suggestion;
-import com.example.shimpyo.domain.survey.entity.SuggestionTourist;
-import com.example.shimpyo.domain.survey.entity.SurveyResult;
-import com.example.shimpyo.domain.survey.entity.WellnessType;
+import com.example.shimpyo.domain.survey.entity.*;
 import com.example.shimpyo.domain.survey.repository.SuggestionRepository;
 import com.example.shimpyo.domain.survey.repository.SuggestionTouristRepository;
+import com.example.shimpyo.domain.survey.repository.SuggestionUserRepository;
 import com.example.shimpyo.domain.survey.repository.SurveyRepository;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.entity.User;
+import com.example.shimpyo.global.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.example.shimpyo.global.exceptionType.CourseException.ALREADY_LIKED;
+import static com.example.shimpyo.global.exceptionType.CourseException.COURSE_NOT_FOUND;
 
 @Service
 @Transactional
@@ -31,6 +34,7 @@ public class SurveyService {
     private final SurveyRepository surveyRepository;
     private final SuggestionRepository suggestionRepository;
     private final SuggestionTouristRepository stRepository;
+    private final SuggestionUserRepository suRepository;
 
     private static final Map<String, List<String>> regionMapping = Map.of(
             "경상도", List.of("경북", "경남"),
@@ -42,6 +46,7 @@ public class SurveyService {
             "default", List.of("경북", "경남","전북", "전남","충북", "충남","서울", "경기","강원","제주")
     );
 
+    @Transactional(readOnly = true)
     public CourseResponseDto getCourse(CourseRequestDto requestDto) {
 
         User user = authService.findUser().getUser();
@@ -114,6 +119,7 @@ public class SurveyService {
         Suggestion suggestion = suggestionRepository.save(
                 Suggestion.builder()
                         .title(days + " " + region  + " 여행")
+                        .token(UUID.randomUUID().toString())
                         .surveyResult(surveyResult)
                         .user(user)
                         .build());
@@ -161,5 +167,14 @@ public class SurveyService {
 
     private SurveyResult saveSurveyResult(User user) {
         return surveyRepository.save(SurveyResult.builder().user(user).build());
+    }
+
+    public void likeCourse(Long courseId) {
+        User user = authService.findUser().getUser();
+        Suggestion suggestion = suggestionRepository.findById(courseId)
+                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        if (!suRepository.existsByUserAndSuggestion(user, suggestion))
+            suRepository.save(SuggestionUser.builder().suggestion(suggestion).user(user).build());
+        else throw new BaseException(ALREADY_LIKED);
     }
 }
