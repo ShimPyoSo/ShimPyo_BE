@@ -106,7 +106,7 @@ public class TouristService {
                 .and(TouristSpecs.hasAllService(filter.getRequiredService()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
-                .and(TouristSpecs.cursorBeforeId(filter.getId()));
+                .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
 
 //        if(filter.getSortBy() == null || "찜 많은순".equalsIgnoreCase(filter.getSortBy())){
 //            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
@@ -137,7 +137,7 @@ public class TouristService {
                 .and(TouristSpecs.hasAllService(filter.getRequiredService()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
-                .and(TouristSpecs.cursorBeforeId(filter.getId()));
+                .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
 
 //        if("찜 많은순".equalsIgnoreCase(filter.getSortBy())){
 //            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));

@@ -78,7 +78,7 @@ public class TouristController {
             "UNSUPPORTED_AGE_GROUP"
         }
     )
-    public ResponseEntity<?> filterTouristBySearch(@RequestParam("keyword") String keyword,
+    public ResponseEntity<?> filterTouristBySearch(@RequestParam(value = "keyword", required = false) String keyword,
                                                    @ModelAttribute FilterRequestDto filter) {
         List<FilterTouristByDataResponseDto> responseDtoList =
                 touristService.filteredTouristBySearch(keyword, filter);
