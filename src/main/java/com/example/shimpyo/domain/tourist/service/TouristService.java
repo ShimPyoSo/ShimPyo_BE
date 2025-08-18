@@ -3,6 +3,7 @@ package com.example.shimpyo.domain.tourist.service;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
+import com.example.shimpyo.domain.search.repository.AcTermRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
@@ -38,6 +39,7 @@ public class TouristService {
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
     private final LikesRepository likesRepository;
+    private final AcTermRepository acTermRepository;
 
     private final Pageable pageable = PageRequest.of(0, 8);
 
@@ -103,7 +105,7 @@ public class TouristService {
                 .where(TouristSpecs.byCategory(category))
                 .and(TouristSpecs.inRegion(filter.getRegion()))
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
-                .and(TouristSpecs.hasAllService(filter.getRequiredService()))
+                .and(TouristSpecs.hasAllService(filter.getFacilities()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
                 .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
@@ -134,7 +136,7 @@ public class TouristService {
                 .where(TouristSpecs.containsSearch(keyword))
                 .and(TouristSpecs.inRegion(filter.getRegion()))
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
-                .and(TouristSpecs.hasAllService(filter.getRequiredService()))
+                .and(TouristSpecs.hasAllService(filter.getFacilities()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
                 .and(TouristSpecs.cursorBeforeId(filter.getLastId()));

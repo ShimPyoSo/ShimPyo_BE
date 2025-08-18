@@ -27,7 +27,8 @@ public final class TouristSpecs {
         String like = "%" + keyword.toLowerCase().trim() + "%";
         return (root, query, cb) -> cb.or(
                 cb.like(cb.lower(root.get("name")), like),
-                cb.like(cb.lower(root.get("description")), like)
+                cb.like(cb.lower(root.get("description")), like),
+                cb.like(cb.lower(root.get("address")), like)
         );
     }
 

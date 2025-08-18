@@ -68,21 +68,4 @@ public class TouristController {
 
         return ResponseEntity.ok(responseDtoList);
     }
-
-    @GetMapping("/search")
-    @SwaggerErrorApi(
-        type = {TouristException.class},
-        codes = {
-            "INVALID_VISIT_TIME_FORMAT",
-            "UNSUPPORTED_GENDER",
-            "UNSUPPORTED_AGE_GROUP"
-        }
-    )
-    public ResponseEntity<?> filterTouristBySearch(@RequestParam(value = "keyword", required = false) String keyword,
-                                                   @ModelAttribute FilterRequestDto filter) {
-        List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTouristBySearch(keyword, filter);
-
-        return ResponseEntity.ok(responseDtoList);
-    }
 }
