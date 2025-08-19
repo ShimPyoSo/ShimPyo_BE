@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class FilterRequestDto {
+    private Long lastId;
     private String region;
-    private boolean reservationRequired;
     private String visitTime;
-    private String requiredService;
+    private String facilities ;
     private String gender;
     private String ageGroup;
 

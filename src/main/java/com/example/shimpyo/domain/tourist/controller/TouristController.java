@@ -61,29 +61,10 @@ public class TouristController {
         }
     )
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category") @NotBlank String category,
-                                                     @ModelAttribute  FilterRequestDto filter,
-                                                     @PageableDefault(size = 8) Pageable pageable) {
+                                                     @ModelAttribute  FilterRequestDto filter) {
         List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTouristByCategory(category, filter, pageable);
+                touristService.filteredTouristByCategory(category, filter);
 
-
-        return ResponseEntity.ok(responseDtoList);
-    }
-
-    @GetMapping("/search")
-    @SwaggerErrorApi(
-        type = {TouristException.class},
-        codes = {
-            "INVALID_VISIT_TIME_FORMAT",
-            "UNSUPPORTED_GENDER",
-            "UNSUPPORTED_AGE_GROUP"
-        }
-    )
-    public ResponseEntity<?> filterTouristBySearch(@RequestParam("keyword") String keyword,
-                                                   @ModelAttribute FilterRequestDto filter,
-                                                   @PageableDefault(size = 8) Pageable pageable) {
-        List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTouristBySearch(keyword, filter, pageable);
 
         return ResponseEntity.ok(responseDtoList);
     }

@@ -29,7 +29,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // ⬅️ 이게 꼭 있어야 해
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/tourlist/category",
-                                "/api/tourlist/search",
+                                "/api/search",
+                                "/api/search/autocomplete",
                                 "/api/tourlist/detail")
                         .permitAll()
                         .anyRequest().authenticated()

@@ -14,13 +14,21 @@ import static com.example.shimpyo.global.exceptionType.TokenException.*;
 
 public final class TouristSpecs {
 
+    private TouristSpecs(){}
+
+    public static Specification<Tourist> cursorBeforeId(Long lastId){
+        return (root, query, cb) ->
+                lastId == null ? cb.conjunction() : cb.greaterThan(root.get("id"), lastId);
+    }
+
     public static Specification<Tourist> containsSearch(String keyword){
         // 키워드가 없으면 전체 검색
         if(keyword == null || keyword.isBlank()) return null;
         String like = "%" + keyword.toLowerCase().trim() + "%";
         return (root, query, cb) -> cb.or(
                 cb.like(cb.lower(root.get("name")), like),
-                cb.like(cb.lower(root.get("description")), like)
+                cb.like(cb.lower(root.get("description")), like),
+                cb.like(cb.lower(root.get("address")), like)
         );
     }
 
@@ -54,13 +62,7 @@ public final class TouristSpecs {
         };
     }
 
-    // 3) 예약 여부
-    public static Specification<Tourist> reservationRequired(boolean required){
-        if(!required) return null; // true 일 때만 조건
-        return (root, query, cb) -> cb.isNotNull(root.get("reservationUrl"));
-    }
-
-    // 4) 방문 시간 포함
+    // 3) 방문 시간 포함
     public static Specification<Tourist> openWithin(String visitTime){
         if(visitTime == null || !visitTime.contains("-")) return null;
 
@@ -88,7 +90,7 @@ public final class TouristSpecs {
         );
     }
 
-    // 5) 제공 서비스: 파이프 구분 문자열
+    // 4) 제공 서비스: 파이프 구분 문자열
     public static Specification<Tourist> hasAllService(String requiredServices){
         if(requiredServices == null || requiredServices.isBlank()) return null;
 
@@ -110,7 +112,7 @@ public final class TouristSpecs {
         };
     }
 
-    // 6) 성별 가중: male/female
+    // 5) 성별 가중: male/female
     public static Specification<Tourist> genderBias(String gender){
         if (gender == null || gender.equalsIgnoreCase("ALL")) return null;
         return (root, query, cb) -> {
@@ -124,7 +126,7 @@ public final class TouristSpecs {
         };
     }
 
-    // 7) 연령대
+    // 6) 연령대
     public static Specification<Tourist> matchesAgeGroup(String ageGroup){
         return matchesAgeGroup(ageGroup, 1e-6);
     }
@@ -181,38 +183,38 @@ public final class TouristSpecs {
         return cb.function("coalesce", Double.class, col, cb.literal(0.0d));
     }
 
-    public static Specification<Tourist> orderByLikesCount(Sort.Direction dir) {
-        return (root, query, cb) -> {
-            // count 쿼리일 때는 정렬/그룹 적용하지 않음
-            if (!Long.class.equals(query.getResultType())){
-                var likes = root.join("likes", JoinType.LEFT);
-                var likesCount = cb.countDistinct(likes);
-                query.groupBy(root.get("id"));
-                // 동률 이라면
-                if(dir.isAscending()){
-                    query.orderBy(cb.asc(likesCount), cb.asc(root.get("id")));
-                } else{
-                    query.orderBy(cb.desc(likesCount), cb.asc(root.get("id")));
-                }
-                query.distinct(true);
-            }
-            return cb.conjunction();
-        };
-    }
-
-    public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
-        return (root, query, cb) -> {
-            if (!Long.class.equals(query.getResultType())){
-                var review = root.join("review", JoinType.LEFT);
-                var reviewsCount = cb.countDistinct(review);
-                query.groupBy(root.get("id"));
-                if(dir.isAscending()){
-                    query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));
-                }else{
-                    query.orderBy(cb.desc(reviewsCount), cb.asc(root.get("id")));
-                }
-            }
-            return cb.conjunction();
-        };
-    }
+//    public static Specification<Tourist> orderByLikesCount(Sort.Direction dir) {
+//        return (root, query, cb) -> {
+//            // count 쿼리일 때는 정렬/그룹 적용하지 않음
+//            if (!Long.class.equals(query.getResultType())){
+//                var likes = root.join("likes", JoinType.LEFT);
+//                var likesCount = cb.countDistinct(likes);
+//                query.groupBy(root.get("id"));
+//                // 동률 이라면
+//                if(dir.isAscending()){
+//                    query.orderBy(cb.asc(likesCount), cb.asc(root.get("id")));
+//                } else{
+//                    query.orderBy(cb.desc(likesCount), cb.asc(root.get("id")));
+//                }
+//                query.distinct(true);
+//            }
+//            return cb.conjunction();
+//        };
+//    }
+//
+//    public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
+//        return (root, query, cb) -> {
+//            if (!Long.class.equals(query.getResultType())){
+//                var review = root.join("review", JoinType.LEFT);
+//                var reviewsCount = cb.countDistinct(review);
+//                query.groupBy(root.get("id"));
+//                if(dir.isAscending()){
+//                    query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));
+//                }else{
+//                    query.orderBy(cb.desc(reviewsCount), cb.asc(root.get("id")));
+//                }
+//            }
+//            return cb.conjunction();
+//        };
+//    }
 }
