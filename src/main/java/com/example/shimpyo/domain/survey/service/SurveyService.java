@@ -207,10 +207,19 @@ public class SurveyService {
         User user = authService.findUser().getUser();
         Suggestion suggestion = suggestionRepository.findById(courseId)
                 .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
-        if (!suggestion.getUser().getId().equals(user.getId()))
+        if (!suggestion.getUser().equals(user))
             throw new BaseException(COURSE_NOT_FOUND);
 
         return CourseResponseDto.toDto(suggestion,
                 CourseResponseDto.fromSuggestionTourists(suggestion.getSuggestionTourists()));
+    }
+
+    public void deleteCourse(Long courseId) {
+        User user = authService.findUser().getUser();
+        Suggestion suggestion = suggestionRepository.findById(courseId)
+                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        if (!suggestion.getUser().equals(user))
+            throw new BaseException(COURSE_NOT_FOUND);
+        suggestionRepository.delete(suggestion);
     }
 }
