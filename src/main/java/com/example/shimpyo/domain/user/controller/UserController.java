@@ -1,6 +1,8 @@
 package com.example.shimpyo.domain.user.controller;
 
 import com.example.shimpyo.domain.course.service.LikesService;
+import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
+import com.example.shimpyo.domain.survey.service.SurveyService;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.dto.MyReviewDetailResponseDto;
 import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
@@ -9,6 +11,7 @@ import com.example.shimpyo.domain.user.dto.TouristLikesResponseDto;
 import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.SwaggerErrorApi;
+import com.example.shimpyo.global.exceptionType.CourseException;
 import com.example.shimpyo.global.exceptionType.MemberExceptionType;
 import com.example.shimpyo.global.exceptionType.TouristException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +34,7 @@ public class UserController {
     private final UserService userService;
     private final LikesService likesService;
     private final TouristService touristService;
+    private final SurveyService surveyService;
 
     @Operation(summary = "닉네임 변경")
     @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"NICKNAME_NOT_VALID", "MEMBER_NOT_FOUND"})
@@ -95,5 +99,13 @@ public class UserController {
         else
             touristService.deleteOneReview(touristId, reviewId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "찜한 코스 상세")
+    @SwaggerErrorApi(type = {MemberExceptionType.class, CourseException.class},
+            codes = {"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
+    @GetMapping("/likes/detail")
+    public ResponseEntity<CourseResponseDto> getLikedCourseDetail(@RequestParam("courseId") Long courseId){
+        return ResponseEntity.ok(surveyService.getLikedCourseDetail(courseId));
     }
 }

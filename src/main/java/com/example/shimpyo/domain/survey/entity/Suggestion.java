@@ -35,13 +35,13 @@ public class Suggestion extends BaseEntity {
     @NotNull
     private String token;
 
+    @NotNull
+    @Enumerated(value = EnumType.STRING)
+    private WellnessType wellnessType;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @OneToOne(optional = false)
-    @JoinColumn(name = "survey_id", nullable = false)
-    private SurveyResult surveyResult;
 
     @Builder.Default
     @OneToMany(mappedBy = "suggestion", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -60,10 +60,4 @@ public class Suggestion extends BaseEntity {
         }
     }
 
-    public void setSurveyResult(SurveyResult surveyResult) {
-        this.surveyResult = surveyResult;
-        if (surveyResult.getSuggestion() != this) {
-            surveyResult.setSuggestion(this);
-        }
-    }
 }
