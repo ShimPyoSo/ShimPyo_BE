@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/survey")
@@ -26,5 +28,13 @@ public class SurveyController {
     @PostMapping("/course")
     public ResponseEntity<CourseResponseDto> getCourse(@Valid @RequestBody CourseRequestDto requestDto) {
         return ResponseEntity.ok(surveyService.getCourse(requestDto));
+    }
+
+    @Operation(summary = "코스 찜하기")
+    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @PostMapping
+    public ResponseEntity<Void> likeCourse(@RequestBody Map<String, Long> requestDto) {
+        surveyService.likeCourse(requestDto.get("courseId"));
+        return ResponseEntity.ok().build();
     }
 }

@@ -12,7 +12,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CourseRequestDto {
     private String typename;
-    @Pattern(regexp = "([1-4])박([2-5])일", message = "1박2일부터 4박5일까지 형식에 맞게 입력해주세요.")
+    @Pattern(regexp = "([1-4])박 ([2-5])일", message = "1박 2일부터 4박 5일까지 형식에 맞게 입력해주세요.")
     private String duration;
     @ValidRegion
     private String region;

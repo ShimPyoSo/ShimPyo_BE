@@ -215,11 +215,6 @@ public class TouristService {
         return reviewRepository.countReviewsByTouristForUser(authService.findUser().getUser().getId());
     }
 
-    public List<Tourist> findByRegionsAndCategories(List<String> regions, List<Category> categories) {
-        return touristRepository.findByRegionsAndCategories(regions, categories);
-    }
-
-
     public void deleteOneReview(Long touristId, Long reviewId) {
         User user = authService.findUser().getUser();
         reviewRepository.delete(reviewRepository.findByUserAndTouristIdAndId(user, touristId, reviewId)
@@ -229,5 +224,9 @@ public class TouristService {
     public void deleteReview(Long touristId) {
         User user = authService.findUser().getUser();
         reviewRepository.deleteAll(reviewRepository.findByUserAndTouristId(user, touristId));
+    }
+
+    public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<Category> categories, int count) {
+        return touristRepository.findByRegionsAndCategoriesAndOpenTimeIsNotNull(regions, categories, count);
     }
 }

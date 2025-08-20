@@ -4,7 +4,7 @@ import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.survey.entity.Suggestion;
 import com.example.shimpyo.domain.course.entity.UserCourse;
-import com.example.shimpyo.domain.survey.entity.SurveyResult;
+import com.example.shimpyo.domain.survey.entity.SuggestionUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,14 +46,8 @@ public class User extends BaseEntity {
     @Column
     private Integer birthYear;
 
-    // 이거 왜 있을까요??
-    private Long survey;
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserAuth userAuth;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SurveyResult> surveyResults = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Suggestion> suggestions = new ArrayList<>();
@@ -66,6 +60,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SuggestionUser> likedSuggestion = new ArrayList<>();
 
     public void changeNickname(String nickname) {
         this.nickname = nickname;

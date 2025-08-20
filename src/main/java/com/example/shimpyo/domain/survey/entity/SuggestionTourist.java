@@ -3,12 +3,15 @@ package com.example.shimpyo.domain.survey.entity;
 import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+
+import java.time.LocalTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +27,14 @@ public class SuggestionTourist extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull
+    @Column
+    private String date;
+
+    @NotNull
+    @Column
+    private LocalTime time;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "suggestion_id", nullable = false)
