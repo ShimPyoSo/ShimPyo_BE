@@ -60,7 +60,7 @@ public class AuthService {
 
     private static final String ACCESS_COOKIE = "access_token";
     private static final String REFRESH_COOKIE = "refresh_token";
-    private static final long ACCESS_MAX_AGE = 1800L; // 30분(초)
+    private static final long ACCESS_MAX_AGE = 600L; // 10분
 
     /* ================= 공통 유틸 ================ */
 

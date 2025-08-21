@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
@@ -42,7 +45,7 @@ public class SearchController {
     public ResponseEntity<?> filterTouristBySearch(@RequestParam(value = "keyword", required = false) String keyword,
                                                    @ModelAttribute FilterRequestDto filter) {
         List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTouristBySearch(keyword, filter);
+                touristService.filteredTouristBySearch(URLDecoder.decode(keyword, StandardCharsets.UTF_8), filter);
 
         return ResponseEntity.ok(responseDtoList);
     }

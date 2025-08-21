@@ -1,5 +1,6 @@
 package com.example.shimpyo.domain.user.dto;
 
+import com.example.shimpyo.domain.tourist.dto.OperationTime;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,17 +13,16 @@ public class SeenTouristResponseDto {
     private String title;
     private String region;
     private String address;
-    private String openTime;
-    private String closeTime;
+    private OperationTime operationTime;
     private String images;
 
     public static SeenTouristResponseDto toDto(Tourist tourist) {
         return SeenTouristResponseDto.builder()
                 .id(tourist.getId())
+                .title(tourist.getName())
                 .region(tourist.getRegion())
                 .address(tourist.getAddress())
-                .openTime(tourist.getOpenTime())
-                .closeTime(tourist.getCloseTime())
+                .operationTime(OperationTime.toDto(tourist))
                 .images(tourist.getImage())
                 .build();
     }

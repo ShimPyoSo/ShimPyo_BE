@@ -76,8 +76,12 @@ public class MailService {
     }
 
     private void sendAuthEmail(String email, String authKey) throws MessagingException {
-        String subject = "쉼표 인증 메일";
-        String text = "인증번호는 " + authKey + "입니다.";
+        String subject = "[쉼표] 이메일 주소 확인을 위한 인증 메일입니다";
+        String content = "안녕하세요, <b>[쉼표]</b>에 가입해주셔서 감사합니다.<br>" +
+                "아래 인증 번호를 입력해주세요.<br>" +
+                "<div class='highlight'>" + authKey + "</div>" +
+                "보안을 위해 이 메일은 타인과 공유하지 마시기 바랍니다.";
+        String text = buildMailTemplate("회원가입 이메일 인증", content);
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
@@ -108,8 +112,14 @@ public class MailService {
             throw new BaseException(EMAIL_NOT_VERIFIED);
         }
 
-        String subject = "쉼표 인증 메일";
-        String text = "임시 비밀번호는 " + tempPW + "입니다.";
+        String subject = "[쉼표] 비밀번호 재설정을 위한 안내 메일입니다";
+        String content = "안녕하세요, <b>[쉼표]</b>를 이용해주셔서 감사합니다.<br>" +
+                "요청하신 계정의 임시 비밀번호는 아래와 같습니다." +
+                "<div class='highlight'>" + tempPW + "</div>" +
+                "로그인 후 반드시 비밀번호를 변경해 주세요.<br>" +
+                "보안을 위해 이 메일은 타인과 공유하지 마시기 바랍니다.";
+
+        String text = buildMailTemplate("비밀번호 재설정 안내", content);
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
@@ -120,5 +130,35 @@ public class MailService {
         mailSender.send(mimeMessage);
     }
 
+
+    public String buildMailTemplate(String title, String content) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<meta charset='UTF-8'>" +
+                "<style>" +
+                "  body { font-family: Arial, sans-serif; background-color:#f9f9f9; margin:0; padding:0; }" +
+                "  .container { max-width:600px; margin:20px auto; background:#ffffff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:30px; border:2px solid #80A381; }" +
+                "  .title { font-size:22px; font-weight:bold; color:#80A381; margin-bottom:20px; text-align:center; }" +
+                "  .content { font-size:15px; color:#333333; line-height:1.8; }" +
+                "  .highlight { font-size:18px; font-weight:bold; color:#ffffff; background:#80A381; padding:12px 18px; border-radius:8px; display:inline-block; margin:20px 0; }" +
+                "  .button { display:inline-block; background:#80A381; color:#ffffff !important; padding:12px 20px; margin:20px 0; border-radius:8px; text-decoration:none; font-weight:bold; }" +
+                "  .footer { font-size:12px; color:#888888; margin-top:30px; text-align:center; border-top:1px solid #eeeeee; padding-top:15px; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "  <div class='container'>" +
+                "    <div class='title'>" + title + "</div>" +
+                "    <div class='content'>" +
+                content +
+                "    </div>" +
+                "    <div class='footer'>" +
+                "      본 메일은 발신 전용 메일입니다.<br>" +
+                "      ⓒ 2025 쉼표. All rights reserved." +
+                "    </div>" +
+                "  </div>" +
+                "</body>" +
+                "</html>";
+    }
 
 }
