@@ -78,9 +78,6 @@ public class Tourist extends BaseEntity {
     // 전화번호
     @Column
     private String telNum;
-    // 제공 서비스
-    @Column
-    private String requiredService;
 
     @Column
     private Double maleRatio;
@@ -111,6 +108,9 @@ public class Tourist extends BaseEntity {
     private List<TouristCategory> touristCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TouristOffer> touristOffers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SuggestionTourist> suggestionTourists = new ArrayList<>();
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -126,13 +126,6 @@ public class Tourist extends BaseEntity {
         suggestionTourists.add(st);
         if (st.getTourist() != this) {
             st.setTourist(this);
-        }
-    }
-
-    public void removeSuggestionTourist(SuggestionTourist st) {
-        suggestionTourists.remove(st);
-        if (st.getTourist() == this) {
-            st.setTourist(null);
         }
     }
 }

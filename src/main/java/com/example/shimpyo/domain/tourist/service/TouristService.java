@@ -183,32 +183,15 @@ public class TouristService {
     }
 
     public TouristDetailResponseDto getTouristDetail(Long touristId){
-
         Tourist tourist = touristRepository.findById(touristId)
                 .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
-
-        return TouristDetailResponseDto.toDto(tourist, extractRegion(tourist.getAddress()));
-
-    }
-
-    private static String extractRegion(String address) {
-
-        List<String> regions = List.of(
-                "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
-                "경기", "강원", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주");
-        Map<String, String> shortNames = Map.of(
-                "충청북도", "충북",
-                "충청남도", "충남",
-                "전라북도", "전북",
-                "전라남도", "전남",
-                "경상북도", "경북",
-                "경상남도", "경남"
-        );
-        return regions.stream()
-                .filter(address::contains)
-                .map(region -> shortNames.getOrDefault(region, region))
-                .findFirst()
-                .orElse("전국");
+        boolean isLiked = false;
+        if (!(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
+            User user = authService.findUser().getUser();
+            if (likesRepository.findByUserAndTourist(user, tourist).isPresent())
+                isLiked = true;
+        }
+        return TouristDetailResponseDto.toDto(tourist, isLiked);
     }
 
     public List<MyReviewListResponseDto> getMyReviewLists() {

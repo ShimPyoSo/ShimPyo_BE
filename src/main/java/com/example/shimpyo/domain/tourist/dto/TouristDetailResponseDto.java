@@ -1,16 +1,17 @@
 package com.example.shimpyo.domain.tourist.dto;
 
+import com.example.shimpyo.domain.tourist.entity.Offer;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.example.shimpyo.domain.tourist.entity.TouristOffer;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Builder
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TouristDetailResponseDto {
@@ -23,10 +24,6 @@ public class TouristDetailResponseDto {
     private String region;
     // 주소
     private String address;
-    // 오픈 시간
-    private String openTime;
-    // 마감 시간
-    private String closeTime;
     // 전화번호
     private String tel;
     // 홈페이지
@@ -40,22 +37,55 @@ public class TouristDetailResponseDto {
     // 위도
     private Double longitude;
 
-    public static TouristDetailResponseDto toDto(Tourist tourist, String region){
+    private OperationTime operationTime;
+
+    private Facilities facilities;
+
+    private Boolean isLiked;
+
+    @Getter
+    @Builder
+    public static class Facilities {
+        private boolean parking;
+        private boolean accessible;
+        private boolean reservation;
+        private boolean pet;
+        private boolean child;
+        private boolean wifi;
+
+        public static Facilities convertToFacilities(List<TouristOffer> touristOffers) {
+            Set<Offer> offers = touristOffers.stream()
+                    .map(TouristOffer::getOffer)
+                    .collect(Collectors.toSet());
+
+            return Facilities.builder()
+                    .parking(offers.contains(Offer.PARKING))
+                    .accessible(offers.contains(Offer.ACCESSIBLE))
+                    .reservation(offers.contains(Offer.RESERVATION))
+                    .pet(offers.contains(Offer.PET))
+                    .child(offers.contains(Offer.CHILD))
+                    .wifi(offers.contains(Offer.WIFI))
+                    .build();
+        }
+
+    }
+    public static TouristDetailResponseDto toDto(Tourist tourist, boolean isLiked){
         List<String> image = new ArrayList<>();
         image.add(tourist.getImage());
         return TouristDetailResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
-                .region(region)
+                .region(tourist.getRegion())
                 .address(tourist.getAddress())
-                .openTime(tourist.getOpenTime())
-                .closeTime(tourist.getCloseTime())
+                .operationTime(OperationTime.toDto(tourist))
                 .tel(tourist.getTelNum())
                 .homepage(tourist.getHomepageUrl())
                 .reservation(tourist.getReservationUrl())
                 .images(image)
                 .latitude(tourist.getLatitude())
                 .longitude(tourist.getLongitude())
+                .facilities(Facilities.convertToFacilities(tourist.getTouristOffers()))
+                .isLiked(isLiked)
                 .build();
     }
 }

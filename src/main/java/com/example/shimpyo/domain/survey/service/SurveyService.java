@@ -77,21 +77,10 @@ public class SurveyService {
         List<String> categories = Category.toNameList(wellnessType.getCategories());
 
         // 3. 관광지 필터링
-        System.out.println("Now regions ");
-        for (String s : regions) {
-            System.out.println(s);
-        }
         List<Tourist> meals = touristService.getTouristsByRegionAndCategoryAndCount(regions, List.of(Category.건강식.name()),
                 mealCount * days);
-        System.out.println("Meals");
-        for (Tourist meal : meals) {
-            System.out.println(meal.getName());
-        }
-        System.out.println("acts");
         List<Tourist> activities = touristService.getTouristsByRegionAndCategoryAndCount(regions, categories, 3 * days);
-        for (Tourist activity : activities) {
-            System.out.println(activity.getName());
-        }
+
         // 4. 일정 생성
         boolean startsWithMeal = mealCount == 3;
         Suggestion suggestion = makeSuggestion(requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration(),
@@ -131,7 +120,6 @@ public class SurveyService {
 
             for (int slot = 0; slot < totalSlots; slot++) {
                 boolean isMealTurn = startWithMeal == (slot % 2 == 0);
-                System.out.println("Now slot" + slot);
                 Tourist candidate = null;
                 if (isMealTurn && mealIndex < meals.size()) {
                     Tourist mealCandidate = meals.get(mealIndex);

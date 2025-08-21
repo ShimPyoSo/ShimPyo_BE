@@ -1,6 +1,8 @@
 package com.example.shimpyo.domain.survey.entity;
 
 import com.example.shimpyo.domain.tourist.entity.Category;
+import com.example.shimpyo.global.BaseException;
+import com.example.shimpyo.global.exceptionType.CourseException;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -27,6 +29,6 @@ public enum WellnessType {
         return Arrays.stream(values())
                 .filter(w -> w.label.equals(label))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 유형: " + label));
+                .orElseThrow(() -> new BaseException(CourseException.ILLEGAL_WELLNESS));
     }
 }
