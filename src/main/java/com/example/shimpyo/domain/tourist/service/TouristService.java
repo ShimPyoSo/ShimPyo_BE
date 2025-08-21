@@ -211,34 +211,4 @@ public class TouristService {
     public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<String> categories, int count) {
         return touristRepository.findByRegionsAndCategoriesAndOpenTimeIsNotNull(regions, categories, count);
     }
-
-    @Transactional
-    public void generateTermForAll() {
-        List<Tourist> list = touristRepository.findAll();
-        for (Tourist t : list) {
-            String combined = (t.getName() + " " + t.getRegion() + " " +
-                    t.getAddress() + " " + t.getDescription());
-            String term = combined.replaceAll("\\s+", "").toLowerCase();
-            t.updateTerm(term);
-        }
-        touristRepository.saveAll(list);
-    }
-
-    /**
-     * 자동완성 검색
-     */
-    @Transactional(readOnly = true)
-    public List<String> autocomplete(String q, int limit) {
-        if (q == null || q.isBlank()) return List.of();
-
-        // 띄어쓰기 제거 + 소문자
-        String normalized = q.replaceAll("\\s+", "").toLowerCase();
-
-        Pageable pageable = PageRequest.of(0, limit);
-        return touristRepository.findTouristBySearch(normalized, pageable)
-                .stream()
-                .distinct() // 중복 제거
-                .toList();
-    }
-
 }
