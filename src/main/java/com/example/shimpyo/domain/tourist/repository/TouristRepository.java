@@ -19,7 +19,7 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
     @Query(value = "SELECT DISTINCT t.* " +
             "FROM tourist t " +
             "JOIN tourist_category tc ON t.id = tc.tourist_id " +
-            "WHERE (:regions IS NULL OR t.region IN (:regions)) " +
+            "WHERE t.region IN (:regions) " +
             "AND tc.category IN (:categories) " +
             "AND t.open_time IS NOT NULL " +
             "ORDER BY RAND() " +
@@ -27,6 +27,6 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
             nativeQuery = true)
     List<Tourist> findByRegionsAndCategoriesAndOpenTimeIsNotNull(
             @Param("regions") List<String> regions,
-            @Param("categories") List<Category> categories,
+            @Param("categories") List<String> categories,
             @Param("count") int count);
 }

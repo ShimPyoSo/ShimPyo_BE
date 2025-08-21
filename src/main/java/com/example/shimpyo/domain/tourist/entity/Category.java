@@ -5,6 +5,8 @@ import com.example.shimpyo.global.exceptionType.TouristException;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public enum Category {
@@ -27,5 +29,11 @@ public enum Category {
                                    || c.name().equalsIgnoreCase(code))
                 .findFirst()
                 .orElseThrow(() -> new BaseException(TouristException.ILLEGAL_CATEGORY));
+    }
+
+    public static List<String> toNameList(List<Category> categories) {
+        return categories.stream()
+                .map(Category::name)
+                .collect(Collectors.toList());
     }
 }

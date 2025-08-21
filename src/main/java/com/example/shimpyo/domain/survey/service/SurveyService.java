@@ -74,10 +74,14 @@ public class SurveyService {
 
         // 1. 유형 → 카테고리
         WellnessType wellnessType = WellnessType.fromLabel(typename);
-        List<Category> categories = wellnessType.getCategories();
+        List<String> categories = Category.toNameList(wellnessType.getCategories());
 
         // 3. 관광지 필터링
-        List<Tourist> meals = touristService.getTouristsByRegionAndCategoryAndCount(regions, List.of(Category.건강식),
+        System.out.println("Now regions ");
+        for (String s : regions) {
+            System.out.println(s);
+        }
+        List<Tourist> meals = touristService.getTouristsByRegionAndCategoryAndCount(regions, List.of(Category.건강식.name()),
                 mealCount * days);
         System.out.println("Meals");
         for (Tourist meal : meals) {

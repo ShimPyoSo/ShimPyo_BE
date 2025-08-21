@@ -226,7 +226,7 @@ public class TouristService {
         reviewRepository.deleteAll(reviewRepository.findByUserAndTouristId(user, touristId));
     }
 
-    public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<Category> categories, int count) {
+    public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<String> categories, int count) {
         return touristRepository.findByRegionsAndCategoriesAndOpenTimeIsNotNull(regions, categories, count);
     }
 }
