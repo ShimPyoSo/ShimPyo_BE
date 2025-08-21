@@ -30,10 +30,4 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
             @Param("categories") List<String> categories,
             @Param("count") int count);
 
-    @Query("""
-        SELECT t.term
-        FROM Tourist t
-        WHERE t.term LIKE CONCAT('%', :normalized, '%')
-    """)
-    List<String> findTouristBySearch(@Param("normalized")String normalized, Pageable pageable);
 }

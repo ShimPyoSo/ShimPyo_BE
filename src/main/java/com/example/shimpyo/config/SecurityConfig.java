@@ -1,5 +1,6 @@
 package com.example.shimpyo.config;
 
+import com.example.shimpyo.domain.auth.JwtAuthenticationEntryPoint;
 import com.example.shimpyo.domain.auth.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +52,9 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));;
         return http.build();
 
     }

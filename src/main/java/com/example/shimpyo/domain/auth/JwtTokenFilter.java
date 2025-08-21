@@ -2,7 +2,11 @@ package com.example.shimpyo.domain.auth;
 
 import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
+import com.example.shimpyo.global.exceptionType.CommonException;
+import com.example.shimpyo.global.exceptionType.ExceptionType;
+import com.example.shimpyo.global.exceptionType.TokenException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.*;
@@ -12,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
 
+import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_TOKEN;
 import static com.example.shimpyo.global.exceptionType.TokenException.TOKEN_IS_BLACKLISTED;
 
 @Component
@@ -40,14 +46,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = extractAccessToken(request);
-        String refreshToken = extractRefreshToken(request);
 
-        if (token != null || refreshToken != null) {
+        if (token != null) {
             try {
-                // 로그아웃 되는 시점 토큰 탈취해 접근 권한 취득을 방지하는 코드
-                if(!request.getRequestURI().equals("/api/user/auth/logout")
-                        && redisService.isBlackList(token)){
-                    throw new BaseException(TOKEN_IS_BLACKLISTED);
+                if(redisService.isBlackList(token)){
+                    setErrorResponse(response, TOKEN_IS_BLACKLISTED);
+                    return;
                 }
                 Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
                 Claims claims = Jwts.parserBuilder()
@@ -61,10 +65,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 // 이건 pk 값
                 Long userId = claims.get("id", Number.class).longValue();
 
-//                List<GrantedAuthority> authorities = new ArrayList<>();
-//
-//                authorities.add(new SimpleGrantedAuthority("ID_" + userId));
-//                UserDetails userDetails = new User(loginId, "", authorities);
                 Map<String, Object> principal = new HashMap<>();
                 principal.put("loginId", loginId);
                 principal.put("userId", userId);
@@ -72,9 +72,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                         principal, "", Collections.emptyList());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception e) {
-                log.error("JWT 인증 실패: {}", e.getMessage());
-                // 예외를 터뜨릴 수도 있고 무시할 수도 있음 (401 처리 여부에 따라)
+            } catch (IllegalArgumentException ex) {
+                setErrorResponse(response, CommonException.ILLEGAL_ARGUMENT);
+                return;
+            } catch (ExpiredJwtException e) {
+                setErrorResponse(response, INVALID_TOKEN);
+                return;
             }
         }
         filterChain.doFilter(request, response);
@@ -90,13 +93,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private String extractRefreshToken(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
-        for (Cookie cookie : request.getCookies()) {
-            if ("refresh_token".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        return null;
+    private void setErrorResponse(HttpServletResponse response, ExceptionType code) throws IOException {
+        log.error(code.message());
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(String.format("{\"message\": \"%s\"}", code.message()));
     }
 }

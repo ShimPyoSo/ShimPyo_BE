@@ -1,0 +1,24 @@
+package com.example.shimpyo.global.exceptionType;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@RequiredArgsConstructor
+public enum CommonException implements ExceptionType {
+    ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "ILLEGAL ARGUMENTS PROVIDED.");
+
+
+    private final HttpStatus status;
+    private final String message;
+    @Override
+    public HttpStatus httpStatus() {
+        return null;
+    }
+
+    @Override
+    public String message() {
+        return null;
+    }
+}
