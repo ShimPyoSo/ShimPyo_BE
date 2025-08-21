@@ -121,7 +121,7 @@ public class AuthService {
     /* ================= 회원가입/이메일 ================= */
 
     // [#MOO1] 사용자 회원가입
-    public void registerUser(RegisterUserRequest dto, HttpServletResponse response) {
+    public LoginResponseDto registerUser(RegisterUserRequest dto, HttpServletResponse response) {
         // 삭제되지 않은 사용자 중 이메일 중복 체크
         if (userRepository.findByEmailAndDeletedAtIsNull(dto.getEmail()).isPresent()) {
             throw new BaseException(EMAIL_DUPLICATION);
@@ -131,6 +131,8 @@ public class AuthService {
         UserAuth userAuth = userAuthRepository.save(dto.toUserAuthEntity(passwordEncoder.encode(dto.getPassword()), user));
 
         issueTokensAndSetCookies(response, dto.getUsername(), userAuth, false);
+
+        return LoginResponseDto.toDto(user);
     }
 
     // [#MOO2] 이메일 인증(가용성 체크)
@@ -154,7 +156,7 @@ public class AuthService {
         }
 
         issueTokensAndSetCookies(response, username, userAuth, dto.getIsRememberMe());
-        return LoginResponseDto.toDto(userAuth);
+        return LoginResponseDto.toDto(userAuth.getUser());
     }
 
     // [#MOO6] AccessToken 재발급

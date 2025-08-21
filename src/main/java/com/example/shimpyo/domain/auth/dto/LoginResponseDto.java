@@ -12,13 +12,6 @@ public class LoginResponseDto {
     private Long userId;
     private String nickname;
 
-    public static LoginResponseDto toDto(UserAuth user) {
-        return LoginResponseDto.builder()
-                .userId(user.getUser().getId())
-                .nickname(user.getUser().getNickname())
-                .build();
-    }
-
     public static LoginResponseDto toDto(User user) {
         return LoginResponseDto.builder()
                 .userId(user.getId())

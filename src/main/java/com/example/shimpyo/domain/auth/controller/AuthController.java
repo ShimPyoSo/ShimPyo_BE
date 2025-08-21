@@ -52,10 +52,9 @@ public class AuthController {
     @Operation(summary = "회원가입")
     @SwaggerErrorApi(type = AuthException.class, codes = {"EMAIL_DUPLICATION"})
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequest dto,
+    public ResponseEntity<LoginResponseDto> registerUser(@Valid @RequestBody RegisterUserRequest dto,
                                           HttpServletResponse response){
-        authService.registerUser(dto, response);
-        return ResponseEntity.ok("회원가입 완료");
+        return ResponseEntity.ok(authService.registerUser(dto, response));
     }
     // [#MOO1] 사용자 회원가입 끝N
 

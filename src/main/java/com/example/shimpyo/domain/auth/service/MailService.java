@@ -79,7 +79,7 @@ public class MailService {
         String subject = "[쉼표] 이메일 주소 확인을 위한 인증 메일입니다";
         String content = "안녕하세요, <b>[쉼표]</b>에 가입해주셔서 감사합니다.<br>" +
                 "아래 인증 번호를 입력해주세요.<br>" +
-                "<div class='highlight'>" + authKey + "</div>" +
+                "<div class='highlight'>" + authKey + "</div><br>" +
                 "보안을 위해 이 메일은 타인과 공유하지 마시기 바랍니다.";
         String text = buildMailTemplate("회원가입 이메일 인증", content);
 
@@ -115,7 +115,7 @@ public class MailService {
         String subject = "[쉼표] 비밀번호 재설정을 위한 안내 메일입니다";
         String content = "안녕하세요, <b>[쉼표]</b>를 이용해주셔서 감사합니다.<br>" +
                 "요청하신 계정의 임시 비밀번호는 아래와 같습니다." +
-                "<div class='highlight'>" + tempPW + "</div>" +
+                "<div class='highlight'>" + tempPW + "</div><br>" +
                 "로그인 후 반드시 비밀번호를 변경해 주세요.<br>" +
                 "보안을 위해 이 메일은 타인과 공유하지 마시기 바랍니다.";
 
