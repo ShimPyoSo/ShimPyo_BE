@@ -3,9 +3,8 @@ package com.example.shimpyo.domain.tourist.service;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
-import com.example.shimpyo.domain.search.repository.AcTermRepository;
+//import com.example.shimpyo.domain.search.repository.AcTermRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
-import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
 import com.example.shimpyo.domain.tourist.util.TouristSpecs;
@@ -39,7 +38,7 @@ public class TouristService {
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
     private final LikesRepository likesRepository;
-    private final AcTermRepository acTermRepository;
+//    private final AcTermRepository acTermRepository;
 
     private final Pageable pageable = PageRequest.of(0, 8);
 
@@ -212,4 +211,34 @@ public class TouristService {
     public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<String> categories, int count) {
         return touristRepository.findByRegionsAndCategoriesAndOpenTimeIsNotNull(regions, categories, count);
     }
+
+    @Transactional
+    public void generateTermForAll() {
+        List<Tourist> list = touristRepository.findAll();
+        for (Tourist t : list) {
+            String combined = (t.getName() + " " + t.getRegion() + " " +
+                    t.getAddress() + " " + t.getDescription());
+            String term = combined.replaceAll("\\s+", "").toLowerCase();
+            t.updateTerm(term);
+        }
+        touristRepository.saveAll(list);
+    }
+
+    /**
+     * 자동완성 검색
+     */
+    @Transactional(readOnly = true)
+    public List<String> autocomplete(String q, int limit) {
+        if (q == null || q.isBlank()) return List.of();
+
+        // 띄어쓰기 제거 + 소문자
+        String normalized = q.replaceAll("\\s+", "").toLowerCase();
+
+        Pageable pageable = PageRequest.of(0, limit);
+        return touristRepository.findTouristBySearch(normalized, pageable)
+                .stream()
+                .distinct() // 중복 제거
+                .toList();
+    }
+
 }

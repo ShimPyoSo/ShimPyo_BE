@@ -37,18 +37,6 @@ public class AcTerm {
     @Column(nullable = false, length = 200)
     private String termNorm;
 
-    /** 랭킹 가중치 (클수록 상위 노출) */
-    @Column(nullable = false)
-    private Integer weight = 0;
-
-    /** 타입 (예: "tourist" | "category" | "region" …) */
-    @Column(nullable = false, length = 32)
-    private String type;
-
-    /** 원본 엔티티 ID (예: touristId 문자열) */
-    @Column(length = 64)
-    private String refId;
-
     /** 저장/수정 시 자동으로 termNorm/termChoseong 생성 */
     @PrePersist
     @PreUpdate
@@ -58,7 +46,6 @@ public class AcTerm {
 
         this.termNorm = normalizeKo(term);
         this.termChoseong = extractChoseong(term);
-        if (this.weight == null) this.weight = 0;
     }
 
     /** 한글/영문/숫자만 남기고, NFKC 표준화 + 소문자 + 공백/특수 제거 */

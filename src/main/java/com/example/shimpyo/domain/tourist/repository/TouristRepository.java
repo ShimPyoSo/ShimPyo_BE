@@ -1,8 +1,7 @@
 package com.example.shimpyo.domain.tourist.repository;
 
-import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import com.example.shimpyo.domain.user.entity.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +29,11 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
             @Param("regions") List<String> regions,
             @Param("categories") List<String> categories,
             @Param("count") int count);
+
+    @Query("""
+        SELECT t.term
+        FROM Tourist t
+        WHERE t.term LIKE CONCAT('%', :normalized, '%')
+    """)
+    List<String> findTouristBySearch(@Param("normalized")String normalized, Pageable pageable);
 }
