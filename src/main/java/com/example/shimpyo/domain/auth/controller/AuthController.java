@@ -6,7 +6,7 @@ import com.example.shimpyo.domain.auth.service.MailService;
 import com.example.shimpyo.domain.auth.service.OAuth2Service;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.AuthException;
-import com.example.shimpyo.global.exceptionType.MemberExceptionType;
+import com.example.shimpyo.global.exceptionType.MemberException;
 import com.example.shimpyo.global.exceptionType.TokenException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,12 +70,12 @@ public class AuthController {
 
     // [#MOO4] 이메일 인증 코드 발급 시작
     @Operation(summary = "이메일 인증 코드 발급")
-    @SwaggerErrorApi(type = AuthException.class, codes = {"EMAIL_DUPLICATION", "EMAIL_NOT_FOUNDED"})
+    @SwaggerErrorApi(type = MemberException.class, codes = {"EMAIL_DUPLICATION", "EMAIL_NOT_FOUNDED"})
     @PostMapping("/email")
     public ResponseEntity<?> sendEmail(@RequestBody MailCodeSendDto dto){
         mailService.authEmail(dto);
 
-        return ResponseEntity.ok("이메일을 전송하였습니다.");
+        return ResponseEntity.ok().build();
     }
     // [#MOO4] 이메일 인증 코드 발급 끝
 
@@ -86,7 +86,7 @@ public class AuthController {
     public ResponseEntity<?> verifyEmail(@RequestBody MailVerifyDto dto){
         mailService.verifyAuthCode(dto);
 
-        return ResponseEntity.ok("인증 완료");
+        return ResponseEntity.ok().build();
     }
     // [#MOO5] 이메일 인증 코드 검증 끝
 
@@ -97,12 +97,12 @@ public class AuthController {
     public ResponseEntity<?> getDuplicate(@RequestParam String username){
         authService.validateDuplicateUsername(username);
 
-        return ResponseEntity.ok("사용 가능한 아이디입니다.");
+        return ResponseEntity.ok().build();
     }
 
     // 아이디 찾기 로직 구현
     @Operation(summary = "아이디 찾기", description = "이메일을 기반으로 사용자의 아이디를 조회합니다.")
-    @SwaggerErrorApi(type = {AuthException.class, MemberExceptionType.class},
+    @SwaggerErrorApi(type = {AuthException.class, MemberException.class},
             codes = {"INVALID_EMAIL_REQUEST", "EMAIL_NOT_FOUNDED", "MEMBER_NOT_FOUND"})
     @PostMapping("/username")
     public ResponseEntity<?> getUsername(@RequestBody FindUsernameRequestDto requestDto){
@@ -112,7 +112,7 @@ public class AuthController {
     }
 
     @Operation(summary = "비밀번호 찾기")
-    @SwaggerErrorApi(type = {AuthException.class, MemberExceptionType.class},
+    @SwaggerErrorApi(type = {AuthException.class, MemberException.class},
             codes = {"EMAIL_NOT_FOUNDED", "MEMBER_NOT_FOUND"})
     @PatchMapping("/password")
     public ResponseEntity<Void> sendPasswordMail(@Valid @RequestBody FindPasswordRequestDto requestDto) throws MessagingException {
@@ -121,7 +121,7 @@ public class AuthController {
     }
 
     @Operation(summary = "비밀번호 변경")
-    @SwaggerErrorApi(type = {AuthException.class, MemberExceptionType.class},
+    @SwaggerErrorApi(type = {AuthException.class, MemberException.class},
             codes = {"PASSWORD_NOT_MATCHED", "TWO_PASSWORD_NOT_MATCHED", "PASSWORD_DUPLICATED", "MEMBER_NOT_FOUND",
             "SOCIAL_USER_CANT_CHANGE_PASSWORD"})
     @PutMapping("/password")
@@ -131,7 +131,7 @@ public class AuthController {
     }
 
     @Operation(summary = "회원 탈퇴")
-    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
     @DeleteMapping
     public ResponseEntity<Void> deleteUser() {
         authService.deleteUser();
@@ -162,7 +162,7 @@ public class AuthController {
     }
 
     @Operation(summary = "추가 정보 입력")
-    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
     @PostMapping("/info")
     public ResponseEntity<Void> getMoreInfo(@Valid @RequestBody InfoRequestDto requestDto) {
         authService.setMoreInfo(requestDto);

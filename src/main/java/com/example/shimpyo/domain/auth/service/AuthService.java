@@ -29,7 +29,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.example.shimpyo.global.exceptionType.AuthException.*;
-import static com.example.shimpyo.global.exceptionType.MemberExceptionType.*;
+import static com.example.shimpyo.global.exceptionType.MemberException.*;
+import static com.example.shimpyo.global.exceptionType.MailException.*;
 import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_REFRESH_TOKEN;
 import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHED_REFRESH_TOKEN;
 

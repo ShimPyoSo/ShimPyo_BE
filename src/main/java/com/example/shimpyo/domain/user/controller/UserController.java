@@ -12,7 +12,7 @@ import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.CourseException;
-import com.example.shimpyo.global.exceptionType.MemberExceptionType;
+import com.example.shimpyo.global.exceptionType.MemberException;
 import com.example.shimpyo.global.exceptionType.TouristException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,30 +37,30 @@ public class UserController {
     private final SurveyService surveyService;
 
     @Operation(summary = "닉네임 변경")
-    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"NICKNAME_NOT_VALID", "MEMBER_NOT_FOUND"})
+    @SwaggerErrorApi(type = {MemberException.class}, codes = {"NICKNAME_NOT_VALID", "MEMBER_NOT_FOUND"})
     @PatchMapping("/nickname")
     public ResponseEntity<Void> changeNickname(@RequestBody Map<String, String> requestDto) {
         String newNickname = requestDto.get("nickname");
         if (!newNickname.matches("^[a-zA-Z0-9가-힣_]{2,8}$")) {
-            throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
+            throw new BaseException(MemberException.NICKNAME_NOT_VALID);
         }
         userService.changeNickname(newNickname);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "닉네임 중복 검사")
-    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"NICKNAME_NOT_VALID", "NICKNAME_DUPLICATED"})
+    @SwaggerErrorApi(type = {MemberException.class}, codes = {"NICKNAME_NOT_VALID", "NICKNAME_DUPLICATED"})
     @GetMapping("/duplicate")
     public ResponseEntity<Void> checkNickname(@RequestParam("nickname") String nickname) {
         if (!nickname.matches("^[a-zA-Z0-9가-힣_]{2,8}$")) {
-            throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
+            throw new BaseException(MemberException.NICKNAME_NOT_VALID);
         }
         userService.checkNickname(nickname);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "찜한 관광지 목록")
-    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
     @GetMapping("/likes")
     public ResponseEntity<List<TouristLikesResponseDto>> getTouristLikes(@RequestParam("category") String category,
                                                                          @RequestParam("likesId") Long id) {
@@ -75,14 +75,14 @@ public class UserController {
     }
 
     @Operation(summary = "내가 쓴 후기 목록")
-    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
     @GetMapping("/review")
     public ResponseEntity<List<MyReviewListResponseDto>> getMyReviewList() {
         return ResponseEntity.ok(touristService.getMyReviewLists());
     }
 
     @Operation(summary = "내가 쓴 후기 상세")
-    @SwaggerErrorApi(type = {MemberExceptionType.class, TouristException.class},
+    @SwaggerErrorApi(type = {MemberException.class, TouristException.class},
             codes = {"MEMBER_NOT_FOUND", "TOURIST_NOT_FOUND", "REVIEW_NOT_FOUND"})
     @GetMapping("/review-detail")
     public ResponseEntity<MyReviewDetailResponseDto> getMyReviewDetail(@RequestParam("touristId") Long touristId) {
@@ -90,7 +90,7 @@ public class UserController {
     }
 
     @Operation(summary = "후기 삭제")
-    @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"MEMBER_NOT_FOUND"})
+    @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
     @DeleteMapping("/review")
     public ResponseEntity<Void> deleteReview(@RequestParam("touristId") Long touristId,
                                              @RequestParam(name = "reviewId", required = false) Long reviewId) {
@@ -102,7 +102,7 @@ public class UserController {
     }
 
     @Operation(summary = "찜한 코스 상세")
-    @SwaggerErrorApi(type = {MemberExceptionType.class, CourseException.class},
+    @SwaggerErrorApi(type = {MemberException.class, CourseException.class},
             codes = {"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @GetMapping("/likes/detail")
     public ResponseEntity<CourseResponseDto> getLikedCourseDetail(@RequestParam("courseId") Long courseId){

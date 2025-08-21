@@ -7,6 +7,7 @@ import com.example.shimpyo.domain.tourist.dto.FilterTouristByDataResponseDto;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.TouristException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.Set;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/search")
+@Tag(name = "Search", description = "검색 관련 API 목록")
 public class SearchController {
 
     private final SuggestService suggestService;

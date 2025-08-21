@@ -4,6 +4,7 @@ import com.example.shimpyo.domain.image.dto.ImageRequestDto;
 import com.example.shimpyo.domain.image.service.S3Service;
 import com.example.shimpyo.global.BaseException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import static com.example.shimpyo.global.exceptionType.AuthException.FILE_SIZE_O
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/image")
+@Tag(name = "Image", description = "이미지 관련 API 목록")
 public class ImageController {
 
     private final S3Service s3Service;
