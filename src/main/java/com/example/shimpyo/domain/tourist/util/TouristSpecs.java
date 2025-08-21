@@ -183,38 +183,75 @@ public final class TouristSpecs {
         return cb.function("coalesce", Double.class, col, cb.literal(0.0d));
     }
 
-//    public static Specification<Tourist> orderByLikesCount(Sort.Direction dir) {
-//        return (root, query, cb) -> {
-//            // count 쿼리일 때는 정렬/그룹 적용하지 않음
-//            if (!Long.class.equals(query.getResultType())){
-//                var likes = root.join("likes", JoinType.LEFT);
-//                var likesCount = cb.countDistinct(likes);
-//                query.groupBy(root.get("id"));
-//                // 동률 이라면
-//                if(dir.isAscending()){
-//                    query.orderBy(cb.asc(likesCount), cb.asc(root.get("id")));
-//                } else{
-//                    query.orderBy(cb.desc(likesCount), cb.asc(root.get("id")));
-//                }
-//                query.distinct(true);
-//            }
-//            return cb.conjunction();
-//        };
-//    }
-//
-//    public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
-//        return (root, query, cb) -> {
-//            if (!Long.class.equals(query.getResultType())){
-//                var review = root.join("review", JoinType.LEFT);
-//                var reviewsCount = cb.countDistinct(review);
-//                query.groupBy(root.get("id"));
-//                if(dir.isAscending()){
-//                    query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));
-//                }else{
-//                    query.orderBy(cb.desc(reviewsCount), cb.asc(root.get("id")));
-//                }
-//            }
-//            return cb.conjunction();
-//        };
-//    }
+    public static Specification<Tourist> orderByLikesCount(Sort.Direction dir) {
+        return (root, query, cb) -> {
+            // count 쿼리일 때는 정렬/그룹 적용하지 않음
+            if (!Long.class.equals(query.getResultType())){
+                var likes = root.join("likes", JoinType.LEFT);
+                var likesCount = cb.countDistinct(likes);
+                query.groupBy(root.get("id"));
+                // 동률 이라면
+                if(dir.isAscending()){
+                    query.orderBy(cb.asc(likesCount), cb.asc(root.get("id")));
+                } else{
+                    query.orderBy(cb.desc(likesCount), cb.asc(root.get("id")));
+                }
+                query.distinct(true);
+            }
+            return cb.conjunction();
+        };
+    }
+
+    public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
+        return (root, query, cb) -> {
+            if (!Long.class.equals(query.getResultType())){
+                var review = root.join("review", JoinType.LEFT);
+                var reviewsCount = cb.countDistinct(review);
+                query.groupBy(root.get("id"));
+                if(dir.isAscending()){
+                    query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));
+                }else{
+                    query.orderBy(cb.desc(reviewsCount), cb.asc(root.get("id")));
+                }
+            }
+            return cb.conjunction();
+        };
+    }
+
+    public static Specification<Tourist> orderByPopularity(Sort.Direction dir) {
+        return (root, query, cb) -> {
+            // Count 쿼리가 아닌 경우만 정렬 적용
+            if (!Long.class.equals(query.getResultType())) {
+                // 성별 비율 계산 (고르게 높을수록 점수 상승)
+                var maleRatio = cb.coalesce(root.get("maleRatio"), 0.0);
+                var femaleRatio = cb.coalesce(root.get("femaleRatio"), 0.0);
+                Expression<Double> genderScore = cb.selectCase()
+                        .when(cb.lessThan(maleRatio, femaleRatio), maleRatio)
+                        .otherwise(femaleRatio).as(Double.class);;
+                // 연령별 비율 합산
+                var ageScore = cb.sum(
+                        cb.sum(cb.sum(cb.sum(cb.sum(
+                                                cb.coalesce(root.get("age20EarlyRatio"), 0.0),
+                                                cb.coalesce(root.get("age20MidRatio"), 0.0)
+                                        ), cb.coalesce(root.get("age20LateRatio"), 0.0)),
+                                        cb.sum(cb.sum(cb.coalesce(root.get("age30EarlyRatio"), 0.0),
+                                                        cb.coalesce(root.get("age30MidRatio"), 0.0)),
+                                                cb.coalesce(root.get("age30LateRatio"), 0.0))),
+                                cb.sum(cb.sum(cb.coalesce(root.get("age40Ratio"), 0.0),
+                                                cb.coalesce(root.get("age50Ratio"), 0.0)),
+                                        cb.coalesce(root.get("age60PlusRatio"), 0.0))
+                        ));
+
+                // 최종 score: 성별 점수와 연령 점수를 합산
+                var totalScore = cb.sum(genderScore, ageScore);
+
+                if (dir.isAscending()) {
+                    query.orderBy(cb.asc(totalScore), cb.asc(root.get("id")));
+                } else {
+                    query.orderBy(cb.desc(totalScore), cb.asc(root.get("id")));
+                }
+            }
+            return cb.conjunction();
+        };
+    }
 }

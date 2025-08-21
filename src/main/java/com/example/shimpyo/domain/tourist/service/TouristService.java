@@ -110,11 +110,11 @@ public class TouristService {
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
                 .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
 
-//        if(filter.getSortBy() == null || "찜 많은순".equalsIgnoreCase(filter.getSortBy())){
-//            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-//        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
-//            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
-//        }
+        if(filter.getSortBy() == null || "liked".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
+        }else if("review".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+        }
 
         //pageable 에서 정렬 빼기
         List<Tourist> rows = touristRepository.findAll(specification, pageable).getContent();
@@ -141,11 +141,11 @@ public class TouristService {
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
                 .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
 
-//        if("찜 많은순".equalsIgnoreCase(filter.getSortBy())){
-//            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-//        }else if("후기순".equalsIgnoreCase(filter.getSortBy())){
-//            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
-//        }
+        if("liked".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
+        }else if("review".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+        }
 
         Pageable pageable = PageRequest.of(0, 8);
         List<Tourist> rows = touristRepository.findAll(specification, pageable).getContent();
