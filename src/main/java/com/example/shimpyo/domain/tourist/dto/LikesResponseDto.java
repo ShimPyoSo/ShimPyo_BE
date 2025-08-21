@@ -15,6 +15,7 @@ public class LikesResponseDto {
 
     private Long id;
     private String images;
+    private String title;
     private String region;
     private List<Category> category;
     private String description;
@@ -24,11 +25,13 @@ public class LikesResponseDto {
         return LikesResponseDto.builder()
                 .id(tourist.getId())
                 .images(tourist.getImage())
+                .title(tourist.getName())
                 .region(tourist.getRegion())
                 .category(tourist.getTouristCategories().stream()
                         .map(TouristCategory::getCategory)
                         .collect(Collectors.toList()))
                 .description(tourist.getDescription())
+                .isLiked(true)
                 .build();
     }
 }
