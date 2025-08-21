@@ -50,7 +50,7 @@ public class UserController {
 
     @Operation(summary = "닉네임 중복 검사")
     @SwaggerErrorApi(type = {MemberExceptionType.class}, codes = {"NICKNAME_NOT_VALID", "NICKNAME_DUPLICATED"})
-    @GetMapping("/duplicate/nickname")
+    @GetMapping("/duplicate")
     public ResponseEntity<Void> checkNickname(@RequestParam("nickname") String nickname) {
         if (!nickname.matches("^[a-zA-Z0-9가-힣_]{2,8}$")) {
             throw new BaseException(MemberExceptionType.NICKNAME_NOT_VALID);
