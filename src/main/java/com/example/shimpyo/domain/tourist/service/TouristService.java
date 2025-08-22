@@ -5,19 +5,16 @@ import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
+import com.example.shimpyo.domain.tourist.repository.QTouristRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
-import com.example.shimpyo.domain.tourist.util.TouristSpecs;
 import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
 import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.ReviewRepository;
 import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.utils.RegionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.example.shimpyo.global.exceptionType.TouristException.REVIEW_NOT_FOUND;
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
@@ -39,7 +35,7 @@ public class TouristService {
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
     private final LikesRepository likesRepository;
-
+    private final QTouristRepository qTouristRepository;
     public List<RecommendsResponseDto> getRecommendTourists() {
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
                 .map(RecommendsResponseDto::toDto).toList();
@@ -90,62 +86,10 @@ public class TouristService {
         }
         return result.stream().map(r -> ReviewResponseDto.toDto(r, r.getUser())).collect(Collectors.toList());
     }
-    private Specification<Tourist> buildSpecification(FilterRequestDto filter, String category, String keyword) {
-        Specification<Tourist> spec = null;
-
-        if (category != null) {
-            spec = TouristSpecs.byCategory(category);
-        } else if (keyword != null && !keyword.isBlank()) {
-            spec = TouristSpecs.containsSearch(keyword);
-        }
-        return Specification
-                .where(spec)
-                .and(TouristSpecs.inRegion(RegionUtils.convertToRegion(filter.getRegion())))
-                .and(TouristSpecs.openWithin(filter.getVisitTime()))
-                .and(TouristSpecs.hasAllService(filter.getFacilities()))
-                .and(TouristSpecs.genderBias(filter.getGender()))
-                .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
-                .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
-    }
 
     @Transactional(readOnly = true)
     public List<FilterTouristByDataResponseDto> filteredTourist(FilterRequestDto filter, String category, String keyword) {
-        Specification<Tourist> specification = buildSpecification(filter, category, keyword);
-
-        // 정렬
-        if ("popular".equalsIgnoreCase(filter.getSortBy())) {
-            specification = specification.and(TouristSpecs.orderByPopularity(Sort.Direction.DESC));
-        } else if("liked".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-        } else if("review".equalsIgnoreCase(filter.getSortBy())) {
-            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
-        }
-
-        Pageable pageable = PageRequest.of(0, 8); // 필요 시 외부에서 받도록 변경 가능
-        List<Tourist> rows = touristRepository.findAll(specification, pageable).getContent();
-
-        Long userId = authService.findUserAuth()
-                .map(UserAuth::getUser).map(User::getId).orElse(null);
-
-        Set<Long> likedIds = findLikedIdsForSlice(userId, rows);
-
-        return toResponse(rows, likedIds);
-    }
-    // 2) 공통 좋아요 배치 조회
-    private Set<Long> findLikedIdsForSlice(Long userId, List<Tourist> slice) {
-        if (userId == null || slice.isEmpty()) return Collections.emptySet();
-        List<Long> ids = slice.stream().map(Tourist::getId).toList();
-        return likesRepository.findLikedTouristIds(userId, ids);
-    }
-    // 3) 최종 매핑
-    private List<FilterTouristByDataResponseDto> toResponse(
-            List<Tourist> slice, Set<Long> likedIds) {
-        List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());
-        for (Tourist t : slice) {
-            boolean isLiked = likedIds.contains(t.getId());
-            res.add(FilterTouristByDataResponseDto.from(t, isLiked));
-        }
-        return res;
+        return qTouristRepository.filteredTourist(filter, category, keyword);
     }
 
     public Tourist findTourist(Long id) {
