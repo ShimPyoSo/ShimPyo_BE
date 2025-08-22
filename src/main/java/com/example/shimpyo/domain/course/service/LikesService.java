@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -41,7 +42,8 @@ public class LikesService {
         User user = authService.findUser().getUser();
         Pageable pageable = PageRequest.of(0, 8);
 
-        return "all".equalsIgnoreCase(category)? likesRepository.findLikesDtoByUser(user, id, pageable):
+        List<Likes> foundLikes = "all".equalsIgnoreCase(category) ? likesRepository.findLikesDtoByUser(user, id, pageable) :
                 likesRepository.findLikesDtoByUserAndCategory(user, id, Category.fromCode(category), pageable);
+        return foundLikes.stream().map(TouristLikesResponseDto::toDto).collect(Collectors.toList());
     }
 }

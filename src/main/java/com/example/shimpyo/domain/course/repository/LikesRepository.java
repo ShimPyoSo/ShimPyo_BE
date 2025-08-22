@@ -2,7 +2,6 @@ package com.example.shimpyo.domain.course.repository;
 
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import com.example.shimpyo.domain.user.dto.TouristLikesResponseDto;
 import com.example.shimpyo.domain.user.entity.Likes;
 import com.example.shimpyo.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
@@ -22,48 +21,30 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     Optional<Likes> findByUserAndTourist(User user, Tourist tourist);
 
     @Query("""
-    SELECT new com.example.shimpyo.domain.user.dto.TouristLikesResponseDto(
-        t.id,
-        l.id,
-        t.name,
-        t.address,
-        t.address,
-        t.openTime,
-        t.closeTime,
-        t.image
-    )
-    FROM Likes l
-    JOIN l.tourist t
-    JOIN t.touristCategories tc
-    WHERE l.user = :user
-      AND l.id < :cursor
-      AND tc.category = :category
-    ORDER BY l.id DESC
-""")
-    List<TouristLikesResponseDto> findLikesDtoByUserAndCategory(
+                SELECT l
+                FROM Likes l
+                JOIN l.tourist t
+                JOIN t.touristCategories tc
+                WHERE l.user = :user
+                  AND l.id < :cursor
+                  AND tc.category = :category
+                ORDER BY l.id DESC
+            """)
+    List<Likes> findLikesDtoByUserAndCategory(
             @Param("user") User user,
             @Param("cursor") Long cursor,
             @Param("category") Category category,
             Pageable pageable
     );
     @Query("""
-    SELECT new com.example.shimpyo.domain.user.dto.TouristLikesResponseDto(
-        t.id,
-        l.id,
-        t.name,
-        t.address,
-        t.address,
-        t.openTime,
-        t.closeTime,
-        t.image
-    )
-    FROM Likes l
-    JOIN l.tourist t
-    WHERE l.user = :user
-      AND l.id < :cursor
-    ORDER BY l.id DESC
-""")
-    List<TouristLikesResponseDto> findLikesDtoByUser(
+                SELECT l
+                FROM Likes l
+                JOIN l.tourist t
+                WHERE l.user = :user
+                  AND l.id < :cursor
+                ORDER BY l.id DESC
+            """)
+    List<Likes> findLikesDtoByUser(
             @Param("user") User user,
             @Param("cursor") Long cursor,
             Pageable pageable
@@ -72,7 +53,5 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
 
     @Query("select l.tourist.id from Likes l where l.user.id = :userId and l.tourist.id in :touristIds")
     Set<Long> findLikedTouristIds(@Param("userId") Long userId, @Param("touristIds") Collection<Long> touristIds);
-
-    Long countLikesByTouristId(Long touristId);
 
 }

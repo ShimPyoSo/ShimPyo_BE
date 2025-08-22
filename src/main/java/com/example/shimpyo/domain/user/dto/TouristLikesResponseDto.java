@@ -1,10 +1,13 @@
 package com.example.shimpyo.domain.user.dto;
 
-import lombok.AllArgsConstructor;
+import com.example.shimpyo.domain.tourist.dto.OperationTime;
+import com.example.shimpyo.domain.tourist.entity.Tourist;
+import com.example.shimpyo.domain.user.entity.Likes;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class TouristLikesResponseDto {
 
     private Long id;
@@ -12,7 +15,19 @@ public class TouristLikesResponseDto {
     private String title;
     private String region;
     private String address;
-    private String openTime;
-    private String closeTime;
+    private OperationTime operationTime;
     private String images;
+
+    public static TouristLikesResponseDto toDto(Likes like) {
+        Tourist tourist = like.getTourist();
+        return TouristLikesResponseDto.builder()
+                .id(tourist.getId())
+                .likesId(like.getId())
+                .title(tourist.getName())
+                .region(tourist.getRegion())
+                .address(tourist.getAddress())
+                .operationTime(OperationTime.toDto(tourist))
+                .images(tourist.getImage())
+                .build();
+    }
 }

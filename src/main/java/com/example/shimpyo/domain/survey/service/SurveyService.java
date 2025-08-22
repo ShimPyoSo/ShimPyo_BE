@@ -150,8 +150,8 @@ public class SurveyService {
         // 예시: tourist.openTime은 "08:00" 형식이라고 가정
         if (tourist.getOpenTime() == null) return true;
 
-        LocalTime open = LocalTime.parse(tourist.getOpenTime());
-        LocalTime close = LocalTime.parse(tourist.getCloseTime());
+        LocalTime open = tourist.getOpenTime();
+        LocalTime close = tourist.getCloseTime();
 
         // 방문 시작 시간이 운영시간 내여야 방문 가능
         return !visitTime.isBefore(open) && !visitTime.isAfter(close);

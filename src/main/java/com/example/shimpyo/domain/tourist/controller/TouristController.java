@@ -62,6 +62,6 @@ public class TouristController {
     )
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category") @NotBlank String category,
                                                      @ModelAttribute  FilterRequestDto filter) {
-        return ResponseEntity.ok(touristService.filteredTouristByCategory(category, filter));
+        return ResponseEntity.ok(touristService.filteredTourist(filter, category, null));
     }
 }

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,13 +69,13 @@ public class Tourist extends BaseEntity {
 
     // 오픈 시간
     @Column
-    private String openTime;
+    private LocalTime openTime;
 
     // 마감 시간
     @Column
-    private String closeTime;
+    private LocalTime closeTime;
 
-    // 휴계시간
+    // 휴게시간
     @Column
     private String breakTime;
     // 전화번호

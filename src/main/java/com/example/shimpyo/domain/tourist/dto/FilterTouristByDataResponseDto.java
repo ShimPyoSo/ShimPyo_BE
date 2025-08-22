@@ -25,29 +25,9 @@ public class FilterTouristByDataResponseDto {
                 .title(tourist.getName())
                 .address(tourist.getAddress())
                 .region(tourist.getRegion())
-                .operationTime(OperationTime.of(tourist))
+                .operationTime(OperationTime.toDto(tourist))
                 .image(tourist.getImage())
                 .isLiked(isLiked)
                 .build();
-    }
-
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class OperationTime{
-        private String dayOff;
-        private String openTime;
-        private String closeTime;
-        private String breakTime;
-
-        public static OperationTime of(Tourist tourist){
-            return OperationTime.builder()
-                    .dayOff(tourist.getDayOff())
-                    .openTime(tourist.getOpenTime())
-                    .closeTime(tourist.getCloseTime())
-                    .breakTime(tourist.getBreakTime())
-                    .build();
-        }
     }
 }

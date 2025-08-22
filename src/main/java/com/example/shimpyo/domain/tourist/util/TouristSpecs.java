@@ -1,6 +1,7 @@
 package com.example.shimpyo.domain.tourist.util;
 
 import com.example.shimpyo.domain.tourist.entity.Category;
+import com.example.shimpyo.domain.tourist.entity.Offer;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.global.BaseException;
 import jakarta.persistence.criteria.*;
@@ -9,6 +10,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.example.shimpyo.global.exceptionType.TokenException.*;
 
@@ -63,54 +66,58 @@ public final class TouristSpecs {
     }
 
     // 3) 방문 시간 포함
-    public static Specification<Tourist> openWithin(String visitTime){
-        if(visitTime == null || !visitTime.contains("-")) return null;
+    public static Specification<Tourist> openWithin(String visitTime) {
+        if (visitTime == null || !visitTime.contains("-")) return null;
 
         if (!visitTime.matches("\\s*\\d{2}:\\d{2}\\s*-\\s*\\d{2}:\\d{2}\\s*")) {
             throw new BaseException(INVALID_VISIT_TIME_FORMAT);
         }
 
         String[] time = visitTime.split("\\s*-\\s*");
-        if(time.length != 2) {
-            throw new BaseException(INVALID_VISIT_TIME_FORMAT);
+        LocalTime visitStart = LocalTime.parse(time[0].trim());
+        // 24:00 처리
+        LocalTime visitEnd;
+        if (time[1].trim().equals("24:00")) {
+            visitEnd = LocalTime.MAX; // 23:59:59.999999999
+        } else {
+            visitEnd = LocalTime.parse(time[1].trim());
         }
-        String openTime = time[0].trim();
-        String closeTime = time[1].trim();
 
-        // 비정상인 시간 선은 스킵
-        LocalTime open =  LocalTime.parse(openTime);
-        LocalTime close = LocalTime.parse(closeTime);
-        if(close.isBefore(open)) {
+        if (visitEnd.isBefore(visitStart) || visitStart.isBefore(LocalTime.of(9, 0))) {
             throw new BaseException(INVALID_VISIT_TIME_FORMAT);
         }
 
         return (root, query, cb) -> cb.and(
-                cb.lessThanOrEqualTo(root.get("openTime").as(String.class), openTime),
-                cb.greaterThanOrEqualTo(root.get("closeTime").as(String.class), closeTime)
+                cb.lessThanOrEqualTo(root.get("openTime").as(LocalTime.class), visitStart),
+                cb.greaterThanOrEqualTo(root.get("closeTime").as(LocalTime.class), visitEnd)
         );
     }
 
     // 4) 제공 서비스: 파이프 구분 문자열
-    public static Specification<Tourist> hasAllService(String requiredServices){
-        if(requiredServices == null || requiredServices.isBlank()) return null;
+    public static Specification<Tourist> hasAllService(String requiredServices) {
+        if (requiredServices == null || requiredServices.isBlank()) return null;
 
-        String[] need = requiredServices.split("\\|");
+        Set<Offer> offers = Arrays.stream(requiredServices.split("\\|"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(Offer::fromString)
+                .collect(Collectors.toSet());
+
         return (root, query, cb) -> {
+            if (offers.isEmpty()) return cb.conjunction();
+
+            var join = root.join("touristOffers", JoinType.INNER);
+
             var expr = cb.conjunction();
-            var col = root.get("requiredService").as(String.class); // 문자열 컬럼
-            for (String raw : need) {
-                String token = raw.trim();
-                if (token.isEmpty()) continue;
-                // 경계 모호성 줄이기 위해 파이프 포함 패턴 사용
-                var like1 = cb.like(col, "%|" + token + "|%");
-                var like2 = cb.like(col, token + "|%");
-                var like3 = cb.like(col, "%|" + token);
-                var like4 = cb.like(col, token); // 단일 항목만 있는 경우
-                expr = cb.and(expr, cb.or(like1, like2, like3, like4));
+            for (Offer offer : offers) {
+                expr = cb.and(expr, cb.equal(join.get("offer"), offer));
             }
+
+            query.distinct(true); // 중복 제거
             return expr;
         };
     }
+
 
     // 5) 성별 가중: male/female
     public static Specification<Tourist> genderBias(String gender){
@@ -145,20 +152,18 @@ public final class TouristSpecs {
             Expression<Double> a50  = nz(root, "age50Ratio", cb);
             Expression<Double> a60p = nz(root, "age60PlusRatio", cb);
 
-            Expression<Double> selected;
-
-            switch (ageGroup){
-                case "20대 초반": selected = a20e; break;
-                case "20대 중반": selected = a20m; break;
-                case "20대 후반": selected = a20l; break;
-                case "30대 초반": selected = a30e; break;
-                case "30대 중반": selected = a30m; break;
-                case "30대 후반": selected = a30l; break;
-                case "40대":      selected = a40;  break;
-                case "50대":      selected = a50;  break;
-                case "60대 이상":  selected = a60p; break;
-                default: throw new BaseException(UNSUPPORTED_AGE_GROUP);
-            }
+            Expression<Double> selected = switch (ageGroup) {
+                case "20Early" -> a20e;
+                case "20Mid" -> a20m;
+                case "20Late" -> a20l;
+                case "30Early" -> a30e;
+                case "30Mid" -> a30m;
+                case "30Late" -> a30l;
+                case "40" -> a40;
+                case "50" -> a50;
+                case "60" -> a60p;
+                default -> throw new BaseException(UNSUPPORTED_AGE_GROUP);
+            };
 
             var eps = cb.literal(epsilon);
 

@@ -37,8 +37,7 @@ public class SearchController {
     public ResponseEntity<?> filterTouristBySearch(@RequestParam(value = "keyword", required = false) String keyword,
                                                    @ModelAttribute FilterRequestDto filter) {
         List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTouristBySearch(URLDecoder.decode(keyword, StandardCharsets.UTF_8), filter);
-
+                touristService.filteredTourist(filter, null, URLDecoder.decode(keyword, StandardCharsets.UTF_8));
         return ResponseEntity.ok(responseDtoList);
     }
 }

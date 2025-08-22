@@ -4,6 +4,8 @@ import com.example.shimpyo.domain.tourist.entity.Tourist;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.format.DateTimeFormatter;
+
 @Getter
 @Builder
 public class OperationTime {
@@ -15,8 +17,8 @@ public class OperationTime {
     public static OperationTime toDto(Tourist tourist) {
         return OperationTime.builder()
                 .dayOff(tourist.getDayOff())
-                .openTime(tourist.getOpenTime())
-                .closeTime(tourist.getCloseTime())
+                .openTime(tourist.getOpenTime().format(DateTimeFormatter.ofPattern("HH:mm")))
+                .closeTime(tourist.getCloseTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                 .breakTime(tourist.getBreakTime())
                 .build();
     }

@@ -40,8 +40,6 @@ public class TouristService {
     private final TouristRepository touristRepository;
     private final LikesRepository likesRepository;
 
-    private final Pageable pageable = PageRequest.of(0, 8);
-
     public List<RecommendsResponseDto> getRecommendTourists() {
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()
                 .map(RecommendsResponseDto::toDto).toList();
@@ -92,68 +90,42 @@ public class TouristService {
         }
         return result.stream().map(r -> ReviewResponseDto.toDto(r, r.getUser())).collect(Collectors.toList());
     }
+    private Specification<Tourist> buildSpecification(FilterRequestDto filter, String category, String keyword) {
+        Specification<Tourist> spec = null;
 
-    @Transactional(readOnly = true)
-    public List<FilterTouristByDataResponseDto> filteredTouristByCategory(
-            String category, FilterRequestDto filter) {
-
-        Specification<Tourist> specification = Specification
-                .where(TouristSpecs.byCategory(category))
+        if (category != null) {
+            spec = TouristSpecs.byCategory(category);
+        } else if (keyword != null && !keyword.isBlank()) {
+            spec = TouristSpecs.containsSearch(keyword);
+        }
+        return Specification
+                .where(spec)
                 .and(TouristSpecs.inRegion(RegionUtils.convertToRegion(filter.getRegion())))
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
                 .and(TouristSpecs.hasAllService(filter.getFacilities()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
                 .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
                 .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
-
-        if(filter.getSortBy() == null || "liked".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-        }else if("review".equalsIgnoreCase(filter.getSortBy())) {
-            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
-        } else if("popular".equalsIgnoreCase(filter.getSortBy())) {
-            specification = specification.and(TouristSpecs.orderByPopularity(Sort.Direction.DESC));
-        }
-
-        //pageable 에서 정렬 빼기
-        List<Tourist> rows = touristRepository.findAll(specification, pageable).getContent();
-
-        Long userId = authService.findUserAuth()
-                .map(UserAuth::getUser).map(User::getId).orElse(null);
-
-
-        Set<Long> likedIds = findLikedIdsForSlice(userId, rows);
-
-        return toResponse(rows, likedIds);
     }
 
     @Transactional(readOnly = true)
-    public List<FilterTouristByDataResponseDto> filteredTouristBySearch(
-            String keyword, FilterRequestDto filter) {
+    public List<FilterTouristByDataResponseDto> filteredTourist(FilterRequestDto filter, String category, String keyword) {
+        Specification<Tourist> specification = buildSpecification(filter, category, keyword);
 
-        Specification<Tourist> specification = Specification
-                .where(TouristSpecs.containsSearch(keyword))
-                .and(TouristSpecs.inRegion(RegionUtils.convertToRegion(filter.getRegion())))
-                .and(TouristSpecs.openWithin(filter.getVisitTime()))
-                .and(TouristSpecs.hasAllService(filter.getFacilities()))
-                .and(TouristSpecs.genderBias(filter.getGender()))
-                .and(TouristSpecs.matchesAgeGroup(filter.getAgeGroup()))
-                .and(TouristSpecs.cursorBeforeId(filter.getLastId()));
-
-        if("liked".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-        }else if("reviews".equalsIgnoreCase(filter.getSortBy())){
-            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
-        } else if("popular".equalsIgnoreCase(filter.getSortBy())) {
+        // 정렬
+        if ("popular".equalsIgnoreCase(filter.getSortBy())) {
             specification = specification.and(TouristSpecs.orderByPopularity(Sort.Direction.DESC));
+        } else if("liked".equalsIgnoreCase(filter.getSortBy())){
+            specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
+        } else if("review".equalsIgnoreCase(filter.getSortBy())) {
+            specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
         }
 
-        Pageable pageable = PageRequest.of(0, 8);
+        Pageable pageable = PageRequest.of(0, 8); // 필요 시 외부에서 받도록 변경 가능
         List<Tourist> rows = touristRepository.findAll(specification, pageable).getContent();
-
 
         Long userId = authService.findUserAuth()
                 .map(UserAuth::getUser).map(User::getId).orElse(null);
-
 
         Set<Long> likedIds = findLikedIdsForSlice(userId, rows);
 
