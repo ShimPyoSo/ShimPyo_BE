@@ -19,10 +19,8 @@ public class FilterTouristByDataResponseDto {
     private OperationTime operationTime;
     private String image;
     private Boolean isLiked;
-    private Long likesCount;
-    private Long reviewCount;
 
-    public static FilterTouristByDataResponseDto from(Tourist tourist, Boolean isLiked, Long likesCount, Long reviewCount) {
+    public static FilterTouristByDataResponseDto from(Tourist tourist, Boolean isLiked) {
         return FilterTouristByDataResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
@@ -32,8 +30,6 @@ public class FilterTouristByDataResponseDto {
                 .operationTime(OperationTime.of(tourist))
                 .image(tourist.getImage()) // 또는 getImages().get(0) 등
                 .isLiked(isLiked)
-                .likesCount(likesCount)
-                .reviewCount(reviewCount)
                 .build();
     }
 
