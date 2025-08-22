@@ -205,8 +205,8 @@ public final class TouristSpecs {
     public static Specification<Tourist> orderByReviewCount(Sort.Direction dir) {
         return (root, query, cb) -> {
             if (!Long.class.equals(query.getResultType())){
-                var review = root.join("review", JoinType.LEFT);
-                var reviewsCount = cb.countDistinct(review);
+                var review = root.join("reviews", JoinType.LEFT);
+                var reviewsCount = cb.count(review);
                 query.groupBy(root.get("id"));
                 if(dir.isAscending()){
                     query.orderBy(cb.asc(reviewsCount), cb.asc(root.get("id")));

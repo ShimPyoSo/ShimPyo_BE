@@ -12,6 +12,7 @@ import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.global.BaseException;
+import com.example.shimpyo.utils.RegionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,38 +34,19 @@ public class SurveyService {
     private final SuggestionTouristRepository stRepository;
     private final SuggestionUserRepository suRepository;
 
-    private static final Map<Integer, String> indexToKey = Map.of(
-            0, "경상도",
-            1, "전라도",
-            2, "충청도",
-            3, "수도권",
-            4, "강원도",
-            5, "제주도"
-    );
-    private static final Map<String, List<String>> regionMapping = Map.of(
-            "경상도", List.of("경북", "경남"),
-            "전라도", List.of("전북", "전남"),
-            "충청도", List.of("충북", "충남"),
-            "수도권", List.of("서울", "경기"),
-            "강원도", List.of("강원"),
-            "제주도", List.of("제주")
-    );
-
     public CourseResponseDto getCourse(CourseRequestDto requestDto) {
 
         User user = authService.findUser().getUser();
         // 2. 기간, 식사 횟수 파싱
         String typename = requestDto.getTypename();
         int days = requestDto.getDuration() == null? 2 : parseDays(requestDto.getDuration());
-        Optional<List<String>> regionCandidates = Optional.ofNullable(requestDto.getRegion())
-                .map(regionMapping::get);
+        Optional<List<String>> regionCandidates = RegionUtils.getRegions(requestDto.getRegion());
         List<String> regions;
         String region;
         if (regionCandidates.isEmpty()) {
-            Random random = new Random();
-            int index = random.nextInt(regionMapping.values().size());
-            regions = new ArrayList<>(regionMapping.values()).get(index);
-            region = indexToKey.get(index);
+            Map.Entry<String, List<String>> randomRegion = RegionUtils.getRandomRegion();
+            regions = randomRegion.getValue();
+            region = randomRegion.getKey();
         } else {
             regions = regionCandidates.get();
             region = requestDto.getRegion();
@@ -85,7 +67,7 @@ public class SurveyService {
         boolean startsWithMeal = mealCount == 3;
         Suggestion suggestion = makeSuggestion(requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration(),
                 region, user, wellnessType);
-        Map<String, List<Tourist>> result = generateCourseWithSchedule(suggestion, meals, activities, days, mealCount, startsWithMeal);
+        generateCourseWithSchedule(suggestion, meals, activities, days, mealCount, startsWithMeal);
 
 
         // 5. 응답 생성
@@ -102,18 +84,14 @@ public class SurveyService {
                         .build());
     }
 
-    public Map<String, List<Tourist>> generateCourseWithSchedule(Suggestion suggestion,
-            List<Tourist> meals, List<Tourist> activities,
+    public void generateCourseWithSchedule(Suggestion suggestion, List<Tourist> meals, List<Tourist> activities,
             int days, int mealCount, boolean startWithMeal) {
-
-        Map<String, List<Tourist>> dayToCourse = new LinkedHashMap<>();
 
         // 인덱스 관리
         int mealIndex = 0;
         int activityIndex = 0;
 
         for (int day = 1; day <= days; day++) {
-            List<Tourist> todayList = new ArrayList<>();
             LocalTime time = LocalTime.of(9, 0);  // 시작 시간 9시
             LocalTime visitTime = time;
             int totalSlots = mealCount + 3;  // 하루 slot 총 갯수 식사+활동 합
@@ -163,12 +141,9 @@ public class SurveyService {
                                     .tourist(candidate).date(day + "일").time(visitTime).build());
                     suggestion.addSuggestionTourist(st);
                     candidate.addSuggestionTourist(st);
-                    todayList.add(candidate);
                 }
             }
-            dayToCourse.put(day + "일", todayList);
         }
-        return dayToCourse;
     }
 
     private boolean canVisitAt(Tourist tourist, LocalTime visitTime) {

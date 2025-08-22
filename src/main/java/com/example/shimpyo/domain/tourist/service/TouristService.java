@@ -3,7 +3,6 @@ package com.example.shimpyo.domain.tourist.service;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
-//import com.example.shimpyo.domain.search.repository.AcTermRepository;
 import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
@@ -13,6 +12,7 @@ import com.example.shimpyo.domain.user.entity.Review;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.ReviewRepository;
 import com.example.shimpyo.global.BaseException;
+import com.example.shimpyo.utils.RegionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -102,7 +102,7 @@ public class TouristService {
 
         Specification<Tourist> specification = Specification
                 .where(TouristSpecs.byCategory(category))
-                .and(TouristSpecs.inRegion(filter.getRegion()))
+                .and(TouristSpecs.inRegion(RegionUtils.convertToRegion(filter.getRegion())))
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
                 .and(TouristSpecs.hasAllService(filter.getFacilities()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
@@ -111,8 +111,10 @@ public class TouristService {
 
         if(filter.getSortBy() == null || "liked".equalsIgnoreCase(filter.getSortBy())){
             specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-        }else if("review".equalsIgnoreCase(filter.getSortBy())){
+        }else if("review".equalsIgnoreCase(filter.getSortBy())) {
             specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+        } else if("popular".equalsIgnoreCase(filter.getSortBy())) {
+            specification = specification.and(TouristSpecs.orderByPopularity(Sort.Direction.DESC));
         }
 
         //pageable 에서 정렬 빼기
@@ -133,7 +135,7 @@ public class TouristService {
 
         Specification<Tourist> specification = Specification
                 .where(TouristSpecs.containsSearch(keyword))
-                .and(TouristSpecs.inRegion(filter.getRegion()))
+                .and(TouristSpecs.inRegion(RegionUtils.convertToRegion(filter.getRegion())))
                 .and(TouristSpecs.openWithin(filter.getVisitTime()))
                 .and(TouristSpecs.hasAllService(filter.getFacilities()))
                 .and(TouristSpecs.genderBias(filter.getGender()))
@@ -142,8 +144,10 @@ public class TouristService {
 
         if("liked".equalsIgnoreCase(filter.getSortBy())){
             specification = specification.and(TouristSpecs.orderByLikesCount(Sort.Direction.DESC));
-        }else if("review".equalsIgnoreCase(filter.getSortBy())){
+        }else if("reviews".equalsIgnoreCase(filter.getSortBy())){
             specification = specification.and(TouristSpecs.orderByReviewCount(Sort.Direction.DESC));
+        } else if("popular".equalsIgnoreCase(filter.getSortBy())) {
+            specification = specification.and(TouristSpecs.orderByPopularity(Sort.Direction.DESC));
         }
 
         Pageable pageable = PageRequest.of(0, 8);
