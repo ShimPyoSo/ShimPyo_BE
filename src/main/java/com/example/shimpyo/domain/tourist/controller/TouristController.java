@@ -61,8 +61,7 @@ public class TouristController {
         }
     )
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category") @NotBlank String category,
-                                                     @RequestParam(value = "lastId", required = false) Long lastId,
                                                      @ModelAttribute  FilterRequestDto filter) {
-        return ResponseEntity.ok(touristService.filteredTouristByCategory(category, filter, lastId));
+        return ResponseEntity.ok(touristService.filteredTouristByCategory(category, filter));
     }
 }
