@@ -10,6 +10,7 @@ import com.example.shimpyo.domain.tourist.entity.*;
 import com.example.shimpyo.domain.user.entity.QLikes;
 import com.example.shimpyo.domain.user.entity.QReview;
 import com.example.shimpyo.global.BaseException;
+import com.example.shimpyo.utils.RegionUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -112,6 +113,8 @@ public class QTouristRepository {
         List<String> regions = Arrays.stream(region.split("\\|"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
+                .map(RegionUtils::convertToRegion) // 지역 코드를 실제 지역명으로 변환
+                .filter(Objects::nonNull) // null 값 제거 (유효하지 않은 지역 코드)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -183,7 +186,7 @@ public class QTouristRepository {
     }
 
     private BooleanExpression genderCondition(String gender, QTourist tourist) {
-        if (gender == null || gender.equalsIgnoreCase("ALL")) {
+        if (gender == null || gender.equalsIgnoreCase("female|male")) {
             return null;
         }
 
@@ -203,38 +206,34 @@ public class QTouristRepository {
 
         double epsilon = 1e-6;
 
-        NumberExpression<Double> a20e = tourist.age20EarlyRatio.coalesce(0.0);
-        NumberExpression<Double> a20m = tourist.age20MidRatio.coalesce(0.0);
-        NumberExpression<Double> a20l = tourist.age20LateRatio.coalesce(0.0);
-        NumberExpression<Double> a30e = tourist.age30EarlyRatio.coalesce(0.0);
-        NumberExpression<Double> a30m = tourist.age30MidRatio.coalesce(0.0);
-        NumberExpression<Double> a30l = tourist.age30LateRatio.coalesce(0.0);
-        NumberExpression<Double> a40 = tourist.age40Ratio.coalesce(0.0);
-        NumberExpression<Double> a50 = tourist.age50Ratio.coalesce(0.0);
-        NumberExpression<Double> a60p = tourist.age60PlusRatio.coalesce(0.0);
+        // 각 연령대 컬럼
+        Map<String, NumberExpression<Double>> ageMap = Map.of(
+                "20Early", tourist.age20EarlyRatio.coalesce(0.0),
+                "20Mid",   tourist.age20MidRatio.coalesce(0.0),
+                "20Late",  tourist.age20LateRatio.coalesce(0.0),
+                "30Early", tourist.age30EarlyRatio.coalesce(0.0),
+                "30Mid",   tourist.age30MidRatio.coalesce(0.0),
+                "30Late",  tourist.age30LateRatio.coalesce(0.0),
+                "40",      tourist.age40Ratio.coalesce(0.0),
+                "50",      tourist.age50Ratio.coalesce(0.0),
+                "60",      tourist.age60PlusRatio.coalesce(0.0)
+        );
 
-        NumberExpression<Double> selected = switch (ageGroup) {
-            case "20Early" -> a20e;
-            case "20Mid" -> a20m;
-            case "20Late" -> a20l;
-            case "30Early" -> a30e;
-            case "30Mid" -> a30m;
-            case "30Late" -> a30l;
-            case "40" -> a40;
-            case "50" -> a50;
-            case "60" -> a60p;
-            default -> throw new BaseException(UNSUPPORTED_AGE_GROUP);
-        };
+        BooleanExpression result = null;
 
-        return selected.goe(a20e.subtract(epsilon))
-                .and(selected.goe(a20m.subtract(epsilon)))
-                .and(selected.goe(a20l.subtract(epsilon)))
-                .and(selected.goe(a30e.subtract(epsilon)))
-                .and(selected.goe(a30m.subtract(epsilon)))
-                .and(selected.goe(a30l.subtract(epsilon)))
-                .and(selected.goe(a40.subtract(epsilon)))
-                .and(selected.goe(a50.subtract(epsilon)))
-                .and(selected.goe(a60p.subtract(epsilon)));
+        // 여러 그룹 처리
+        for (String group : ageGroup.split("\\|")) {
+            String g = group.trim();
+            NumberExpression<Double> selected = ageMap.get(g);
+            if (selected == null) throw new BaseException(UNSUPPORTED_AGE_GROUP);
+
+            // 선택된 그룹의 비율이 epsilon 이상인지 체크
+            BooleanExpression condition = selected.goe(epsilon);
+
+            // OR로 연결
+            result = (result == null) ? condition : result.or(condition);
+        }
+        return result;
     }
 
     private BooleanExpression cursorCondition(Long lastId, QTourist tourist) {
