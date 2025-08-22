@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.example.shimpyo.global.exceptionType.TouristException.REVIEW_NOT_FOUND;
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
@@ -38,12 +39,8 @@ public class TouristService {
     private final ReviewRepository reviewRepository;
     private final TouristRepository touristRepository;
     private final LikesRepository likesRepository;
-//    private final AcTermRepository acTermRepository;
 
     private final Pageable pageable = PageRequest.of(0, 8);
-
-    // 오차 방지
-    private static final double EPS = 1e-9;
 
     public List<RecommendsResponseDto> getRecommendTourists() {
         List<RecommendsResponseDto> responseDto = touristRepository.findRandom8Recommends().stream()

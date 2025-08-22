@@ -41,6 +41,7 @@ public class RegionUtils {
      * 지역 키("수도권")로 하위 지역 리스트 반환
      */
     public static Optional<List<String>> getRegions(String regionKey) {
+        if (regionKey == null) return Optional.empty();
         return Optional.ofNullable(regionMapping.get(regionKey));
     }
 
@@ -64,12 +65,9 @@ public class RegionUtils {
     }
 
     /**
-     * "busan" -> "경상도", "daegu" -> "경상도"
+     * "busan" -> "경남", "daegu" -> "경북"
      */
     public static String convertToRegion(String value) {
-        String subRegion = valueToSubRegion.get(value);
-        if (subRegion == null) throw new BaseException(TouristException.ILLEGAL_REGION);
-
-        return subRegion;
+        return value == null? null : valueToSubRegion.get(value);
     }
 }

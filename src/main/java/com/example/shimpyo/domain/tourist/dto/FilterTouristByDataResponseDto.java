@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class FilterTouristByDataResponseDto {
     private Long id;
     private String title;
-    private String type;
     private String region;
     private String address;
     private OperationTime operationTime;
@@ -24,11 +23,10 @@ public class FilterTouristByDataResponseDto {
         return FilterTouristByDataResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
-//                .type(tourist)
                 .address(tourist.getAddress())
                 .region(tourist.getRegion())
                 .operationTime(OperationTime.of(tourist))
-                .image(tourist.getImage()) // 또는 getImages().get(0) 등
+                .image(tourist.getImage())
                 .isLiked(isLiked)
                 .build();
     }
