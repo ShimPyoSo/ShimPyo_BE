@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.tourist;
+package com.example.shimpyo.domain.tourist.util;
 
 import com.example.shimpyo.domain.search.entity.AcTerm;
 import com.example.shimpyo.domain.search.repository.AcTermRepository;
