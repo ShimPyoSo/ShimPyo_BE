@@ -34,11 +34,11 @@ public class SearchController {
         return ResponseEntity.ok(results);
     }
 
-    /*@PostMapping("/reindex")
+    @PostMapping("/reindex")
     public ResponseEntity<String> reindexTourists() {
         searchService.indexAllTourists();
         return ResponseEntity.ok("Reindexing completed");
-    }*/
+    }
 
     @Operation(summary = "검색")
     @GetMapping()
