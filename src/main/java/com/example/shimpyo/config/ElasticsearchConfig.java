@@ -15,6 +15,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
 
 @Configuration
 @RequiredArgsConstructor
@@ -28,7 +29,16 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
-                .connectedTo(elasticsearchUrl.replace("http://", ""))
+                .connectedTo(elasticsearchUrl)  // replace 없이 바로 사용
+                .withConnectTimeout(Duration.ofSeconds(30))
+                .withSocketTimeout(Duration.ofSeconds(60))
                 .build();
+    }
+
+    // ElasticsearchConfig에 이거 추가해서 확인
+    @PostConstruct
+    public void init() {
+        System.out.println("=== Environment ELASTIC_HOST: " + System.getenv("ELASTIC_HOST"));
+        System.out.println("=== Spring property elasticsearch.uris: " + elasticsearchUrl);
     }
 }
