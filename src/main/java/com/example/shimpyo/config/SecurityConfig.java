@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/api/tourlist/category",
                                 "/api/search",
                                 "/api/search/autocomplete",
-                                "/api/tourlist/detail")
+                                "/api/tourlist/detail",
+                                "/api/search/reindex")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

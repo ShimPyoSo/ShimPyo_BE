@@ -1,0 +1,6 @@
+{
+  "properties": {
+    "nameKeywords": { "type": "keyword" },
+    "regionKeywords": { "type": "keyword" }
+  }
+}

@@ -3,7 +3,6 @@ package com.example.shimpyo.domain.tourist.entity;
 import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.survey.entity.SuggestionTourist;
 import com.example.shimpyo.domain.course.entity.UserCourseList;
-import com.example.shimpyo.domain.tourist.TouristEntityListener;
 import com.example.shimpyo.domain.user.entity.Likes;
 import com.example.shimpyo.domain.user.entity.Review;
 import jakarta.persistence.*;
@@ -23,7 +22,6 @@ import java.util.List;
 @Entity
 @Builder
 @Getter
-@EntityListeners(TouristEntityListener.class)
 // Hibernate 구현체가 delete를 수행하는 경우 soft delete 로 수행하도록 하는 명령어
 @SQLDelete(sql = "UPDATE tourist SET deleted_at = now() WHERE id = ?")
 // 조회 하는 경우 deleted_at 이 null 인 데이터만 조회

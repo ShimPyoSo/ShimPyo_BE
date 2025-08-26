@@ -126,4 +126,8 @@ public class TouristService {
     public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<String> categories, int count) {
         return touristRepository.findByRegionsAndCategoriesAndOpenTimeIsNotNull(regions, categories, count);
     }
+
+    public List<Tourist> findAll() {
+        return touristRepository.findAll();
+    }
 }

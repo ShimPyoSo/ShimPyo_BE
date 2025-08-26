@@ -1,11 +1,12 @@
 package com.example.shimpyo.domain.search.controller;
 
-import com.example.shimpyo.domain.search.service.SuggestService;
+import com.example.shimpyo.domain.search.service.SearchService;
 import com.example.shimpyo.domain.tourist.dto.FilterRequestDto;
 import com.example.shimpyo.domain.tourist.dto.FilterTouristByDataResponseDto;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.TouristException;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +22,25 @@ import java.util.List;
 @Tag(name = "Search", description = "검색 관련 API 목록")
 public class SearchController {
 
-    private final SuggestService suggestService;
+    private final SearchService searchService;
     private final TouristService touristService;
 
-    /** 자동완성 (2글자 이상부터 호출 권장) */
+    @Operation(summary = "검색어 자동완성")
     @GetMapping("/autocomplete")
-    public ResponseEntity<List<String>> suggest(@RequestParam("word") String word) {
-        List<String> result = suggestService.autocomplete(word, 8); // 최대 8개
-        return ResponseEntity.ok(result);
+    public ResponseEntity<List<String>> autoComplete(
+            @RequestParam("word") String word) {
+
+        List<String> results = searchService.autoComplete(word);
+        return ResponseEntity.ok(results);
     }
 
+    /*@PostMapping("/reindex")
+    public ResponseEntity<String> reindexTourists() {
+        searchService.indexAllTourists();
+        return ResponseEntity.ok("Reindexing completed");
+    }*/
+
+    @Operation(summary = "검색")
     @GetMapping()
     @SwaggerErrorApi(type = {TouristException.class},
             codes = {"INVALID_VISIT_TIME_FORMAT", "UNSUPPORTED_GENDER", "UNSUPPORTED_AGE_GROUP"})
