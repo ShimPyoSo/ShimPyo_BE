@@ -28,7 +28,7 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
-                .connectedTo(elasticsearchUrl)
+                .connectedTo(elasticsearchUrl.replace("http://", ""))
                 .build();
     }
 }
