@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.tourist.repository;
 
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
+import com.example.shimpyo.domain.search.dto.SearchResponseDto;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.tourist.dto.FilterRequestDto;
@@ -36,19 +37,31 @@ public class QTouristRepository {
     private final LikesRepository likesRepository;
     private final AuthService authService;
 
-    @Transactional(readOnly = true)
-    public List<FilterTouristByDataResponseDto> filteredTourist(FilterRequestDto filter, String category, String keyword) {
-        QTourist tourist = QTourist.tourist;
-        QTouristCategory touristCategory = QTouristCategory.touristCategory;
-        QTouristOffer touristOffer = QTouristOffer.touristOffer;
-        QLikes likes = QLikes.likes;
-        QReview review = QReview.review;
+    QTourist tourist = QTourist.tourist;
+    QTouristCategory touristCategory = QTouristCategory.touristCategory;
+    QTouristOffer touristOffer = QTouristOffer.touristOffer;
+    QLikes likes = QLikes.likes;
+    QReview review = QReview.review;
+
+    public List<SearchResponseDto> searchResult(FilterRequestDto filter, String keyword) {
+        List<Tourist> tourists = filteredTourist(filter, null, keyword);
+        Set<Long> likedIds = findLikedIds(tourists);
+        List<SearchResponseDto> result = new ArrayList<>();
+        for (Tourist t : tourists) {
+            boolean isLiked = likedIds.contains(t.getId());
+            result.add(SearchResponseDto.toDto(t, isLiked));
+        }
+        return result;
+    }
+
+
+    private List<Tourist> filteredTourist(FilterRequestDto filter, String category, String keyword) {
 
         BooleanBuilder whereClause = new BooleanBuilder();
 
         // 1. 카테고리 또는 키워드 검색
         if (category != null) {
-            whereClause.and(categoryCondition(category, tourist, touristCategory));
+            whereClause.and(categoryCondition(category, touristCategory));
         } else if (keyword != null && !keyword.isBlank()) {
             whereClause.and(keywordCondition(keyword, tourist));
         }
@@ -60,12 +73,11 @@ public class QTouristRepository {
         whereClause.and(genderCondition(filter.getGender(), tourist));
         whereClause.and(ageGroupCondition(filter.getAgeGroup(), tourist));
         whereClause.and(cursorCondition(filter.getLastId(), tourist));
-
         // 3. 정렬 조건
         List<OrderSpecifier<?>> orderBy = getOrderSpecifiers(filter.getSortBy(), tourist, likes, review);
 
         // 4. 쿼리 실행
-        List<Tourist> results = queryFactory
+        return queryFactory
                 .selectFrom(tourist)
                 .leftJoin(tourist.touristCategories, touristCategory)
                 .leftJoin(tourist.touristOffers, touristOffer)
@@ -76,18 +88,18 @@ public class QTouristRepository {
                 .orderBy(orderBy.toArray(new OrderSpecifier[0]))
                 .limit(8)
                 .fetch();
-
+    }
+    private Set<Long> findLikedIds(List<Tourist>results) {
         // 5. 좋아요 정보 조회 및 응답 생성
         Long userId = authService.findUserAuth()
                 .map(UserAuth::getUser)
                 .map(User::getId)
                 .orElse(null);
 
-        Set<Long> likedIds = findLikedIdsForSlice(userId, results);
-        return toResponse(results, likedIds);
+        return findLikedIdsForSlice(userId, results);
     }
 
-    private BooleanExpression categoryCondition(String category, QTourist tourist, QTouristCategory touristCategory) {
+    private BooleanExpression categoryCondition(String category, QTouristCategory touristCategory) {
         if (category == null || category.equalsIgnoreCase("all")) {
             return null;
         }
@@ -287,12 +299,14 @@ public class QTouristRepository {
         return likesRepository.findLikedTouristIds(userId, ids);
     }
 
-    private List<FilterTouristByDataResponseDto> toResponse(List<Tourist> slice, Set<Long> likedIds) {
-        List<FilterTouristByDataResponseDto> res = new ArrayList<>(slice.size());
-        for (Tourist t : slice) {
+    public List<FilterTouristByDataResponseDto> makeFilterResponse(FilterRequestDto filter, String category) {
+        List<Tourist> tourists = filteredTourist(filter, category, null);
+        List<FilterTouristByDataResponseDto> result = new ArrayList<>(tourists.size());
+        Set<Long> likedIds = findLikedIds(tourists);
+        for (Tourist t : tourists) {
             boolean isLiked = likedIds.contains(t.getId());
-            res.add(FilterTouristByDataResponseDto.from(t, isLiked));
+            result.add(FilterTouristByDataResponseDto.from(t, isLiked));
         }
-        return res;
+        return result;
     }
 }

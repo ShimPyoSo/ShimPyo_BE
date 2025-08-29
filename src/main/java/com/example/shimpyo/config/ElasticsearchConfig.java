@@ -34,11 +34,4 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
                 .withSocketTimeout(Duration.ofSeconds(60))
                 .build();
     }
-
-    // ElasticsearchConfig에 이거 추가해서 확인
-    @PostConstruct
-    public void init() {
-        System.out.println("=== Environment ELASTIC_HOST: " + System.getenv("ELASTIC_HOST"));
-        System.out.println("=== Spring property elasticsearch.uris: " + elasticsearchUrl);
-    }
 }

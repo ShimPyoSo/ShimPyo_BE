@@ -1,5 +1,6 @@
 package com.example.shimpyo.domain.search.controller;
 
+import com.example.shimpyo.domain.search.dto.SearchResponseDto;
 import com.example.shimpyo.domain.search.service.SearchService;
 import com.example.shimpyo.domain.tourist.dto.FilterRequestDto;
 import com.example.shimpyo.domain.tourist.dto.FilterTouristByDataResponseDto;
@@ -46,8 +47,8 @@ public class SearchController {
             codes = {"INVALID_VISIT_TIME_FORMAT", "UNSUPPORTED_GENDER", "UNSUPPORTED_AGE_GROUP"})
     public ResponseEntity<?> filterTouristBySearch(@RequestParam(value = "keyword", required = false) String keyword,
                                                    @ModelAttribute FilterRequestDto filter) {
-        List<FilterTouristByDataResponseDto> responseDtoList =
-                touristService.filteredTourist(filter, null, URLDecoder.decode(keyword, StandardCharsets.UTF_8));
+        List<SearchResponseDto> responseDtoList =
+                touristService.searchResults(filter, URLDecoder.decode(keyword, StandardCharsets.UTF_8));
         return ResponseEntity.ok(responseDtoList);
     }
 }

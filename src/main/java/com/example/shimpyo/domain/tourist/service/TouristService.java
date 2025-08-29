@@ -1,8 +1,10 @@
 package com.example.shimpyo.domain.tourist.service;
 
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
+import com.example.shimpyo.domain.search.dto.SearchResponseDto;
 import com.example.shimpyo.domain.tourist.dto.*;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.QTouristRepository;
@@ -88,8 +90,13 @@ public class TouristService {
     }
 
     @Transactional(readOnly = true)
-    public List<FilterTouristByDataResponseDto> filteredTourist(FilterRequestDto filter, String category, String keyword) {
-        return qTouristRepository.filteredTourist(filter, category, keyword);
+    public List<FilterTouristByDataResponseDto> filteredTourist(FilterRequestDto filter, String category) {
+        return qTouristRepository.makeFilterResponse(filter, category);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SearchResponseDto> searchResults(FilterRequestDto filter, String keyword) {
+        return qTouristRepository.searchResult(filter, keyword);
     }
 
     public Tourist findTourist(Long id) {
