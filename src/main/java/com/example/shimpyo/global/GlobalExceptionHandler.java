@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleMethodArgumentNotValid (MethodArgumentNotValidException e) {
 
-        log.warn("handleMethodArgumentNotValidException : {}", "Invalid Arguments");
+        log.error("handleMethodArgumentNotValidException : {}", "Invalid Arguments");
         String errMsg = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
