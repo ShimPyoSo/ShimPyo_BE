@@ -1,6 +1,7 @@
 package com.example.shimpyo.domain.course.controller;
 
 import com.example.shimpyo.domain.course.dto.AdditionRecommendsResponseDto;
+import com.example.shimpyo.domain.course.dto.ChangeTitleRequestDto;
 import com.example.shimpyo.domain.course.service.LikesService;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.service.SurveyService;
@@ -10,6 +11,7 @@ import com.example.shimpyo.global.exceptionType.MemberException;
 import com.example.shimpyo.global.exceptionType.TouristException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +49,14 @@ public class CourseController {
     public ResponseEntity<Void> modifyCourse(@RequestBody CourseResponseDto requestDto) {
         surveyService.modifyCourse(requestDto);
     }*/
+
+    @Operation(summary = "코스명 수정")
+    @SwaggerErrorApi(type = {MemberException.class, CourseException.class}, codes ={"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
+    @PatchMapping("/title")
+    public ResponseEntity<Void> changeCourseTitle(@Valid @RequestBody ChangeTitleRequestDto requestDto) {
+        surveyService.changeCourseTitle(requestDto);
+        return ResponseEntity.ok().build();
+    }
 
     @Operation(summary = "찜한 코스 삭제")
     @SwaggerErrorApi(type = {MemberException.class, CourseException.class},

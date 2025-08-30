@@ -6,7 +6,11 @@ import com.example.shimpyo.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface SuggestionUserRepository extends JpaRepository<SuggestionUser, Long> {
     boolean existsByUserAndSuggestion(User user, Suggestion suggestion);
+
+    Optional<SuggestionUser> findBySuggestionAndUser(Suggestion suggestion, User user);
 }

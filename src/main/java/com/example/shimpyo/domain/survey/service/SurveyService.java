@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.survey.service;
 
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.dto.AdditionRecommendsResponseDto;
+import com.example.shimpyo.domain.course.dto.ChangeTitleRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.entity.*;
@@ -166,8 +167,7 @@ public class SurveyService {
 
     public void likeCourse(Long courseId) {
         User user = authService.findUser().getUser();
-        Suggestion suggestion = suggestionRepository.findById(courseId)
-                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        Suggestion suggestion = getSuggestion(courseId);
         if (!suRepository.existsByUserAndSuggestion(user, suggestion))
             suRepository.save(SuggestionUser.builder().suggestion(suggestion).user(user).build());
         else throw new BaseException(ALREADY_LIKED);
@@ -175,8 +175,7 @@ public class SurveyService {
 
     public CourseResponseDto getLikedCourseDetail(Long courseId) {
         User user = authService.findUser().getUser();
-        Suggestion suggestion = suggestionRepository.findById(courseId)
-                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        Suggestion suggestion = getSuggestion(courseId);
         if (!suggestion.getUser().equals(user))
             throw new BaseException(COURSE_NOT_FOUND);
 
@@ -185,8 +184,7 @@ public class SurveyService {
 
     public void deleteCourse(Long courseId) {
         User user = authService.findUser().getUser();
-        Suggestion suggestion = suggestionRepository.findById(courseId)
-                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        Suggestion suggestion = getSuggestion(courseId);
         if (!suggestion.getUser().equals(user))
             throw new BaseException(COURSE_NOT_FOUND);
         suggestionRepository.delete(suggestion);
@@ -195,8 +193,7 @@ public class SurveyService {
     @Transactional(readOnly = true)
     public List<AdditionRecommendsResponseDto> additionRecommends(Long courseId) {
         User user = authService.findUser().getUser();
-        Suggestion suggestion = suggestionRepository.findById(courseId)
-                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        Suggestion suggestion = getSuggestion(courseId);
         if (!suggestionRepository.existsByUserAndId(user, courseId))
             throw new BaseException(COURSE_NOT_FOUND);
         return touristService.getRecommendsOnAddition(suggestion.getWellnessType().getCategories(),
@@ -206,8 +203,7 @@ public class SurveyService {
 
     public void modifyCourse(CourseResponseDto requestDto) {
         User user = authService.findUser().getUser();
-        Suggestion suggestion = suggestionRepository.findById(requestDto.getCourseId())
-                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        Suggestion suggestion = getSuggestion(requestDto.getCourseId());
         if (!suggestion.getUser().equals(user))
             throw new BaseException(COURSE_NOT_FOUND);
 
@@ -226,9 +222,20 @@ public class SurveyService {
     @Transactional(readOnly = true)
     public CourseResponseDto sharedCourse(Long courseId, String token) {
 
-        Suggestion suggestion = suggestionRepository.findById(courseId).orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        Suggestion suggestion = getSuggestion(courseId);
         if (!suggestion.getToken().equals(token))
             throw new BaseException(COURSE_NOT_FOUND);
         return CourseResponseDto.fromSuggestion(suggestion);
+    }
+
+    public void changeCourseTitle(ChangeTitleRequestDto requestDto) {
+        Suggestion suggestion = getSuggestion(requestDto.getCourseId());
+        if (!suggestion.getUser().equals(authService.findUser().getUser()))
+            throw new BaseException(COURSE_NOT_FOUND);
+        suggestion.changeTitle(requestDto.getTitle());
+    }
+
+    private Suggestion getSuggestion(Long courseId) {
+        return suggestionRepository.findById(courseId).orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
     }
 }

@@ -53,11 +53,8 @@ public class Suggestion extends BaseEntity {
             st.addSuggestion(this);
         }
     }
-    public void removeSuggestionTourist(SuggestionTourist st) {
-        suggestionTourists.remove(st);
-        if (st.getSuggestion() == this) {
-            st.addSuggestion(null);
-        }
+    public void changeTitle(String title) {
+        this.title = title;
     }
 
 }
