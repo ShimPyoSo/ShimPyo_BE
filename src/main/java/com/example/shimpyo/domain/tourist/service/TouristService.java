@@ -1,11 +1,11 @@
 package com.example.shimpyo.domain.tourist.service;
 
-import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.course.repository.LikesRepository;
 import com.example.shimpyo.domain.search.dto.SearchResponseDto;
 import com.example.shimpyo.domain.tourist.dto.*;
+import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.repository.QTouristRepository;
 import com.example.shimpyo.domain.tourist.repository.TouristRepository;
@@ -136,5 +136,9 @@ public class TouristService {
 
     public List<Tourist> findAll() {
         return touristRepository.findAll();
+    }
+
+    public List<Tourist> getRecommendsOnAddition(List<Category> categories, List<String> regions) {
+        return touristRepository.findByRegionsAndCategories(regions, categories);
     }
 }

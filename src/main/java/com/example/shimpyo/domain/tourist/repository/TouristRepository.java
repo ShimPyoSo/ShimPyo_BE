@@ -1,7 +1,7 @@
 package com.example.shimpyo.domain.tourist.repository;
 
+import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -29,5 +29,12 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
             @Param("regions") List<String> regions,
             @Param("categories") List<String> categories,
             @Param("count") int count);
+
+    @Query(value = "SELECT DISTINCT t FROM Tourist t " +
+            "JOIN t.touristCategories tc " +
+            "WHERE t.region IN (:regions) " +
+            "AND tc.category IN (:categories)")
+    List<Tourist> findByRegionsAndCategories(@Param("regions") List<String> regions,
+                                             @Param("categories") List<Category> categories);
 
 }

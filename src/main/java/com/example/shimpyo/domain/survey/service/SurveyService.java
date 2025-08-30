@@ -1,6 +1,7 @@
 package com.example.shimpyo.domain.survey.service;
 
 import com.example.shimpyo.domain.auth.service.AuthService;
+import com.example.shimpyo.domain.course.dto.AdditionRecommendsResponseDto;
 import com.example.shimpyo.domain.survey.dto.CourseRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.entity.*;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.shimpyo.global.exceptionType.CourseException.ALREADY_LIKED;
 import static com.example.shimpyo.global.exceptionType.CourseException.COURSE_NOT_FOUND;
@@ -188,5 +190,17 @@ public class SurveyService {
         if (!suggestion.getUser().equals(user))
             throw new BaseException(COURSE_NOT_FOUND);
         suggestionRepository.delete(suggestion);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdditionRecommendsResponseDto> additionRecommends(Long courseId) {
+        User user = authService.findUser().getUser();
+        Suggestion suggestion = suggestionRepository.findById(courseId)
+                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        if (!suggestionRepository.existsByUserAndId(user, courseId))
+            throw new BaseException(COURSE_NOT_FOUND);
+        return touristService.getRecommendsOnAddition(suggestion.getWellnessType().getCategories(),
+                        stRepository.findDistinctRegionsBySuggestionId(suggestion.getId()))
+                .stream().map(AdditionRecommendsResponseDto::toDto).collect(Collectors.toList());
     }
 }
