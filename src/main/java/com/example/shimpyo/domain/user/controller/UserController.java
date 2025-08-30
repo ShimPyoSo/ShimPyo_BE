@@ -4,10 +4,7 @@ import com.example.shimpyo.domain.course.service.LikesService;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.service.SurveyService;
 import com.example.shimpyo.domain.tourist.service.TouristService;
-import com.example.shimpyo.domain.user.dto.MyReviewDetailResponseDto;
-import com.example.shimpyo.domain.user.dto.MyReviewListResponseDto;
-import com.example.shimpyo.domain.user.dto.SeenTouristResponseDto;
-import com.example.shimpyo.domain.user.dto.TouristLikesResponseDto;
+import com.example.shimpyo.domain.user.dto.*;
 import com.example.shimpyo.domain.user.service.UserService;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.SwaggerErrorApi;
@@ -99,6 +96,14 @@ public class UserController {
         else
             touristService.deleteOneReview(touristId, reviewId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "찜한 코스 목록")
+    @SwaggerErrorApi(type = {MemberException.class, CourseException.class},
+            codes = {"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
+    @GetMapping("/likes/course")
+    public ResponseEntity<List<LikedCourseResponseDto>> getLikedCourseList() {
+        return ResponseEntity.ok(surveyService.getLikedCourseList());
     }
 
     @Operation(summary = "찜한 코스 상세")

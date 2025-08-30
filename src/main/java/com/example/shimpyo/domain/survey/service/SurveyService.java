@@ -11,6 +11,7 @@ import com.example.shimpyo.domain.survey.repository.SuggestionUserRepository;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.service.TouristService;
+import com.example.shimpyo.domain.user.dto.LikedCourseResponseDto;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.utils.RegionUtils;
@@ -202,5 +203,24 @@ public class SurveyService {
         return touristService.getRecommendsOnAddition(suggestion.getWellnessType().getCategories(),
                         stRepository.findDistinctRegionsBySuggestionId(suggestion.getId()))
                 .stream().map(AdditionRecommendsResponseDto::toDto).collect(Collectors.toList());
+    }
+
+    public void modifyCourse(CourseResponseDto requestDto) {
+        User user = authService.findUser().getUser();
+        Suggestion suggestion = suggestionRepository.findById(requestDto.getCourseId())
+                .orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        if (!suggestion.getUser().equals(user))
+            throw new BaseException(COURSE_NOT_FOUND);
+
+
+    }
+
+    @Transactional(readOnly = true)
+    public List<LikedCourseResponseDto> getLikedCourseList() {
+        User user = authService.findUser().getUser();
+        return user.getLikedSuggestion().stream()
+                .map(s -> LikedCourseResponseDto.toDto(s.getSuggestion(),
+                        s.getSuggestion().getSuggestionTourists().get(0).getTourist().getImage()))
+                .collect(Collectors.toList());
     }
 }
