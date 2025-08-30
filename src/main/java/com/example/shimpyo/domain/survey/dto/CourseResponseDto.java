@@ -37,7 +37,7 @@ public class CourseResponseDto {
         return CourseResponseDto.builder()
                 .courseId(suggestion.getId())
                 .title(suggestion.getTitle())
-                .typename(suggestion.getWellnessType().toString())
+                .typename(suggestion.getWellnessType().getLabel())
                 .token(suggestion.getToken())
                 .days(days)
                 .build();
