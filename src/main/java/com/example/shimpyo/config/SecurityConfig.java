@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/api/search",
                                 "/api/search/autocomplete",
                                 "/api/tourlist/detail",
-                                "/api/search/reindex")
+                                "/api/course/share")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

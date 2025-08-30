@@ -74,7 +74,7 @@ public class SurveyService {
 
 
         // 5. 응답 생성
-        return CourseResponseDto.toDto(suggestion, CourseResponseDto.fromSuggestionTourists(suggestion.getSuggestionTourists()));
+        return CourseResponseDto.fromSuggestion(suggestion);
     }
 
     private Suggestion makeSuggestion(String days, String region, User user, WellnessType type) {
@@ -180,8 +180,7 @@ public class SurveyService {
         if (!suggestion.getUser().equals(user))
             throw new BaseException(COURSE_NOT_FOUND);
 
-        return CourseResponseDto.toDto(suggestion,
-                CourseResponseDto.fromSuggestionTourists(suggestion.getSuggestionTourists()));
+        return CourseResponseDto.fromSuggestion(suggestion);
     }
 
     public void deleteCourse(Long courseId) {
@@ -222,5 +221,14 @@ public class SurveyService {
                 .map(s -> LikedCourseResponseDto.toDto(s.getSuggestion(),
                         s.getSuggestion().getSuggestionTourists().get(0).getTourist().getImage()))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public CourseResponseDto sharedCourse(Long courseId, String token) {
+
+        Suggestion suggestion = suggestionRepository.findById(courseId).orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
+        if (!suggestion.getToken().equals(token))
+            throw new BaseException(COURSE_NOT_FOUND);
+        return CourseResponseDto.fromSuggestion(suggestion);
     }
 }
