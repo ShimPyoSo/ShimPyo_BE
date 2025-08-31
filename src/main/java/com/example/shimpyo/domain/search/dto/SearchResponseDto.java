@@ -17,7 +17,7 @@ public class SearchResponseDto {
     private OperationTime operationTime;
     private Double latitude;
     private Double longitude;
-    private String image;
+    private String images;
     private Boolean isLiked;
 
     public static SearchResponseDto toDto(Tourist tourist, Boolean isLiked) {
@@ -30,7 +30,7 @@ public class SearchResponseDto {
                 .operationTime(OperationTime.toDto(tourist))
                 .latitude(tourist.getLatitude())
                 .longitude(tourist.getLongitude())
-                .image(tourist.getImage())
+                .images(tourist.getImage())
                 .isLiked(isLiked)
                 .build();
     }
