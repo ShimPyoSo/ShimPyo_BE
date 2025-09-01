@@ -43,12 +43,13 @@ public class CourseController {
         return ResponseEntity.ok(surveyService.additionRecommends(courseId));
     }
 
-    /*@Operation(summary = "코스 수정")
+    @Operation(summary = "코스 수정")
     @SwaggerErrorApi(type = {MemberException.class, CourseException.class}, codes ={"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @PatchMapping
     public ResponseEntity<Void> modifyCourse(@RequestBody CourseResponseDto requestDto) {
         surveyService.modifyCourse(requestDto);
-    }*/
+        return ResponseEntity.ok().build();
+    }
 
     @Operation(summary = "코스명 수정")
     @SwaggerErrorApi(type = {MemberException.class, CourseException.class}, codes ={"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
