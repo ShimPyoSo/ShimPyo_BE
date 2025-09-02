@@ -60,7 +60,7 @@ public class UserController {
     @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
     @GetMapping("/likes")
     public ResponseEntity<List<TouristLikesResponseDto>> getTouristLikes(@RequestParam("category") String category,
-                                                                         @RequestParam("likesId") Long id) {
+                                                                         @RequestParam(name = "likesId", required = false) Long id) {
         return ResponseEntity.ok(likesService.getTouristLikes(category, id));
     }
 
