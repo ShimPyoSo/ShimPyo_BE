@@ -33,16 +33,6 @@ public class CourseResponseDto {
     @NotNull
     private List<CourseDayDto> days;
 
-    public static CourseResponseDto toDto(Suggestion suggestion, List<CourseDayDto> days) {
-        return CourseResponseDto.builder()
-                .courseId(suggestion.getId())
-                .title(suggestion.getTitle())
-                .typename(suggestion.getWellnessType().getLabel())
-                .token(suggestion.getToken())
-                .days(days)
-                .build();
-    }
-
     public static CourseResponseDto fromSuggestion(Suggestion suggestion) {
         // 1. Suggestion이 가진 suggestionTourists 꺼내기
         List<SuggestionTourist> suggestionTourists = suggestion.getSuggestionTourists();
@@ -67,7 +57,7 @@ public class CourseResponseDto {
         return CourseResponseDto.builder()
                 .courseId(suggestion.getId())
                 .title(suggestion.getTitle())
-                .typename(suggestion.getWellnessType().toString())
+                .typename(suggestion.getWellnessType().getLabel())
                 .token(suggestion.getToken())
                 .days(days)
                 .build();
