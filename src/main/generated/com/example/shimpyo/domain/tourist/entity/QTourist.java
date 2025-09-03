@@ -46,7 +46,7 @@ public class QTourist extends EntityPathBase<Tourist> {
 
     public final TimePath<java.time.LocalTime> closeTime = createTime("closeTime", java.time.LocalTime.class);
 
-    public final NumberPath<Long> content_id = createNumber("content_id", Long.class);
+    public final NumberPath<Long> contentId = createNumber("contentId", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;

@@ -51,7 +51,7 @@ public class Tourist extends BaseEntity {
     private Double longitude;
 
     @Column
-    private Long content_id;
+    private Long contentId;
 
     @Column
     private String description;

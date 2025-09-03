@@ -47,6 +47,9 @@ public class Suggestion extends BaseEntity {
     @OneToMany(mappedBy = "suggestion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SuggestionTourist> suggestionTourists = new ArrayList<>();
 
+    @OneToMany(mappedBy = "suggestion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SuggestionUser> suggestionUsers = new ArrayList<>();
+
     public void addSuggestionTourist(SuggestionTourist st) {
         suggestionTourists.add(st);
         if (st.getSuggestion() != this) {
