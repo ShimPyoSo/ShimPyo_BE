@@ -76,4 +76,9 @@ public class CourseController {
                                                           @RequestParam("token") String token) {
         return ResponseEntity.ok(surveyService.sharedCourse(courseId, token));
     }
+
+    @DeleteMapping("/test")
+    public ResponseEntity<Void> test() {
+        return ResponseEntity.ok().build();
+    }
 }
