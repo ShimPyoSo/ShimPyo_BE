@@ -1,4 +1,4 @@
-package com.example.shimpyo.utils;
+package com.example.shimpyo.domain.utils;
 
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.TouristException;

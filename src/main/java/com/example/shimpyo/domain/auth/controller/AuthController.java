@@ -38,17 +38,6 @@ public class AuthController {
         return ResponseEntity.ok(oAuth2Service.kakaoLogin(requestDto.get("accessToken"),response));
     }
 
-    // [#MOO3] 유저 로그인 시작
-    @Operation(summary = "일반 로그인")
-    @SwaggerErrorApi(type = AuthException.class, codes = {"MEMBER_NOT_FOUND", "MEMBER_INFO_NOT_MATCHED"})
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
-        LoginResponseDto loginResponseDto = authService.login(dto, response);
-
-        return ResponseEntity.ok(loginResponseDto);
-    }
-    // [#MOO3] 유저 로그인 끝
-
     // [#MOO1] 사용자 회원가입 시작
     @Operation(summary = "회원가입")
     @SwaggerErrorApi(type = AuthException.class, codes = {"EMAIL_DUPLICATION"})
@@ -134,8 +123,8 @@ public class AuthController {
     @Operation(summary = "회원 탈퇴")
     @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser() {
-        authService.deleteUser();
+    public ResponseEntity<Void> deleteUser(HttpServletResponse response) {
+        authService.deleteUser(response);
         return ResponseEntity.ok().build();
     }
 

@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.tourist.util;
+package com.example.shimpyo.domain.utils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,12 +1,20 @@
 package com.example.shimpyo.config;
 
-import com.example.shimpyo.domain.auth.JwtAuthenticationEntryPoint;
-import com.example.shimpyo.domain.auth.JwtTokenFilter;
+import com.example.shimpyo.domain.auth.jwt.JwtAuthenticationEntryPoint;
+import com.example.shimpyo.domain.auth.jwt.JwtAuthenticationFilter;
+import com.example.shimpyo.domain.auth.jwt.JwtTokenFilter;
+import com.example.shimpyo.domain.auth.jwt.JwtTokenProvider;
+import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
+import com.example.shimpyo.domain.auth.service.AuthService;
+import com.example.shimpyo.domain.auth.service.RedisService;
+import com.example.shimpyo.domain.utils.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -26,9 +34,28 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final CookieUtils cookieUtils;
+    private final RedisService redisService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+        return new JwtAuthenticationFilter(jwtTokenProvider, cookieUtils, authenticationManager, redisService);
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -53,11 +80,11 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtTokenFilter, JwtAuthenticationFilter.class)
+                .addFilterAt(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));;
+                        exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         return http.build();
-
     }
 
     @Bean
@@ -71,10 +98,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.auth;
+package com.example.shimpyo.domain.auth.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

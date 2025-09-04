@@ -3,7 +3,7 @@ package com.example.shimpyo.domain.search.service;
 import com.example.shimpyo.domain.tourist.entity.TouristDocument;
 import com.example.shimpyo.domain.tourist.repository.TouristElasticSearchRepository;
 import com.example.shimpyo.domain.tourist.service.TouristService;
-import com.example.shimpyo.domain.tourist.util.AutocompleteKeywordGenerator;
+import com.example.shimpyo.domain.utils.AutocompleteKeywordGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;

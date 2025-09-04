@@ -1,10 +1,10 @@
-package com.example.shimpyo.domain.auth;
+package com.example.shimpyo.domain.auth.jwt;
 
-import com.example.shimpyo.domain.user.utils.RedisService;
-import com.example.shimpyo.global.BaseException;
+import com.example.shimpyo.domain.auth.service.RedisService;
+import com.example.shimpyo.domain.common.UserDetailsImpl;
+import com.example.shimpyo.domain.common.UserDetailsServiceImpl;
 import com.example.shimpyo.global.exceptionType.CommonException;
 import com.example.shimpyo.global.exceptionType.ExceptionType;
-import com.example.shimpyo.global.exceptionType.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -35,10 +35,9 @@ import static com.example.shimpyo.global.exceptionType.TokenException.*;
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.secretKey}")
-    private String secretKey;
-
     private final RedisService redisService;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtTokenProvider tokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -52,25 +51,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     setErrorResponse(response, TOKEN_IS_BLACKLISTED);
                     return;
                 }
-                Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-                Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(key)
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody();
 
-                // 이건 로그인 ID
-                String loginId = claims.getSubject();
-                // 이건 pk 값
-                Long userId = claims.get("id", Number.class).longValue();
-
-                Map<String, Object> principal = new HashMap<>();
-                principal.put("loginId", loginId);
-                principal.put("userId", userId);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        principal, "", Collections.emptyList());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                UserDetailsImpl userDetails = userDetailsService.loadUserByUserLoginId(
+                        tokenProvider.getUserNameFromAccess(token));
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             } catch (IllegalArgumentException ex) {
                 setErrorResponse(response, CommonException.ILLEGAL_ARGUMENT);
                 return;

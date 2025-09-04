@@ -1,4 +1,4 @@
-package com.example.shimpyo.domain.auth;
+package com.example.shimpyo.domain.auth.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -28,28 +28,26 @@ public class JwtTokenProvider {
     long expirationRT;
 
     // accesstoken 생성
-    public String createAccessToken(String loginId, long id){
-        return createToken(loginId, id, expiration, "sec");
+    public String createAccessToken(String loginId){
+        return createToken(loginId, expiration, "access");
     }
 
     // refresh token 재발급 로직
-    public String createRefreshToken(String loginId, long id, boolean isRememberMe){
+    public String createRefreshToken(String loginId, boolean isRememberMe){
         long expiry = isRememberMe ? expirationALRT : expirationRT;
-        return createToken(loginId, id, expiry, "ref");
+        return createToken(loginId, expiry, "refresh");
     }
 
     // JWT 생성 공통 메서드
-    private String createToken(String loginId, long id, long expiry, String type){
-        Claims claims = Jwts.claims().setSubject(loginId);
-        claims.put("id", id);
+    private String createToken(String loginId, long expiry, String type){
         Key key = null;
-        if(type.equals("ref")) {
+        if(type.equals("refresh")) {
            key = Keys.hmacShaKeyFor(secretKeyRT.getBytes());
         } else{
             key = Keys.hmacShaKeyFor(secretKey.getBytes());
         }
         return Jwts.builder()
-                .setClaims(claims)
+                .claim("loginId", loginId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiry) )
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -65,19 +63,13 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getUserNameToRefresh(String token){
-        return Jwts.parserBuilder().setSigningKey(secretKeyRT.getBytes()).build()
-                .parseClaimsJws(token).getBody().getSubject();
+    public String getUserNameFromRefresh(String token){
+        return (String) Jwts.parserBuilder().setSigningKey(secretKeyRT.getBytes()).build()
+                .parseClaimsJws(token).getBody().get("loginId");
     }
-
-    public long getUserIdToRefresh(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKeyRT.getBytes())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return ((Number) claims.get("id")).longValue();
+    public String getUserNameFromAccess(String token){
+        return (String) Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build()
+                .parseClaimsJws(token).getBody().get("loginId");
     }
 
     // JWT 남은 만료 시간을 추출하는 메서드

@@ -1,14 +1,14 @@
 package com.example.shimpyo.domain.auth.service;
 
-import com.example.shimpyo.domain.auth.JwtTokenProvider;
+import com.example.shimpyo.domain.auth.jwt.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.SocialLoginResponseDto;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.UserRepository;
-import com.example.shimpyo.domain.user.utils.RedisService;
-import com.example.shimpyo.utils.NicknamePrefixLoader;
+import com.example.shimpyo.domain.utils.CookieUtils;
+import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,9 +33,12 @@ public class OAuth2Service {
     private final UserAuthRepository userAuthRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
+    private final CookieUtils cookieUtils;
 
     @Value("${spring.security.oauth2.client.provider.kakao.admin-key}")
     private String KAKAO_ADMIN_KEY;
+    @Value("${jwt.expiration}")
+    long expiration;
     @Value("${jwt.expirationRT}")
     long expirationRT;
 
@@ -89,27 +92,13 @@ public class OAuth2Service {
 
     // 소셜 로그인 시 토큰 생성
     private void createToken(String loginId, long id, HttpServletResponse response){
-        String accessToken = jwtTokenProvider.createAccessToken(loginId, id);
-        String refreshToken = jwtTokenProvider.createRefreshToken(loginId, id, false);
+        String accessToken = jwtTokenProvider.createAccessToken(loginId);
+        String refreshToken = jwtTokenProvider.createRefreshToken(loginId, false);
 
         redisService.saveRefreshToken(loginId, refreshToken);
 
-        ResponseCookie accessCookie = createCookie("access_token", accessToken, expirationRT / 1000L);
-        ResponseCookie refreshCookie = createCookie("refresh_token", refreshToken, expirationRT / 1000L);
-
-        response.addHeader("Set-Cookie", accessCookie.toString());
-        response.addHeader("Set-Cookie", refreshCookie.toString());
-
-    }
-
-    private ResponseCookie createCookie(String name, String value, long maxAgeSeconds){
-        return ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(true) // 운영 환경에서는 true 권장
-                .path("/")
-                .maxAge(maxAgeSeconds)
-                .sameSite("Lax")
-                .build();
+        cookieUtils.addCookies(response, cookieUtils.buildAccessCookie(accessToken, expiration / 1000L),
+                cookieUtils.buildRefreshCookie(refreshToken, expirationRT));
     }
 
     public void unlinkKaKao(UserAuth userAuth) {

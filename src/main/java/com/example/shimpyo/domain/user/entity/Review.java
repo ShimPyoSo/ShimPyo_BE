@@ -2,7 +2,7 @@ package com.example.shimpyo.domain.user.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
-import com.example.shimpyo.utils.StringListConverter;
+import com.example.shimpyo.domain.utils.StringListConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.example.shimpyo.utils;
+package com.example.shimpyo.domain.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

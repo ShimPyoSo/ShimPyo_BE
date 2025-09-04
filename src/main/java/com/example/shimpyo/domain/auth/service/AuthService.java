@@ -1,25 +1,23 @@
 package com.example.shimpyo.domain.auth.service;
 
-import com.example.shimpyo.domain.auth.JwtTokenProvider;
+import com.example.shimpyo.domain.auth.jwt.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.dto.*;
 import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.UserRepository;
-import com.example.shimpyo.domain.user.utils.RedisService;
 import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.utils.NicknamePrefixLoader;
-import com.example.shimpyo.utils.SecurityUtils;
+import com.example.shimpyo.domain.utils.CookieUtils;
+import com.example.shimpyo.domain.utils.NicknamePrefixLoader;
+import com.example.shimpyo.domain.utils.SecurityUtils;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +38,8 @@ import static com.example.shimpyo.global.exceptionType.TokenException.NOT_MATCHE
 @Transactional
 public class AuthService {
 
+    @Value("${jwt.expiration}")
+    long expiration;
     @Value("${jwt.expirationALRT}")
     long expirationALRT; // 자동 로그인(RememberMe)일 때의 RT 유효시간(밀리초)
     @Value("${jwt.expirationRT}")
@@ -52,15 +52,13 @@ public class AuthService {
     private final RedisService redisService;
     private final MailService mailService;
     private final OAuth2Service oAuth2Service;
+    private final CookieUtils cookieUtils;
 
     private static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String NUMBERS = "0123456789";
     private static final String SPECIALS = "~!@#$%^&*";
     private static final String ALL = LETTERS + NUMBERS + SPECIALS;
     private static final SecureRandom random = new SecureRandom();
-
-    private static final String ACCESS_COOKIE = "access_token";
-    private static final String REFRESH_COOKIE = "refresh_token";
 
     /* ================= 공통 유틸 ================ */
 
@@ -69,50 +67,18 @@ public class AuthService {
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
     }
 
-    private String getCookieValue(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
-        for (Cookie c : cookies) {
-            if (REFRESH_COOKIE.equals(c.getName())) return c.getValue();
-        }
-        return null;
-    }
-
-    private ResponseCookie buildCookie(String name, String value, long maxAgeSeconds) {
-        return ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(maxAgeSeconds)
-                .sameSite("None")
-                .build();
-    }
-
-    private void addCookies(HttpServletResponse response, ResponseCookie... cookies) {
-        for (ResponseCookie c : cookies) {
-            response.addHeader("Set-Cookie", c.toString());
-        }
-    }
-
-    private void clearAuthCookies(HttpServletResponse response) {
-        addCookies(response,
-                buildCookie(ACCESS_COOKIE, "", 0),
-                buildCookie(REFRESH_COOKIE, "", 0)
-        );
-    }
-
     private void issueTokensAndSetCookies(HttpServletResponse response, String username, UserAuth userAuth, boolean isRememberMe) {
-        String accessToken = jwtTokenProvider.createAccessToken(username, userAuth.getId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(username, userAuth.getId(), isRememberMe);
+        String accessToken = jwtTokenProvider.createAccessToken(username);
+        String refreshToken = jwtTokenProvider.createRefreshToken(username, isRememberMe);
 
         // Redis: RT 저장 (키 = 로그인 아이디)
         redisService.saveRefreshToken(userAuth.getUserLoginId(), refreshToken);
 
         long refreshMaxAgeSec = (isRememberMe ? expirationALRT : expirationRT) / 1000L;
 
-        addCookies(response,
-                buildCookie(ACCESS_COOKIE, accessToken, refreshMaxAgeSec),
-                buildCookie(REFRESH_COOKIE, refreshToken, refreshMaxAgeSec)
+        cookieUtils.addCookies(response,
+                cookieUtils.buildAccessCookie(accessToken, expiration / 1000L),
+                cookieUtils.buildRefreshCookie(refreshToken, refreshMaxAgeSec)
         );
 
         userAuthRepository.updateLastLogin(username);
@@ -144,30 +110,15 @@ public class AuthService {
         return Map.of("EmailValidated", true);
     }
 
-    /* ================= 로그인/재발급/로그아웃 ================= */
-
-    // [#MOO3] 로그인
-    public LoginResponseDto login(UserLoginDto dto, HttpServletResponse response) {
-        String username = dto.getUsername();
-        UserAuth userAuth = getUserAuthOrThrow(username);
-
-        if (!passwordEncoder.matches(dto.getPassword(), userAuth.getPassword())) {
-            throw new BaseException(MEMBER_INFO_NOT_MATCHED);
-        }
-
-        issueTokensAndSetCookies(response, username, userAuth, dto.getIsRememberMe());
-        return LoginResponseDto.toDto(userAuth.getUser());
-    }
-
+    /* ================= 재발급/로그아웃 ================= */
     // [#MOO6] AccessToken 재발급
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = getCookieValue(request);
+        String refreshToken = cookieUtils.getCookieValue(request);
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             throw new BaseException(INVALID_REFRESH_TOKEN);
         }
 
-        String userName = jwtTokenProvider.getUserNameToRefresh(refreshToken);
-        long userId = jwtTokenProvider.getUserIdToRefresh(refreshToken);
+        String userName = jwtTokenProvider.getUserNameFromRefresh(refreshToken);
 
         // Redis RT 일치 확인
         String savedToken = redisService.getRefreshToken(userName);
@@ -175,8 +126,9 @@ public class AuthService {
             throw new BaseException(NOT_MATCHED_REFRESH_TOKEN);
         }
 
-        String newAccessToken = jwtTokenProvider.createAccessToken(userName, userId);
-        addCookies(response, buildCookie(ACCESS_COOKIE, newAccessToken, jwtTokenProvider.getRemainingExpiration(refreshToken)));
+        String newAccessToken = jwtTokenProvider.createAccessToken(userName);
+        cookieUtils.addCookies(response,
+                cookieUtils.buildAccessCookie(newAccessToken, jwtTokenProvider.getRemainingExpiration(refreshToken)));
     }
 
     public void logout(String accessToken, HttpServletResponse response) {
@@ -188,16 +140,18 @@ public class AuthService {
         redisService.deleteRefreshToken(SecurityUtils.getLoginId());
 
         // 3) 쿠키 삭제
-        clearAuthCookies(response);
+        cookieUtils.clearAuthCookies(response);
     }
 
     // 자동 로그인(리프레시만으로 사용자 정보 응답)
     public LoginResponseDto reLoginResponse(HttpServletRequest request) {
-        String token = getCookieValue(request);
-        long userId = jwtTokenProvider.getUserIdToRefresh(token);
+        String token = cookieUtils.getCookieValue(request);
+        if (jwtTokenProvider.validateToken(token))
+            throw new BaseException(INVALID_REFRESH_TOKEN);
+        String username = jwtTokenProvider.getUserNameFromRefresh(token);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
+        User user = userAuthRepository.findByUserLoginId(username)
+                .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND)).getUser();
         return LoginResponseDto.toDto(user);
     }
 
@@ -261,7 +215,7 @@ public class AuthService {
         userAuth.resetPassword(passwordEncoder.encode(newPW));
     }
 
-    public void deleteUser() {
+    public void deleteUser(HttpServletResponse response) {
         UserAuth userAuth = getUserAuthOrThrow(SecurityUtils.getLoginId());
         User user = userRepository.findByUserAuth(userAuth)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND));
@@ -271,7 +225,7 @@ public class AuthService {
         if (userAuth.getSocialType().equals(SocialType.KAKAO)) {
             oAuth2Service.unlinkKaKao(userAuth);
         }
-
+        cookieUtils.clearAuthCookies(response);
         userAuthRepository.delete(userAuth);
         userRepository.delete(user);
     }
