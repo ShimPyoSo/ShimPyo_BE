@@ -39,6 +39,7 @@ public class AuthController {
     }
 
     // [#MOO3] 유저 로그인 시작
+    @Operation(summary = "일반 로그인")
     @SwaggerErrorApi(type = AuthException.class, codes = {"MEMBER_NOT_FOUND", "MEMBER_INFO_NOT_MATCHED"})
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
