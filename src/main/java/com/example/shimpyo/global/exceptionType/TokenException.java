@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum TokenException implements ExceptionType{
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "잘못된 토큰입니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "RefreshToken 유효하지 않음"),
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     NOT_MATCHED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "RefreshToken 불일치"),
     TOKEN_IS_BLACKLISTED(HttpStatus.UNAUTHORIZED, "로그아웃 된 쿠키 토큰입니다."),
     INVALID_VISIT_TIME_FORMAT(HttpStatus.BAD_REQUEST, "잘못된 형식의 시간입니다."),

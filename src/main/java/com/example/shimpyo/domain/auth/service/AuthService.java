@@ -61,7 +61,6 @@ public class AuthService {
 
     private static final String ACCESS_COOKIE = "access_token";
     private static final String REFRESH_COOKIE = "refresh_token";
-    private static final long ACCESS_MAX_AGE = 600L; // 10분
 
     /* ================= 공통 유틸 ================ */
 
@@ -112,7 +111,7 @@ public class AuthService {
         long refreshMaxAgeSec = (isRememberMe ? expirationALRT : expirationRT) / 1000L;
 
         addCookies(response,
-                buildCookie(ACCESS_COOKIE, accessToken, ACCESS_MAX_AGE),
+                buildCookie(ACCESS_COOKIE, accessToken, refreshMaxAgeSec),
                 buildCookie(REFRESH_COOKIE, refreshToken, refreshMaxAgeSec)
         );
 
@@ -177,7 +176,7 @@ public class AuthService {
         }
 
         String newAccessToken = jwtTokenProvider.createAccessToken(userName, userId);
-        addCookies(response, buildCookie(ACCESS_COOKIE, newAccessToken, ACCESS_MAX_AGE));
+        addCookies(response, buildCookie(ACCESS_COOKIE, newAccessToken, jwtTokenProvider.getRemainingExpiration(refreshToken)));
     }
 
     public void logout(String accessToken, HttpServletResponse response) {

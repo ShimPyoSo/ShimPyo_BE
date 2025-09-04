@@ -28,8 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
 
-import static com.example.shimpyo.global.exceptionType.TokenException.INVALID_TOKEN;
-import static com.example.shimpyo.global.exceptionType.TokenException.TOKEN_IS_BLACKLISTED;
+import static com.example.shimpyo.global.exceptionType.TokenException.*;
 
 @Component
 @Slf4j
@@ -76,7 +75,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 setErrorResponse(response, CommonException.ILLEGAL_ARGUMENT);
                 return;
             } catch (ExpiredJwtException e) {
-                setErrorResponse(response, INVALID_TOKEN);
+                setErrorResponse(response, EXPIRED_TOKEN);
                 return;
             }
         }

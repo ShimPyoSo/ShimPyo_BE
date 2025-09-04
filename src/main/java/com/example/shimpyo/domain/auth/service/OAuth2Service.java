@@ -94,7 +94,7 @@ public class OAuth2Service {
 
         redisService.saveRefreshToken(loginId, refreshToken);
 
-        ResponseCookie accessCookie = createCookie("access_token", accessToken, 600);
+        ResponseCookie accessCookie = createCookie("access_token", accessToken, expirationRT / 1000L);
         ResponseCookie refreshCookie = createCookie("refresh_token", refreshToken, expirationRT / 1000L);
 
         response.addHeader("Set-Cookie", accessCookie.toString());
