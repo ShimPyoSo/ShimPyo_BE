@@ -51,6 +51,9 @@ public class SuggestionService {
     public Long likeCourse(String token) {
         User user = authService.findUser().getUser();
         SuggestionRedisDto dto = redisService.findSuggestionByTempId(token);
+        System.out.println("Request Token : " + token);
+        System.out.println("Request User : " + user.getId());
+        System.out.println("Found Suggetion's User : " + dto.getUserId());
         if (!user.getId().equals(dto.getUserId()))
             throw new BaseException(COURSE_NOT_FOUND);
        if (redisService.existsSuggestionByToken(token)) {
