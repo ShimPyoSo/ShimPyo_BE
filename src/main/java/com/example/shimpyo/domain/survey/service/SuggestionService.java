@@ -51,13 +51,9 @@ public class SuggestionService {
     public Long likeCourse(String token) {
         User user = authService.findUser().getUser();
         SuggestionRedisDto dto = redisService.findSuggestionByTempId(token);
-        System.out.println("Request Token : " + token);
-        System.out.println("Request User : " + user.getId());
-        System.out.println("Found Suggetion's User : " + dto.getUserId());
         if (!user.getId().equals(dto.getUserId()))
             throw new BaseException(COURSE_NOT_FOUND);
        if (redisService.existsSuggestionByToken(token)) {
-           System.out.println("saving suggestion ... ");
             return saveSuggestionFromTemp(user, dto.getCourse());
         }
         throw new BaseException(ALREADY_LIKED);
@@ -75,11 +71,7 @@ public class SuggestionService {
         // 3. SuggestionTourist 생성
         for (CourseResponseDto.CourseDayDto day : dto.getDays()) {
             for (CourseResponseDto.TouristInfoDto tDto : day.getList()) {
-                System.out.println(tDto.getTouristId());
-                System.out.println(tDto.getTitle());
                 SuggestionTourist st = new SuggestionTourist();
-                st.addSuggestion(suggestion);
-
                 // n일차
                 st.defineDate(day.getDate());
                 // 방문 시간
@@ -98,7 +90,6 @@ public class SuggestionService {
                 .user(user)
                 .suggestion(suggestion)
                 .build());
-
 
         // 5. 최종 저장
         return suggestion.getId();
@@ -204,8 +195,6 @@ public class SuggestionService {
 
         suggestionRepository.save(suggestion);
     }
-
-
 
     @Transactional(readOnly = true)
     public List<LikedCourseResponseDto> getLikedCourseList() {

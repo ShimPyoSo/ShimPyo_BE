@@ -52,7 +52,6 @@ public class SuggestionTourist extends BaseEntity {
     }
     public void addSuggestion(Suggestion suggestion) {
         this.suggestion = suggestion;
-        suggestion.getSuggestionTourists().add(this);
     }
 
     public void setTourist(Tourist tourist) {
