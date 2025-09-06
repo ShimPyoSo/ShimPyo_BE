@@ -25,9 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -122,7 +120,6 @@ public class SuggestionService {
                 .stream().map(AdditionRecommendsResponseDto::toDto).collect(Collectors.toList());
     }
 
-    @Transactional
     public void modifyCourse(CourseUpdateRequestDto dto) {
         User user = authService.findUser().getUser();
 
@@ -131,19 +128,31 @@ public class SuggestionService {
 
         // 2. 기존 엔티티 맵핑
         Map<Long, SuggestionTourist> existingTourists = suggestion.getSuggestionTourists()
-                .stream().collect(Collectors.toMap(st -> st.getTourist().getId(), Function.identity()));
+                .stream().collect(Collectors.toMap(
+                        st -> st.getTourist().getId(),
+                        Function.identity()
+                ));
         Map<Long, SuggestionCustomTourist> existingCustoms = suggestion.getSuggestionCustomTourists()
-                .stream().collect(Collectors.toMap(sct -> sct.getCustomTourist().getId(), Function.identity()));
+                .stream().collect(Collectors.toMap(
+                        sct -> sct.getCustomTourist().getId(),
+                        Function.identity()
+                ));
 
-        // 3. 업데이트할 리스트
-        List<SuggestionTourist> updatedTourists = new ArrayList<>();
-        List<SuggestionCustomTourist> updatedCustoms = new ArrayList<>();
+        // 3. 업데이트 및 삭제 처리용 리스트
+        Set<SuggestionTourist> toKeepTourists = new HashSet<>();
+        Set<SuggestionCustomTourist> toKeepCustoms = new HashSet<>();
 
+        // 기존 엔티티는 모두 삭제 후보로 넣어두고, 사용된 것은 제거
+        List<SuggestionTourist> toDeleteTourists = new ArrayList<>(suggestion.getSuggestionTourists());
+        List<SuggestionCustomTourist> toDeleteCustoms = new ArrayList<>(suggestion.getSuggestionCustomTourists());
+
+        // 4. DTO 반복
         for (CourseUpdateRequestDto.CourseDayDto dayDto : dto.getDays()) {
             for (CourseUpdateRequestDto.TouristInfoDto tDto : dayDto.getList()) {
+                LocalTime time = LocalTime.parse(tDto.getTime());
 
-                // 3-1. 새 CustomTourist 생성
                 if (tDto.getTouristId() == -1 && "CUSTOM".equals(tDto.getType())) {
+                    // 새 CustomTourist 생성
                     CustomTourist customTourist = CustomTourist.builder()
                             .name(tDto.getTitle())
                             .address(tDto.getAddress())
@@ -158,42 +167,41 @@ public class SuggestionService {
                             .customTourist(customTourist)
                             .suggestion(suggestion)
                             .date(dayDto.getDate())
-                            .time(LocalTime.parse(tDto.getTime()))
+                            .time(time)
                             .build();
-                    updatedCustoms.add(sct);
+                    suggestion.getSuggestionCustomTourists().add(sct);
+                    toKeepCustoms.add(sct);
 
                 } else if ("TOURIST".equals(tDto.getType()) && tDto.getTouristId() != -1) {
-                    // 3-2. 기존 Tourist 수정
                     SuggestionTourist st = existingTourists.get(tDto.getTouristId());
                     if (st != null) {
+                        // 날짜/시간 변경
                         st.defineDate(dayDto.getDate());
-                        st.defineTime(LocalTime.parse(tDto.getTime()));
-                        updatedTourists.add(st);
-                        existingTourists.remove(tDto.getTouristId());
+                        st.defineTime(time);
+                        toKeepTourists.add(st);
+                        toDeleteTourists.remove(st);
                     }
 
                 } else if ("CUSTOM".equals(tDto.getType()) && tDto.getTouristId() != -1) {
-                    // 3-3. 기존 CustomTourist 수정
                     SuggestionCustomTourist sct = existingCustoms.get(tDto.getTouristId());
                     if (sct != null) {
                         sct.defineDate(dayDto.getDate());
-                        sct.defineTime(LocalTime.parse(tDto.getTime()));
-                        updatedCustoms.add(sct);
-                        existingCustoms.remove(tDto.getTouristId());
+                        sct.defineTime(time);
+                        toKeepCustoms.add(sct);
+                        toDeleteCustoms.remove(sct);
                     }
                 }
             }
         }
 
-        // 4. 삭제 처리: existing에 남아있는 것들은 삭제
-        suggestion.getSuggestionTourists().clear();
-        suggestion.getSuggestionTourists().addAll(updatedTourists);
+        // 5. 삭제 처리 (한 번만)
+        suggestion.getSuggestionTourists().removeAll(toDeleteTourists);
+        suggestion.getSuggestionCustomTourists().removeAll(toDeleteCustoms);
 
-        suggestion.getSuggestionCustomTourists().clear();
-        suggestion.getSuggestionCustomTourists().addAll(updatedCustoms);
-
+        // 6. 저장
         suggestionRepository.save(suggestion);
     }
+
 
     @Transactional(readOnly = true)
     public List<LikedCourseResponseDto> getLikedCourseList() {
