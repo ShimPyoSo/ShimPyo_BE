@@ -137,8 +137,6 @@ public class SurveyService {
                 .build();
     }
 
-
-
     private boolean canVisitAt(Tourist tourist, LocalTime visitTime) {
         // 예시: tourist.openTime은 "08:00" 형식이라고 가정
         if (tourist.getOpenTime() == null) return true;

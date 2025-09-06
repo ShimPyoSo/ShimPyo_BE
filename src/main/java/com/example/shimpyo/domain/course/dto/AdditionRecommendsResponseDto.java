@@ -1,9 +1,14 @@
 package com.example.shimpyo.domain.course.dto;
 
 import com.example.shimpyo.domain.tourist.dto.OperationTime;
+import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
+import com.example.shimpyo.domain.tourist.entity.TouristCategory;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -12,6 +17,7 @@ public class AdditionRecommendsResponseDto {
         private String title;
         private String region;
         private String address;
+        private List<Category> category;
         private OperationTime operationTime;
         private String tel;
         private String images;
@@ -25,6 +31,9 @@ public class AdditionRecommendsResponseDto {
                     .title(tourist.getName())
                     .region(tourist.getRegion())
                     .address(tourist.getAddress())
+                    .category(tourist.getTouristCategories().stream()
+                            .map(TouristCategory::getCategory)
+                            .collect(Collectors.toList()))
                     .tel(tourist.getTel())
                     .latitude(tourist.getLatitude())
                     .longitude(tourist.getLongitude())
