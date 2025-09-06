@@ -41,6 +41,6 @@ public class SurveyController {
             codes = {"MEMBER_NOT_FOUND", "ALREADY_LIKED", "COURSE_NOT_FOUND", "SERVER_ERROR"})
     @PostMapping
     public ResponseEntity<Map<String, Long>> likeCourse(@RequestBody Map<String, String> requestDto) {
-        return ResponseEntity.ok(Map.of("courseId", suggestionService.likeCourse(requestDto.get("courseId"))));
+        return ResponseEntity.ok(Map.of("courseId", suggestionService.likeCourse(requestDto.get("token"))));
     }
 }
