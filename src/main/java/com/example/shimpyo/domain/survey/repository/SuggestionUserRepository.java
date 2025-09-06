@@ -11,18 +11,24 @@ import java.util.List;
 @Repository
 public interface SuggestionUserRepository extends JpaRepository<SuggestionUser, Long> {
     @Query("""
-        select new com.example.shimpyo.domain.user.dto.LikedCourseResponseDto(
-            s.id,
-            s.title,
-            s.wellnessType,
-            s.token,
-            st.tourist.image
-        )
-        from SuggestionUser us
-        join us.suggestion s
-        join s.suggestionTourists st
-        join st.tourist t
-        where us.user.id = :userId
-    """)
+                select new com.example.shimpyo.domain.user.dto.LikedCourseResponseDto(
+                    s.id,
+                    s.title,
+                    s.wellnessType,
+                    s.token,
+                    (
+                        select st.tourist.image
+                        from SuggestionTourist st
+                        where st.suggestion = s
+                        order by st.id asc
+                        limit 1
+                    )
+                )
+                from SuggestionUser us
+                join us.suggestion s
+                join s.suggestionTourists st
+                join st.tourist t
+                where us.user.id = :userId
+            """)
     List<LikedCourseResponseDto> findLikedCoursesByUserId(@Param("userId") Long userId);
 }
