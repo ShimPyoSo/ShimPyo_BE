@@ -57,6 +57,7 @@ public class SuggestionService {
         if (!user.getId().equals(dto.getUserId()))
             throw new BaseException(COURSE_NOT_FOUND);
        if (redisService.existsSuggestionByToken(token)) {
+           System.out.println("saving suggestion ... ");
             return saveSuggestionFromTemp(user, dto.getCourse());
         }
         throw new BaseException(ALREADY_LIKED);
@@ -74,6 +75,8 @@ public class SuggestionService {
         // 3. SuggestionTourist 생성
         for (CourseResponseDto.CourseDayDto day : dto.getDays()) {
             for (CourseResponseDto.TouristInfoDto tDto : day.getList()) {
+                System.out.println(tDto.getTouristId());
+                System.out.println(tDto.getTitle());
                 SuggestionTourist st = new SuggestionTourist();
                 st.addSuggestion(suggestion);
 
@@ -82,14 +85,12 @@ public class SuggestionService {
                 // 방문 시간
                 st.defineTime(LocalTime.parse(tDto.getTime(), DateTimeFormatter.ofPattern("HH:mm")));
 
-                if (tDto.getTouristId() != null) {
-                    Tourist tourist = touristService.findTourist(tDto.getTouristId());
-                    st.setTourist(tourist);
-                }
+                Tourist tourist = touristService.findTourist(tDto.getTouristId());
+                st.setTourist(tourist);
                 suggestion.addSuggestionTourist(st);
             }
         }
-
+        System.out.println("Tourist count: " + suggestion.getSuggestionTourists().size());
         suggestionRepository.save(suggestion);
 
         // 4. SuggestionUser 저장

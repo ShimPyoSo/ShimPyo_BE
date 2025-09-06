@@ -52,15 +52,11 @@ public class SuggestionTourist extends BaseEntity {
     }
     public void addSuggestion(Suggestion suggestion) {
         this.suggestion = suggestion;
-        if (suggestion != null && !suggestion.getSuggestionTourists().contains(this)) {
-            suggestion.getSuggestionTourists().add(this);
-        }
+        suggestion.getSuggestionTourists().add(this);
     }
 
     public void setTourist(Tourist tourist) {
         this.tourist = tourist;
-        if (tourist != null && !tourist.getSuggestionTourists().contains(this)) {
-            tourist.getSuggestionTourists().add(this);
-        }
+        tourist.getSuggestionTourists().add(this);
     }
 }
