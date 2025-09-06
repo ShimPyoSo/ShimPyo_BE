@@ -198,11 +198,7 @@ public class SuggestionService {
 
     @Transactional(readOnly = true)
     public List<LikedCourseResponseDto> getLikedCourseList() {
-        User user = authService.findUser().getUser();
-        return user.getLikedSuggestion().stream()
-                .map(s -> LikedCourseResponseDto.toDto(s.getSuggestion(),
-                        s.getSuggestion().getSuggestionTourists().get(0).getTourist().getImage()))
-                .collect(Collectors.toList());
+        return suRepository.findLikedCoursesByUserId(authService.findUser().getUser().getId());
     }
 
     @Transactional(readOnly = true)

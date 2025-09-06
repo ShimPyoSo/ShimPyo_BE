@@ -1,16 +1,28 @@
 package com.example.shimpyo.domain.survey.repository;
 
-import com.example.shimpyo.domain.survey.entity.Suggestion;
 import com.example.shimpyo.domain.survey.entity.SuggestionUser;
-import com.example.shimpyo.domain.user.entity.User;
+import com.example.shimpyo.domain.user.dto.LikedCourseResponseDto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
 
 @Repository
 public interface SuggestionUserRepository extends JpaRepository<SuggestionUser, Long> {
-    boolean existsByUserAndSuggestion(User user, Suggestion suggestion);
-
-    Optional<SuggestionUser> findBySuggestionAndUser(Suggestion suggestion, User user);
+    @Query("""
+        select new com.example.shimpyo.domain.user.dto.LikedCourseResponseDto(
+            s.id,
+            s.title,
+            s.wellnessType,
+            s.token,
+            st.tourist.image
+        )
+        from SuggestionUser us
+        join us.suggestion s
+        join s.suggestionTourists st
+        join st.tourist t
+        where us.user.id = :userId
+    """)
+    List<LikedCourseResponseDto> findLikedCoursesByUserId(@Param("userId") Long userId);
 }

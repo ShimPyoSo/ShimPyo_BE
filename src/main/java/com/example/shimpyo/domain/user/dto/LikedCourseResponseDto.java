@@ -1,11 +1,11 @@
 package com.example.shimpyo.domain.user.dto;
 
-import com.example.shimpyo.domain.survey.entity.Suggestion;
-import lombok.Builder;
+import com.example.shimpyo.domain.survey.entity.WellnessType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@Builder
+@AllArgsConstructor
 public class LikedCourseResponseDto {
 
     private Long courseId;
@@ -14,13 +14,11 @@ public class LikedCourseResponseDto {
     private String token;
     private String thumbnail;
 
-    public static LikedCourseResponseDto toDto(Suggestion s, String thumbnail) {
-        return LikedCourseResponseDto.builder()
-                .courseId(s.getId())
-                .title(s.getTitle())
-                .typename(s.getWellnessType().getLabel())
-                .token(s.getToken())
-                .thumbnail(thumbnail)
-                .build();
+    public LikedCourseResponseDto(Long courseId, String title, WellnessType wellnessType, String token, String thumbnail) {
+        this.courseId = courseId;
+        this.title = title;
+        this.typename = wellnessType.getLabel();
+        this.token = token;
+        this.thumbnail = thumbnail;
     }
 }
