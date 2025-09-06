@@ -70,4 +70,16 @@ public class RegionUtils {
     public static String convertToRegion(String value) {
         return value == null? null : valueToSubRegion.get(value);
     }
+
+    public static String convertProvince(String address) {
+        char firstChar = address.charAt(0);
+
+        if (firstChar == '충' || firstChar == '전' || firstChar == '경') {
+            // 충청도, 전라도, 경상도는 앞 세 글자
+            return address.substring(0, 3);
+        } else {
+            // 나머지는 앞 두 글자
+            return address.substring(0, 2);
+        }
+    }
 }

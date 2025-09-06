@@ -6,7 +6,7 @@ import com.example.shimpyo.domain.user.dto.*;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberException;
-import com.example.shimpyo.utils.SecurityUtils;
+import com.example.shimpyo.domain.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

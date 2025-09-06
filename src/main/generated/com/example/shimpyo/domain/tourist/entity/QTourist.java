@@ -20,9 +20,10 @@ public class QTourist extends EntityPathBase<Tourist> {
 
     public static final QTourist tourist = new QTourist("tourist");
 
-    public final com.example.shimpyo.domain.common.QBaseEntity _super = new com.example.shimpyo.domain.common.QBaseEntity(this);
+    public final QAbstractTourist _super = new QAbstractTourist(this);
 
-    public final StringPath address = createString("address");
+    //inherited
+    public final StringPath address = _super.address;
 
     public final NumberPath<Double> age20EarlyRatio = createNumber("age20EarlyRatio", Double.class);
 
@@ -51,7 +52,9 @@ public class QTourist extends EntityPathBase<Tourist> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath dayOff = createString("dayOff");
+    public final StringPath dayOffCal = createString("dayOffCal");
+
+    public final StringPath dayOffShow = createString("dayOffShow");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> deletedAt = _super.deletedAt;
@@ -62,23 +65,29 @@ public class QTourist extends EntityPathBase<Tourist> {
 
     public final StringPath homepageUrl = createString("homepageUrl");
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
+    //inherited
+    public final NumberPath<Long> id = _super.id;
 
-    public final StringPath image = createString("image");
+    //inherited
+    public final StringPath image = _super.image;
 
-    public final NumberPath<Double> latitude = createNumber("latitude", Double.class);
+    //inherited
+    public final NumberPath<Double> latitude = _super.latitude;
 
     public final ListPath<com.example.shimpyo.domain.user.entity.Likes, com.example.shimpyo.domain.user.entity.QLikes> likes = this.<com.example.shimpyo.domain.user.entity.Likes, com.example.shimpyo.domain.user.entity.QLikes>createList("likes", com.example.shimpyo.domain.user.entity.Likes.class, com.example.shimpyo.domain.user.entity.QLikes.class, PathInits.DIRECT2);
 
-    public final NumberPath<Double> longitude = createNumber("longitude", Double.class);
+    //inherited
+    public final NumberPath<Double> longitude = _super.longitude;
 
     public final NumberPath<Double> maleRatio = createNumber("maleRatio", Double.class);
 
-    public final StringPath name = createString("name");
+    //inherited
+    public final StringPath name = _super.name;
 
     public final TimePath<java.time.LocalTime> openTime = createTime("openTime", java.time.LocalTime.class);
 
-    public final StringPath region = createString("region");
+    //inherited
+    public final StringPath region = _super.region;
 
     public final StringPath reservationUrl = createString("reservationUrl");
 
@@ -86,7 +95,8 @@ public class QTourist extends EntityPathBase<Tourist> {
 
     public final ListPath<com.example.shimpyo.domain.survey.entity.SuggestionTourist, com.example.shimpyo.domain.survey.entity.QSuggestionTourist> suggestionTourists = this.<com.example.shimpyo.domain.survey.entity.SuggestionTourist, com.example.shimpyo.domain.survey.entity.QSuggestionTourist>createList("suggestionTourists", com.example.shimpyo.domain.survey.entity.SuggestionTourist.class, com.example.shimpyo.domain.survey.entity.QSuggestionTourist.class, PathInits.DIRECT2);
 
-    public final StringPath telNum = createString("telNum");
+    //inherited
+    public final StringPath tel = _super.tel;
 
     public final ListPath<TouristCategory, QTouristCategory> touristCategories = this.<TouristCategory, QTouristCategory>createList("touristCategories", TouristCategory.class, QTouristCategory.class, PathInits.DIRECT2);
 
@@ -94,8 +104,6 @@ public class QTourist extends EntityPathBase<Tourist> {
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
-
-    public final ListPath<com.example.shimpyo.domain.course.entity.UserCourseList, com.example.shimpyo.domain.course.entity.QUserCourseList> userCourseLists = this.<com.example.shimpyo.domain.course.entity.UserCourseList, com.example.shimpyo.domain.course.entity.QUserCourseList>createList("userCourseLists", com.example.shimpyo.domain.course.entity.UserCourseList.class, com.example.shimpyo.domain.course.entity.QUserCourseList.class, PathInits.DIRECT2);
 
     public QTourist(String variable) {
         super(Tourist.class, forVariable(variable));

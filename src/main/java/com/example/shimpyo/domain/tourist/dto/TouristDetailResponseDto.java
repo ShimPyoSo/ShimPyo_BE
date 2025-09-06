@@ -78,7 +78,7 @@ public class TouristDetailResponseDto {
                 .region(tourist.getRegion())
                 .address(tourist.getAddress())
                 .operationTime(OperationTime.toDto(tourist))
-                .tel(tourist.getTelNum())
+                .tel(tourist.getTel())
                 .homepage(tourist.getHomepageUrl())
                 .reservation(tourist.getReservationUrl())
                 .images(image)

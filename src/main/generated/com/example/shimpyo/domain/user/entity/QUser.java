@@ -53,8 +53,6 @@ public class QUser extends EntityPathBase<User> {
 
     public final com.example.shimpyo.domain.auth.entity.QUserAuth userAuth;
 
-    public final ListPath<com.example.shimpyo.domain.course.entity.UserCourse, com.example.shimpyo.domain.course.entity.QUserCourse> userCourses = this.<com.example.shimpyo.domain.course.entity.UserCourse, com.example.shimpyo.domain.course.entity.QUserCourse>createList("userCourses", com.example.shimpyo.domain.course.entity.UserCourse.class, com.example.shimpyo.domain.course.entity.QUserCourse.class, PathInits.DIRECT2);
-
     public QUser(String variable) {
         this(User.class, forVariable(variable), INITS);
     }

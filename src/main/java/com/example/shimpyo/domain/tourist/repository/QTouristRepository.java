@@ -11,7 +11,7 @@ import com.example.shimpyo.domain.tourist.entity.*;
 import com.example.shimpyo.domain.user.entity.QLikes;
 import com.example.shimpyo.domain.user.entity.QReview;
 import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.utils.RegionUtils;
+import com.example.shimpyo.domain.utils.RegionUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -22,7 +22,6 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.util.*;

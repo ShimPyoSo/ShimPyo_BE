@@ -1,6 +1,8 @@
 package com.example.shimpyo.domain.survey.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
+import com.example.shimpyo.domain.tourist.entity.AbstractTourist;
+import com.example.shimpyo.domain.tourist.entity.CustomTourist;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -19,11 +21,10 @@ import java.time.LocalTime;
 @Builder
 @Getter
 // Hibernate 구현체가 delete를 수행하는 경우 soft delete 로 수행하도록 하는 명령어
-@SQLDelete(sql = "UPDATE suggestion_tourist SET deleted_at = now() WHERE id = ?")
+@SQLDelete(sql = "UPDATE suggestion_custom_tourist SET deleted_at = now() WHERE id = ?")
 // 조회 하는 경우 deleted_at 이 null 인 데이터만 조회
 @SQLRestriction("deleted_at IS NULL")
-public class SuggestionTourist extends BaseEntity {
-
+public class SuggestionCustomTourist extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,8 +42,8 @@ public class SuggestionTourist extends BaseEntity {
     private Suggestion suggestion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tourist_id")
-    private Tourist tourist;
+    @JoinColumn(name = "custom_tourist_id")
+    private CustomTourist customTourist;
 
     public void defineDate(String date) {
         this.date = date;
@@ -50,17 +51,18 @@ public class SuggestionTourist extends BaseEntity {
     public void defineTime(LocalTime time) {
         this.time = time;
     }
+
     public void addSuggestion(Suggestion suggestion) {
         this.suggestion = suggestion;
-        if (suggestion != null && !suggestion.getSuggestionTourists().contains(this)) {
-            suggestion.getSuggestionTourists().add(this);
+        if (suggestion != null && !suggestion.getSuggestionCustomTourists().contains(this)) {
+            suggestion.getSuggestionCustomTourists().add(this);
         }
     }
 
-    public void setTourist(Tourist tourist) {
-        this.tourist = tourist;
-        if (tourist != null && !tourist.getSuggestionTourists().contains(this)) {
-            tourist.getSuggestionTourists().add(this);
+    public void setCustomTourist(CustomTourist customTourist) {
+        this.customTourist = customTourist;
+        if (customTourist != null && !customTourist.getSuggestionCustomTourists().contains(this)) {
+            customTourist.getSuggestionCustomTourists().add(this);
         }
     }
 }

@@ -26,7 +26,7 @@ public class SearchResponseDto {
                 .title(tourist.getName())
                 .address(tourist.getAddress())
                 .region(tourist.getRegion())
-                .tel(tourist.getTelNum())
+                .tel(tourist.getTel())
                 .operationTime(OperationTime.toDto(tourist))
                 .latitude(tourist.getLatitude())
                 .longitude(tourist.getLongitude())

@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.survey.controller;
 
 import com.example.shimpyo.domain.survey.dto.CourseRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
+import com.example.shimpyo.domain.survey.service.SuggestionService;
 import com.example.shimpyo.domain.survey.service.SurveyService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.CourseException;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class SurveyController {
 
     private final SurveyService surveyService;
+    private final SuggestionService suggestionService;
 
     @Operation(summary = "코스 확인하기")
     @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
@@ -36,8 +38,7 @@ public class SurveyController {
     @Operation(summary = "코스 찜하기")
     @SwaggerErrorApi(type = {MemberException.class, CourseException.class}, codes = {"MEMBER_NOT_FOUND", "ALREADY_LIKED"})
     @PostMapping
-    public ResponseEntity<Void> likeCourse(@RequestBody Map<String, Long> requestDto) {
-        surveyService.likeCourse(requestDto.get("courseId"));
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Long>> likeCourse(@RequestBody Map<String, String> requestDto) {
+        return ResponseEntity.ok(Map.of("courseId", suggestionService.likeCourse(requestDto.get("courseId"))));
     }
 }

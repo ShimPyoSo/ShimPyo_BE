@@ -1,8 +1,6 @@
 package com.example.shimpyo.domain.tourist.entity;
 
-import com.example.shimpyo.domain.common.BaseEntity;
 import com.example.shimpyo.domain.survey.entity.SuggestionTourist;
-import com.example.shimpyo.domain.course.entity.UserCourseList;
 import com.example.shimpyo.domain.user.entity.Likes;
 import com.example.shimpyo.domain.user.entity.Review;
 import jakarta.persistence.*;
@@ -10,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -17,38 +16,12 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Builder
 @Getter
-// Hibernate 구현체가 delete를 수행하는 경우 soft delete 로 수행하도록 하는 명령어
-@SQLDelete(sql = "UPDATE tourist SET deleted_at = now() WHERE id = ?")
-// 조회 하는 경우 deleted_at 이 null 인 데이터만 조회
-@SQLRestriction("deleted_at IS NULL")
-public class Tourist extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column
-    private String name;
-
-    @Column
-    private String address;
-
-    @Column
-    private String region;
-
-    @Column
-    private String image;
-
-    @Column
-    private Double latitude;
-
-    @Column
-    private Double longitude;
+@Table(name = "tourist")
+@SuperBuilder
+@NoArgsConstructor
+public class Tourist extends AbstractTourist {
 
     @Column
     private Long contentId;
@@ -63,22 +36,19 @@ public class Tourist extends BaseEntity {
     private String reservationUrl;
 
     @Column
-    private String dayOff;
+    private String dayOffShow;
 
-    // 오픈 시간
+    @Column
+    private String dayOffCal;
+
     @Column
     private LocalTime openTime;
 
-    // 마감 시간
     @Column
     private LocalTime closeTime;
 
-    // 휴게시간
     @Column
     private String breakTime;
-    // 전화번호
-    @Column
-    private String telNum;
 
     @Column
     private Double maleRatio;
@@ -115,9 +85,6 @@ public class Tourist extends BaseEntity {
     private List<SuggestionTourist> suggestionTourists = new ArrayList<>();
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCourseList> userCourseLists = new ArrayList<>();
-
-    @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Likes> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -128,6 +95,14 @@ public class Tourist extends BaseEntity {
         if (st.getTourist() != this) {
             st.setTourist(this);
         }
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
 

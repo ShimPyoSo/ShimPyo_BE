@@ -79,4 +79,23 @@ public class RedisConfig {
         return redisTemplate;
     }
     // [#MOO5] 토큰 발급 로직 수정 끝
+
+    // 추천 코스 저장용 0번 저장소 사용
+    @Bean
+    @Qualifier("0")
+    public RedisConnectionFactory redisSuggestionConnectionFactory() {
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
+        redisStandaloneConfiguration.setDatabase(3);
+        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+    }
+
+    @Bean
+    @Qualifier("0")
+    public RedisTemplate<String, Object> redisSuggestionTemplate(@Qualifier("0") RedisConnectionFactory redisBlackListConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisBlackListConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return redisTemplate;
+    }
 }

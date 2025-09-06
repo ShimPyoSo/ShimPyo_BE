@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.user.controller;
 
 import com.example.shimpyo.domain.course.service.LikesService;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
+import com.example.shimpyo.domain.survey.service.SuggestionService;
 import com.example.shimpyo.domain.survey.service.SurveyService;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.dto.*;
@@ -31,7 +32,7 @@ public class UserController {
     private final UserService userService;
     private final LikesService likesService;
     private final TouristService touristService;
-    private final SurveyService surveyService;
+    private final SuggestionService suggestionService;
 
     @Operation(summary = "닉네임 변경")
     @SwaggerErrorApi(type = {MemberException.class}, codes = {"NICKNAME_NOT_VALID", "MEMBER_NOT_FOUND"})
@@ -103,7 +104,7 @@ public class UserController {
             codes = {"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @GetMapping("/likes/course")
     public ResponseEntity<List<LikedCourseResponseDto>> getLikedCourseList() {
-        return ResponseEntity.ok(surveyService.getLikedCourseList());
+        return ResponseEntity.ok(suggestionService.getLikedCourseList());
     }
 
     @Operation(summary = "찜한 코스 상세")
@@ -111,6 +112,6 @@ public class UserController {
             codes = {"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @GetMapping("/likes/detail")
     public ResponseEntity<CourseResponseDto> getLikedCourseDetail(@RequestParam("courseId") Long courseId){
-        return ResponseEntity.ok(surveyService.getLikedCourseDetail(courseId));
+        return ResponseEntity.ok(suggestionService.getLikedCourseDetail(courseId));
     }
 }

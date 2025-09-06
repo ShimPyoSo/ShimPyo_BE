@@ -4,7 +4,8 @@ import com.example.shimpyo.domain.course.dto.AdditionRecommendsResponseDto;
 import com.example.shimpyo.domain.course.dto.ChangeTitleRequestDto;
 import com.example.shimpyo.domain.course.service.LikesService;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
-import com.example.shimpyo.domain.survey.service.SurveyService;
+import com.example.shimpyo.domain.survey.dto.CourseUpdateRequestDto;
+import com.example.shimpyo.domain.survey.service.SuggestionService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.CourseException;
 import com.example.shimpyo.global.exceptionType.MemberException;
@@ -25,7 +26,7 @@ import java.util.Map;
 @Tag(name = "Course", description = "관광지 관련 API 목록")
 public class CourseController {
     private final LikesService likesService;
-    private final SurveyService surveyService;
+    private final SuggestionService suggestionService;
 
     @Operation(summary = "관광지 찜 추가/삭제")
     @SwaggerErrorApi(type = {TouristException.class, MemberException.class},
@@ -40,14 +41,14 @@ public class CourseController {
     @SwaggerErrorApi(type = {MemberException.class, CourseException.class}, codes ={"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @GetMapping("/addition")
     public ResponseEntity<List<AdditionRecommendsResponseDto>> additionRecommends(@RequestParam("courseId") Long courseId) {
-        return ResponseEntity.ok(surveyService.additionRecommends(courseId));
+        return ResponseEntity.ok(suggestionService.additionRecommends(courseId));
     }
 
     @Operation(summary = "코스 수정")
     @SwaggerErrorApi(type = {MemberException.class, CourseException.class}, codes ={"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @PatchMapping
-    public ResponseEntity<Void> modifyCourse(@RequestBody CourseResponseDto requestDto) {
-        surveyService.modifyCourse(requestDto);
+    public ResponseEntity<Void> modifyCourse(@RequestBody CourseUpdateRequestDto requestDto) {
+        suggestionService.modifyCourse(requestDto);
         return ResponseEntity.ok().build();
     }
 
@@ -55,7 +56,7 @@ public class CourseController {
     @SwaggerErrorApi(type = {MemberException.class, CourseException.class}, codes ={"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @PatchMapping("/title")
     public ResponseEntity<Void> changeCourseTitle(@Valid @RequestBody ChangeTitleRequestDto requestDto) {
-        surveyService.changeCourseTitle(requestDto);
+        suggestionService.changeCourseTitle(requestDto);
         return ResponseEntity.ok().build();
     }
 
@@ -64,7 +65,7 @@ public class CourseController {
             codes = {"MEMBER_NOT_FOUND", "COURSE_NOT_FOUND"})
     @DeleteMapping
     public ResponseEntity<Void> deleteCourse(@RequestParam("id") Long courseId) {
-        surveyService.deleteCourse(courseId);
+        suggestionService.deleteCourse(courseId);
         return ResponseEntity.ok().build();
     }
 
@@ -74,6 +75,6 @@ public class CourseController {
     @GetMapping("/share")
     public ResponseEntity<CourseResponseDto> sharedCourse(@RequestParam("courseId") Long courseId,
                                                           @RequestParam("token") String token) {
-        return ResponseEntity.ok(surveyService.sharedCourse(courseId, token));
+        return ResponseEntity.ok(suggestionService.sharedCourse(courseId, token));
     }
 }

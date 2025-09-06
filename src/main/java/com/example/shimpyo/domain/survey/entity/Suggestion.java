@@ -47,6 +47,10 @@ public class Suggestion extends BaseEntity {
     @OneToMany(mappedBy = "suggestion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SuggestionTourist> suggestionTourists = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "suggestion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SuggestionCustomTourist> suggestionCustomTourists = new ArrayList<>();
+
     @OneToMany(mappedBy = "suggestion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SuggestionUser> suggestionUsers = new ArrayList<>();
 

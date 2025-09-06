@@ -1,31 +1,24 @@
 package com.example.shimpyo.domain.survey.service;
 
 import com.example.shimpyo.domain.auth.service.AuthService;
-import com.example.shimpyo.domain.course.dto.AdditionRecommendsResponseDto;
-import com.example.shimpyo.domain.course.dto.ChangeTitleRequestDto;
+import com.example.shimpyo.domain.auth.service.RedisService;
 import com.example.shimpyo.domain.survey.dto.CourseRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.entity.*;
 import com.example.shimpyo.domain.survey.repository.SuggestionRepository;
 import com.example.shimpyo.domain.survey.repository.SuggestionTouristRepository;
-import com.example.shimpyo.domain.survey.repository.SuggestionUserRepository;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.service.TouristService;
-import com.example.shimpyo.domain.user.dto.LikedCourseResponseDto;
 import com.example.shimpyo.domain.user.entity.User;
-import com.example.shimpyo.global.BaseException;
-import com.example.shimpyo.utils.RegionUtils;
+import com.example.shimpyo.domain.utils.RegionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.example.shimpyo.global.exceptionType.CourseException.ALREADY_LIKED;
-import static com.example.shimpyo.global.exceptionType.CourseException.COURSE_NOT_FOUND;
 
 @Service
 @Transactional
@@ -33,17 +26,15 @@ import static com.example.shimpyo.global.exceptionType.CourseException.COURSE_NO
 public class SurveyService {
 
     private final AuthService authService;
+    private final RedisService redisService;
     private final TouristService touristService;
-    private final SuggestionRepository suggestionRepository;
-    private final SuggestionTouristRepository stRepository;
-    private final SuggestionUserRepository suRepository;
 
     public CourseResponseDto getCourse(CourseRequestDto requestDto) {
-
         User user = authService.findUser().getUser();
-        // 2. 기간, 식사 횟수 파싱
+
         String typename = requestDto.getTypename();
-        int days = requestDto.getDuration() == null? 2 : parseDays(requestDto.getDuration());
+        int days = requestDto.getDuration() == null ? 2 : parseDays(requestDto.getDuration());
+
         Optional<List<String>> regionCandidates = RegionUtils.getRegions(requestDto.getRegion());
         List<String> regions;
         String region;
@@ -56,99 +47,97 @@ public class SurveyService {
             region = requestDto.getRegion();
         }
 
-        int mealCount = requestDto.getMeal() == null? 2 : requestDto.getMeal();
-
-        // 1. 유형 → 카테고리
+        int mealCount = requestDto.getMeal() == null ? 2 : requestDto.getMeal();
         WellnessType wellnessType = WellnessType.fromLabel(typename);
         List<String> categories = Category.toNameList(wellnessType.getCategories());
 
-        // 3. 관광지 필터링
-        List<Tourist> meals = touristService.getTouristsByRegionAndCategoryAndCount(regions, List.of(Category.건강식.name()),
-                mealCount * days);
-        List<Tourist> activities = touristService.getTouristsByRegionAndCategoryAndCount(regions, categories, 3 * days);
+        // 관광지 후보
+        List<Tourist> meals = touristService.getTouristsByRegionAndCategoryAndCount(
+                regions, List.of(Category.건강식.name()), mealCount * days);
+        List<Tourist> activities = touristService.getTouristsByRegionAndCategoryAndCount(
+                regions, categories, 3 * days);
 
-        // 4. 일정 생성
+        // 코스 생성
         boolean startsWithMeal = mealCount == 3;
-        Suggestion suggestion = makeSuggestion(requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration(),
-                region, user, wellnessType);
-        generateCourseWithSchedule(suggestion, meals, activities, days, mealCount, startsWithMeal);
+        String token = UUID.randomUUID().toString();
 
+        CourseResponseDto courseResponseDto = generateCourseResponse(
+                typename,
+                requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration() + " " + region + " 여행",
+                token, meals, activities, days,  mealCount, startsWithMeal);
 
-        // 5. 응답 생성
-        return CourseResponseDto.fromSuggestion(suggestion);
+        // Redis에 저장
+        redisService.saveSuggestion(courseResponseDto, token, user.getId());
+
+        return courseResponseDto;
     }
 
-    private Suggestion makeSuggestion(String days, String region, User user, WellnessType type) {
-        return suggestionRepository.save(
-                Suggestion.builder()
-                        .title(days + " " + region  + " 여행")
-                        .token(UUID.randomUUID().toString())
-                        .wellnessType(type)
-                        .user(user)
-                        .build());
-    }
+    public CourseResponseDto generateCourseResponse(String typename, String title, String token,
+                                                    List<Tourist> meals, List<Tourist> activities,
+                                                    int days, int mealCount, boolean startWithMeal) {
 
-    public void generateCourseWithSchedule(Suggestion suggestion, List<Tourist> meals, List<Tourist> activities,
-            int days, int mealCount, boolean startWithMeal) {
-
-        // 인덱스 관리
         int mealIndex = 0;
         int activityIndex = 0;
+        List<CourseResponseDto.CourseDayDto> dayDtos = new ArrayList<>();
+        Set<Long> usedTouristIds = new HashSet<>(); // 이미 추가된 Tourist ID 관리
 
         for (int day = 1; day <= days; day++) {
-            LocalTime time = LocalTime.of(9, 0);  // 시작 시간 9시
-            LocalTime visitTime = time;
-            int totalSlots = mealCount + 3;  // 하루 slot 총 갯수 식사+활동 합
+            LocalTime time = LocalTime.of(9, 0); // 하루 시작 시간
+            List<CourseResponseDto.TouristInfoDto> touristInfos = new ArrayList<>();
+            int totalSlots = mealCount + 3;
 
             for (int slot = 0; slot < totalSlots; slot++) {
                 boolean isMealTurn = startWithMeal == (slot % 2 == 0);
                 Tourist candidate = null;
+                LocalTime visitTime = time;
+
                 if (isMealTurn && mealIndex < meals.size()) {
                     Tourist mealCandidate = meals.get(mealIndex);
-                    if (canVisitAt(mealCandidate, time)) {
+                    if (canVisitAt(mealCandidate, time) && usedTouristIds.add(mealCandidate.getId())) {
                         candidate = mealCandidate;
                         mealIndex++;
-                        time = time.plusHours(1);  // 식사 1시간
+                        time = time.plusHours(1);
                     } else if (activityIndex < activities.size()) {
                         Tourist actCandidate = activities.get(activityIndex);
-                        if (canVisitAt(actCandidate, time)) {
+                        if (canVisitAt(actCandidate, time) && usedTouristIds.add(actCandidate.getId())) {
                             candidate = actCandidate;
                             activityIndex++;
-                            time = time.plusHours(2); // 관광지 2시간
-                        } else {
-                            break; // 방문 불가시 다음 slot 진행 안함
+                            time = time.plusHours(2);
                         }
-                    } else {
-                        break; // 더 이상 후보 없음
                     }
                 } else if (!isMealTurn && activityIndex < activities.size()) {
                     Tourist actCandidate = activities.get(activityIndex);
-                    if (canVisitAt(actCandidate, time)) {
+                    if (canVisitAt(actCandidate, time) && usedTouristIds.add(actCandidate.getId())) {
                         candidate = actCandidate;
                         activityIndex++;
                         time = time.plusHours(2);
                     } else if (mealIndex < meals.size()) {
                         Tourist mealCandidate = meals.get(mealIndex);
-                        if (canVisitAt(mealCandidate, time)) {
+                        if (canVisitAt(mealCandidate, time) && usedTouristIds.add(mealCandidate.getId())) {
                             candidate = mealCandidate;
                             mealIndex++;
                             time = time.plusHours(1);
-                        } else {
-                            break;
                         }
-                    } else {
-                        break;
                     }
                 }
+
                 if (candidate != null) {
-                    SuggestionTourist st = stRepository.save(SuggestionTourist.builder().suggestion(suggestion)
-                                    .tourist(candidate).date(day + "일").time(visitTime).build());
-                    suggestion.addSuggestionTourist(st);
-                    candidate.addSuggestionTourist(st);
+                    touristInfos.add(CourseResponseDto.TouristInfoDto.toDto(candidate, visitTime));
                 }
             }
+            dayDtos.add(CourseResponseDto.CourseDayDto.builder()
+                    .date(day + "일").list(touristInfos).build());
         }
+
+        return CourseResponseDto.builder()
+                .title(title)
+                .typename(typename)
+                .token(token)
+                .days(dayDtos)
+                .build();
     }
+
+
 
     private boolean canVisitAt(Tourist tourist, LocalTime visitTime) {
         // 예시: tourist.openTime은 "08:00" 형식이라고 가정
@@ -165,77 +154,4 @@ public class SurveyService {
         return Integer.parseInt(duration.replaceAll("[^0-9]", "").substring(1)); // "1박2일" -> 2
     }
 
-    public void likeCourse(Long courseId) {
-        User user = authService.findUser().getUser();
-        Suggestion suggestion = getSuggestion(courseId);
-        if (!suRepository.existsByUserAndSuggestion(user, suggestion))
-            suRepository.save(SuggestionUser.builder().suggestion(suggestion).user(user).build());
-        else throw new BaseException(ALREADY_LIKED);
-    }
-
-    public CourseResponseDto getLikedCourseDetail(Long courseId) {
-        User user = authService.findUser().getUser();
-        Suggestion suggestion = getSuggestion(courseId);
-        if (!suggestion.getUser().equals(user))
-            throw new BaseException(COURSE_NOT_FOUND);
-
-        return CourseResponseDto.fromSuggestion(suggestion);
-    }
-
-    public void deleteCourse(Long courseId) {
-        User user = authService.findUser().getUser();
-        Suggestion suggestion = getSuggestion(courseId);
-        if (!suggestion.getUser().equals(user))
-            throw new BaseException(COURSE_NOT_FOUND);
-        suggestionRepository.delete(suggestion);
-    }
-
-    @Transactional(readOnly = true)
-    public List<AdditionRecommendsResponseDto> additionRecommends(Long courseId) {
-        User user = authService.findUser().getUser();
-        Suggestion suggestion = getSuggestion(courseId);
-        if (!suggestionRepository.existsByUserAndId(user, courseId))
-            throw new BaseException(COURSE_NOT_FOUND);
-        return touristService.getRecommendsOnAddition(suggestion.getWellnessType().getCategories(),
-                        stRepository.findDistinctRegionsBySuggestionId(suggestion.getId()))
-                .stream().map(AdditionRecommendsResponseDto::toDto).collect(Collectors.toList());
-    }
-
-    public void modifyCourse(CourseResponseDto requestDto) {
-        User user = authService.findUser().getUser();
-        Suggestion suggestion = getSuggestion(requestDto.getCourseId());
-        if (!suggestion.getUser().equals(user))
-            throw new BaseException(COURSE_NOT_FOUND);
-
-
-    }
-
-    @Transactional(readOnly = true)
-    public List<LikedCourseResponseDto> getLikedCourseList() {
-        User user = authService.findUser().getUser();
-        return user.getLikedSuggestion().stream()
-                .map(s -> LikedCourseResponseDto.toDto(s.getSuggestion(),
-                        s.getSuggestion().getSuggestionTourists().get(0).getTourist().getImage()))
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public CourseResponseDto sharedCourse(Long courseId, String token) {
-
-        Suggestion suggestion = getSuggestion(courseId);
-        if (!suggestion.getToken().equals(token))
-            throw new BaseException(COURSE_NOT_FOUND);
-        return CourseResponseDto.fromSuggestion(suggestion);
-    }
-
-    public void changeCourseTitle(ChangeTitleRequestDto requestDto) {
-        Suggestion suggestion = getSuggestion(requestDto.getCourseId());
-        if (!suggestion.getUser().equals(authService.findUser().getUser()))
-            throw new BaseException(COURSE_NOT_FOUND);
-        suggestion.changeTitle(requestDto.getTitle());
-    }
-
-    private Suggestion getSuggestion(Long courseId) {
-        return suggestionRepository.findById(courseId).orElseThrow(() -> new BaseException(COURSE_NOT_FOUND));
-    }
 }

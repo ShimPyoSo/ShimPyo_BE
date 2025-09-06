@@ -25,7 +25,7 @@ public class AdditionRecommendsResponseDto {
                     .title(tourist.getName())
                     .region(tourist.getRegion())
                     .address(tourist.getAddress())
-                    .tel(tourist.getTelNum())
+                    .tel(tourist.getTel())
                     .latitude(tourist.getLatitude())
                     .longitude(tourist.getLongitude())
                     .operationTime(OperationTime.toDto(tourist))

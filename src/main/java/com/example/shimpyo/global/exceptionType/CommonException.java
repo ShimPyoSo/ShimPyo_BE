@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum CommonException implements ExceptionType {
-    ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "ILLEGAL ARGUMENTS PROVIDED.");
+    ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "ILLEGAL ARGUMENTS PROVIDED."),
+    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error Occurred During Processing.");
 
 
     private final HttpStatus status;

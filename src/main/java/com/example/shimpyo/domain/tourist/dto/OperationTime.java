@@ -16,7 +16,7 @@ public class OperationTime {
 
     public static OperationTime toDto(Tourist tourist) {
         return OperationTime.builder()
-                .dayOff(tourist.getDayOff())
+                .dayOff(tourist.getDayOffShow())
                 .openTime(tourist.getOpenTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                 .closeTime(tourist.getCloseTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                 .breakTime(tourist.getBreakTime())
