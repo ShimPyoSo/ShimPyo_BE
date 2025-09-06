@@ -1,5 +1,6 @@
 package com.example.shimpyo.domain.survey.repository;
 
+import com.example.shimpyo.domain.survey.entity.Suggestion;
 import com.example.shimpyo.domain.survey.entity.SuggestionTourist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,6 @@ public interface SuggestionTouristRepository extends JpaRepository<SuggestionTou
             "JOIN st.tourist t " +
             "WHERE st.suggestion.id = :suggestionId")
     List<String> findDistinctRegionsBySuggestionId(@Param("suggestionId") Long suggestionId);
+
+    SuggestionTourist findTop1BySuggestionOrderByIdAsc(@Param("suggestion") Suggestion suggestion);
 }

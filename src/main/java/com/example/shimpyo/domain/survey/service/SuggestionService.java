@@ -198,8 +198,24 @@ public class SuggestionService {
 
     @Transactional(readOnly = true)
     public List<LikedCourseResponseDto> getLikedCourseList() {
+        List<LikedCourseResponseDto> result = new ArrayList<>();
         User user = authService.findUser().getUser();
-        return suRepository.findLikedCoursesByUserId(user.getId());
+        List<SuggestionUser> likes = user.getLikedSuggestion();
+        for (SuggestionUser like : likes) {
+            System.out.println("==================");
+            System.out.println(like.getSuggestion().getId());
+            System.out.println(like.getSuggestion().getTitle());
+        }
+        System.out.println();
+        List<SuggestionUser> findLikes = suRepository.findByUser(user);
+        for (SuggestionUser findLike : findLikes) {
+            System.out.println("==================");
+            System.out.println(findLike.getSuggestion().getId());
+            System.out.println(findLike.getSuggestion().getTitle());
+            SuggestionTourist st = stRepository.findTop1BySuggestionOrderByIdAsc(findLike.getSuggestion());
+            result.add(LikedCourseResponseDto.toDto(findLike.getSuggestion(), st));
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)
