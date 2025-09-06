@@ -85,7 +85,7 @@ public class RedisConfig {
     @Qualifier("0")
     public RedisConnectionFactory redisSuggestionConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
-        redisStandaloneConfiguration.setDatabase(3);
+        redisStandaloneConfiguration.setDatabase(0);
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
 
