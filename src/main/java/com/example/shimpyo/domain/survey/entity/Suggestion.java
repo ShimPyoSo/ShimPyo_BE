@@ -56,9 +56,7 @@ public class Suggestion extends BaseEntity {
 
     public void addSuggestionTourist(SuggestionTourist st) {
         suggestionTourists.add(st);
-        if (st.getSuggestion() != this) {
-            st.addSuggestion(this);
-        }
+        st.addSuggestion(this);
     }
     public void changeTitle(String title) {
         this.title = title;
