@@ -78,7 +78,7 @@ public class SuggestionService {
                 st.defineTime(LocalTime.parse(tDto.getTime(), DateTimeFormatter.ofPattern("HH:mm")));
 
                 Tourist tourist = touristService.findTourist(tDto.getTouristId());
-                st.setTourist(tourist);
+                st.addTourist(tourist);
                 suggestion.addSuggestionTourist(st);
             }
         }

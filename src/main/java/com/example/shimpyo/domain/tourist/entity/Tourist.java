@@ -4,13 +4,9 @@ import com.example.shimpyo.domain.survey.entity.SuggestionTourist;
 import com.example.shimpyo.domain.user.entity.Likes;
 import com.example.shimpyo.domain.user.entity.Review;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -93,7 +89,7 @@ public class Tourist extends AbstractTourist {
     public void addSuggestionTourist(SuggestionTourist st) {
         suggestionTourists.add(st);
         if (st.getTourist() != this) {
-            st.setTourist(this);
+            st.addTourist(this);
         }
     }
 
