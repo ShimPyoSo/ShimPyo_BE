@@ -82,7 +82,6 @@ public class SuggestionService {
                 suggestion.addSuggestionTourist(st);
             }
         }
-        System.out.println("Tourist count: " + suggestion.getSuggestionTourists().size());
         suggestionRepository.save(suggestion);
 
         // 4. SuggestionUser 저장
@@ -200,18 +199,8 @@ public class SuggestionService {
     public List<LikedCourseResponseDto> getLikedCourseList() {
         List<LikedCourseResponseDto> result = new ArrayList<>();
         User user = authService.findUser().getUser();
-        List<SuggestionUser> likes = user.getLikedSuggestion();
-        for (SuggestionUser like : likes) {
-            System.out.println("==================");
-            System.out.println(like.getSuggestion().getId());
-            System.out.println(like.getSuggestion().getTitle());
-        }
-        System.out.println();
         List<SuggestionUser> findLikes = suRepository.findByUser(user);
         for (SuggestionUser findLike : findLikes) {
-            System.out.println("==================");
-            System.out.println(findLike.getSuggestion().getId());
-            System.out.println(findLike.getSuggestion().getTitle());
             SuggestionTourist st = stRepository.findTop1BySuggestionOrderByIdAsc(findLike.getSuggestion());
             result.add(LikedCourseResponseDto.toDto(findLike.getSuggestion(), st));
         }

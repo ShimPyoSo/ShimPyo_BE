@@ -63,7 +63,7 @@ public class SurveyService {
 
         CourseResponseDto courseResponseDto = generateCourseResponse(
                 typename,
-                (requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration() + " " + region) + " 여행",
+                (requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration() + " ") + region + " 여행",
                 token, meals, activities, days,  mealCount, startsWithMeal);
 
         // Redis에 저장
@@ -76,46 +76,48 @@ public class SurveyService {
                                                     List<Tourist> meals, List<Tourist> activities,
                                                     int days, int mealCount, boolean startWithMeal) {
 
+        // 오픈 시간 기준 정렬
+        meals.sort(Comparator.comparing(Tourist::getOpenTime, Comparator.nullsFirst(Comparator.naturalOrder())));
+        activities.sort(Comparator.comparing(Tourist::getOpenTime, Comparator.nullsFirst(Comparator.naturalOrder())));
+
         int mealIndex = 0;
         int activityIndex = 0;
         List<CourseResponseDto.CourseDayDto> dayDtos = new ArrayList<>();
-        Set<Long> usedTouristIds = new HashSet<>(); // 이미 추가된 Tourist ID 관리
 
         for (int day = 1; day <= days; day++) {
             LocalTime time = LocalTime.of(9, 0); // 하루 시작 시간
             List<CourseResponseDto.TouristInfoDto> touristInfos = new ArrayList<>();
             int totalSlots = mealCount + 3;
 
+            // 하루 단위 중복 체크
+            Set<Long> usedToday = new HashSet<>();
+
             for (int slot = 0; slot < totalSlots; slot++) {
                 boolean isMealTurn = startWithMeal == (slot % 2 == 0);
                 Tourist candidate = null;
                 LocalTime visitTime = time;
 
-                if (isMealTurn && mealIndex < meals.size()) {
-                    Tourist mealCandidate = meals.get(mealIndex);
-                    if (canVisitAt(mealCandidate, time) && usedTouristIds.add(mealCandidate.getId())) {
-                        candidate = mealCandidate;
-                        mealIndex++;
+                if (isMealTurn) {
+                    candidate = findNextAvailable(meals, mealIndex, usedToday, visitTime);
+                    if (candidate != null) {
+                        mealIndex = meals.indexOf(candidate) + 1;
                         time = time.plusHours(1);
-                    } else if (activityIndex < activities.size()) {
-                        Tourist actCandidate = activities.get(activityIndex);
-                        if (canVisitAt(actCandidate, time) && usedTouristIds.add(actCandidate.getId())) {
-                            candidate = actCandidate;
-                            activityIndex++;
+                    } else {
+                        candidate = findNextAvailable(activities, activityIndex, usedToday, visitTime);
+                        if (candidate != null) {
+                            activityIndex = activities.indexOf(candidate) + 1;
                             time = time.plusHours(2);
                         }
                     }
-                } else if (!isMealTurn && activityIndex < activities.size()) {
-                    Tourist actCandidate = activities.get(activityIndex);
-                    if (canVisitAt(actCandidate, time) && usedTouristIds.add(actCandidate.getId())) {
-                        candidate = actCandidate;
-                        activityIndex++;
+                } else {
+                    candidate = findNextAvailable(activities, activityIndex, usedToday, visitTime);
+                    if (candidate != null) {
+                        activityIndex = activities.indexOf(candidate) + 1;
                         time = time.plusHours(2);
-                    } else if (mealIndex < meals.size()) {
-                        Tourist mealCandidate = meals.get(mealIndex);
-                        if (canVisitAt(mealCandidate, time) && usedTouristIds.add(mealCandidate.getId())) {
-                            candidate = mealCandidate;
-                            mealIndex++;
+                    } else {
+                        candidate = findNextAvailable(meals, mealIndex, usedToday, visitTime);
+                        if (candidate != null) {
+                            mealIndex = meals.indexOf(candidate) + 1;
                             time = time.plusHours(1);
                         }
                     }
@@ -123,10 +125,14 @@ public class SurveyService {
 
                 if (candidate != null) {
                     touristInfos.add(CourseResponseDto.TouristInfoDto.toDto(candidate, visitTime));
+                    usedToday.add(candidate.getId());
                 }
             }
+
             dayDtos.add(CourseResponseDto.CourseDayDto.builder()
-                    .date(day + "일").list(touristInfos).build());
+                    .date(day + "일")
+                    .list(touristInfos)
+                    .build());
         }
 
         return CourseResponseDto.builder()
@@ -136,6 +142,18 @@ public class SurveyService {
                 .days(dayDtos)
                 .build();
     }
+
+    // 같은 카테고리 후보 중 방문 가능한 관광지를 찾아 반환
+    private Tourist findNextAvailable(List<Tourist> candidates, int startIndex, Set<Long> usedToday, LocalTime visitTime) {
+        for (int i = startIndex; i < candidates.size(); i++) {
+            Tourist candidate = candidates.get(i);
+            if (!usedToday.contains(candidate.getId()) && canVisitAt(candidate, visitTime)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
 
     private boolean canVisitAt(Tourist tourist, LocalTime visitTime) {
         // 예시: tourist.openTime은 "08:00" 형식이라고 가정
