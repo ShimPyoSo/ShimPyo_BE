@@ -73,8 +73,11 @@ public class JwtTokenProvider {
     }
 
     // JWT 남은 만료 시간을 추출하는 메서드
-    public long getRemainingExpiration(String token){
-        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    public long getRemainingExpiration(String token, boolean isRefresh){
+        Key key = isRefresh
+                ? Keys.hmacShaKeyFor(secretKeyRT.getBytes())
+                : Keys.hmacShaKeyFor(secretKey.getBytes());
+
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
