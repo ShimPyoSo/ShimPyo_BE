@@ -128,12 +128,12 @@ public class AuthService {
 
         String newAccessToken = jwtTokenProvider.createAccessToken(userName);
         cookieUtils.addCookies(response,
-                cookieUtils.buildAccessCookie(newAccessToken, jwtTokenProvider.getRemainingExpiration(refreshToken, true)));
+                cookieUtils.buildAccessCookie(newAccessToken, expiration / 1000L));
     }
 
     public void logout(String accessToken, HttpServletResponse response) {
         // 1) AccessToken 블랙리스트
-        long expiration = jwtTokenProvider.getRemainingExpiration(accessToken, false);
+        long expiration = jwtTokenProvider.getAccessTokenRemainingExpiration(accessToken);
         redisService.tokenBlackList(accessToken, expiration);
 
         // 2) Redis의 RefreshToken 삭제 (키는 loginId 그대로)
