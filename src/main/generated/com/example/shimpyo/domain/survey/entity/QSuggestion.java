@@ -36,8 +36,6 @@ public class QSuggestion extends EntityPathBase<Suggestion> {
 
     public final ListPath<SuggestionTourist, QSuggestionTourist> suggestionTourists = this.<SuggestionTourist, QSuggestionTourist>createList("suggestionTourists", SuggestionTourist.class, QSuggestionTourist.class, PathInits.DIRECT2);
 
-    public final ListPath<SuggestionUser, QSuggestionUser> suggestionUsers = this.<SuggestionUser, QSuggestionUser>createList("suggestionUsers", SuggestionUser.class, QSuggestionUser.class, PathInits.DIRECT2);
-
     public final StringPath title = createString("title");
 
     public final StringPath token = createString("token");

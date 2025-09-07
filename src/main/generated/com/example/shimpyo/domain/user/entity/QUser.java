@@ -38,8 +38,6 @@ public class QUser extends EntityPathBase<User> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<com.example.shimpyo.domain.survey.entity.SuggestionUser, com.example.shimpyo.domain.survey.entity.QSuggestionUser> likedSuggestion = this.<com.example.shimpyo.domain.survey.entity.SuggestionUser, com.example.shimpyo.domain.survey.entity.QSuggestionUser>createList("likedSuggestion", com.example.shimpyo.domain.survey.entity.SuggestionUser.class, com.example.shimpyo.domain.survey.entity.QSuggestionUser.class, PathInits.DIRECT2);
-
     public final ListPath<Likes, QLikes> likes = this.<Likes, QLikes>createList("likes", Likes.class, QLikes.class, PathInits.DIRECT2);
 
     public final StringPath nickname = createString("nickname");

@@ -63,7 +63,7 @@ public class SurveyService {
 
         CourseResponseDto courseResponseDto = generateCourseResponse(
                 typename,
-                (requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration() + " ") + region + " 여행",
+                (requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration()) + " " + region + " 여행",
                 token, meals, activities, days,  mealCount, startsWithMeal);
 
         // Redis에 저장
