@@ -5,8 +5,6 @@ import com.example.shimpyo.global.BaseException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Map;
-
 import static com.example.shimpyo.global.exceptionType.AuthException.AUTHENTICATION_GET_FAILED;
 
 public class SecurityUtils {

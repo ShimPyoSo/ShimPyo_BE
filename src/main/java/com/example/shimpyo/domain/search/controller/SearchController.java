@@ -3,7 +3,6 @@ package com.example.shimpyo.domain.search.controller;
 import com.example.shimpyo.domain.search.dto.SearchResponseDto;
 import com.example.shimpyo.domain.search.service.SearchService;
 import com.example.shimpyo.domain.tourist.dto.FilterRequestDto;
-import com.example.shimpyo.domain.tourist.dto.FilterTouristByDataResponseDto;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.TouristException;

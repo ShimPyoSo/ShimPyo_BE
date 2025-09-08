@@ -3,7 +3,6 @@ package com.example.shimpyo.domain.user.controller;
 import com.example.shimpyo.domain.course.service.LikesService;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.service.SuggestionService;
-import com.example.shimpyo.domain.survey.service.SurveyService;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.dto.*;
 import com.example.shimpyo.domain.user.service.UserService;

@@ -1,9 +1,6 @@
 package com.example.shimpyo.domain.tourist.entity;
-import co.elastic.clients.elasticsearch.xpack.usage.Base;
-import com.example.shimpyo.domain.common.BaseEntity;
+
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

@@ -1,6 +1,5 @@
 package com.example.shimpyo.domain.common;
 
-import com.example.shimpyo.domain.auth.entity.UserAuth;
 import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberException;

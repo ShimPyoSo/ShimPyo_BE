@@ -1,6 +1,5 @@
 package com.example.shimpyo.domain.survey.dto;
 
-import com.example.shimpyo.domain.tourist.dto.OperationTime;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

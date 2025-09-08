@@ -1,6 +1,5 @@
 package com.example.shimpyo.domain.search.dto;
 
-import com.example.shimpyo.domain.tourist.dto.FilterTouristByDataResponseDto;
 import com.example.shimpyo.domain.tourist.dto.OperationTime;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import lombok.Builder;

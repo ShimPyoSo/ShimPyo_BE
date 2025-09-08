@@ -1,9 +1,7 @@
 package com.example.shimpyo.domain.survey.entity;
 
 import com.example.shimpyo.domain.common.BaseEntity;
-import com.example.shimpyo.domain.tourist.entity.AbstractTourist;
 import com.example.shimpyo.domain.tourist.entity.CustomTourist;
-import com.example.shimpyo.domain.tourist.entity.Tourist;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

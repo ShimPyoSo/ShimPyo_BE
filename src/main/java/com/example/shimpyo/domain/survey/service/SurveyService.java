@@ -5,8 +5,6 @@ import com.example.shimpyo.domain.auth.service.RedisService;
 import com.example.shimpyo.domain.survey.dto.CourseRequestDto;
 import com.example.shimpyo.domain.survey.dto.CourseResponseDto;
 import com.example.shimpyo.domain.survey.entity.*;
-import com.example.shimpyo.domain.survey.repository.SuggestionRepository;
-import com.example.shimpyo.domain.survey.repository.SuggestionTouristRepository;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.service.TouristService;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
