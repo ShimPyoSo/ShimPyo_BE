@@ -76,7 +76,8 @@ public class SecurityConfig {
                                 "/api/search",
                                 "/api/search/autocomplete",
                                 "/api/tourlist/detail",
-                                "/api/course/share")
+                                "/api/course/share",
+                                "/health-check")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
