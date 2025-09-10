@@ -18,6 +18,9 @@ import com.example.shimpyo.domain.user.dto.LikedCourseResponseDto;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.utils.RegionUtils;
 import com.example.shimpyo.global.BaseException;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +46,14 @@ public class SuggestionService {
     private final SuggestionRepository suggestionRepository;
     private final CustomTouristRepository customTouristRepository;
 
+    @Getter
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    static class SuggestionSortKey {
+        private Long touristId;
+        private String date;
+        private LocalTime time;
+    }
 
     public Long likeCourse(String token) {
         User user = authService.findUser().getUser();
@@ -118,55 +129,59 @@ public class SuggestionService {
         // 1. 기존 Suggestion 조회
         Suggestion suggestion = getSuggestion(dto.getCourseId());
 
-        // 2. 기존 엔티티 맵핑 (date 포함 키)
-        Map<String, SuggestionTourist> existingTourists = suggestion.getSuggestionTourists()
+        // 2. 기존 엔티티 맵핑 (SuggestionKey 활용)
+        Map<SuggestionSortKey, SuggestionTourist> existingTourists = suggestion.getSuggestionTourists()
                 .stream()
                 .collect(Collectors.toMap(
-                        st -> st.getTourist().getId() + "_" + st.getDate(),
+                        st -> new SuggestionSortKey(st.getTourist().getId(), st.getDate(), st.getTime()),
                         Function.identity()
                 ));
 
-        Map<String, SuggestionCustomTourist> existingCustoms = suggestion.getSuggestionCustomTourists()
+        Map<SuggestionSortKey, SuggestionCustomTourist> existingCustoms = suggestion.getSuggestionCustomTourists()
                 .stream()
                 .collect(Collectors.toMap(
-                        sct -> sct.getCustomTourist().getId() + "_" + sct.getDate(),
+                        sct -> new SuggestionSortKey(sct.getCustomTourist().getId(), sct.getDate(), sct.getTime()),
                         Function.identity()
                 ));
 
-        // 3. 업데이트 및 삭제 처리용 리스트
-        Set<SuggestionTourist> toKeepTourists = new HashSet<>();
-        Set<SuggestionCustomTourist> toKeepCustoms = new HashSet<>();
-
-        // 기존 엔티티는 모두 삭제 후보로 넣어두고, 사용된 것은 제거
+        // 3. 삭제 후보 리스트
         List<SuggestionTourist> toDeleteTourists = new ArrayList<>(suggestion.getSuggestionTourists());
         List<SuggestionCustomTourist> toDeleteCustoms = new ArrayList<>(suggestion.getSuggestionCustomTourists());
 
-        // 4. DTO 반복
+        // 4. DTO 반복 처리
         for (CourseUpdateRequestDto.CourseDayDto dayDto : dto.getDays()) {
             for (CourseUpdateRequestDto.TouristInfoDto tDto : dayDto.getList()) {
                 LocalTime time = LocalTime.parse(tDto.getTime());
-                String key = tDto.getTouristId() + "_" + dayDto.getDate();
+                SuggestionSortKey key = new SuggestionSortKey(tDto.getTouristId(), dayDto.getDate(), time);
 
-                if (tDto.getTouristId() == -1 && "CUSTOM".equals(tDto.getType())) {
-                    // 새 CustomTourist 생성
-                    CustomTourist customTourist = CustomTourist.builder()
-                            .name(tDto.getTitle())
-                            .address(tDto.getAddress())
-                            .region(RegionUtils.convertProvince(tDto.getAddress()))
-                            .latitude(tDto.getLatitude())
-                            .longitude(tDto.getLongitude())
-                            .tel(tDto.getTel())
-                            .build();
-                    customTouristRepository.save(customTourist);
+                if ("CUSTOM".equals(tDto.getType())) {
+                    if (tDto.getTouristId() == -1) {
+                        // 새 CustomTourist 생성
+                        CustomTourist customTourist = CustomTourist.builder()
+                                .name(tDto.getTitle())
+                                .address(tDto.getAddress())
+                                .region(RegionUtils.convertProvince(tDto.getAddress()))
+                                .latitude(tDto.getLatitude())
+                                .longitude(tDto.getLongitude())
+                                .tel(tDto.getTel())
+                                .build();
+                        customTouristRepository.save(customTourist);
 
-                    SuggestionCustomTourist sct = SuggestionCustomTourist.builder()
-                            .customTourist(customTourist)
-                            .suggestion(suggestion)
-                            .date(dayDto.getDate())
-                            .time(time)
-                            .build();
-                    suggestion.getSuggestionCustomTourists().add(sct);
-                    toKeepCustoms.add(sct);
+                        SuggestionCustomTourist sct = SuggestionCustomTourist.builder()
+                                .customTourist(customTourist)
+                                .suggestion(suggestion)
+                                .date(dayDto.getDate())
+                                .time(time)
+                                .build();
+                        suggestion.getSuggestionCustomTourists().add(sct);
+                    } else {
+                        SuggestionCustomTourist sct = existingCustoms.get(key);
+                        if (sct != null) {
+                            sct.defineDate(dayDto.getDate());
+                            sct.defineTime(time);
+                            toDeleteCustoms.remove(sct);
+                        }
+                    }
 
                 } else if ("TOURIST".equals(tDto.getType()) && tDto.getTouristId() != -1) {
                     SuggestionTourist st = existingTourists.get(key);
@@ -174,7 +189,6 @@ public class SuggestionService {
                         // 날짜/시간 변경
                         st.defineDate(dayDto.getDate());
                         st.defineTime(time);
-                        toKeepTourists.add(st);
                         toDeleteTourists.remove(st);
                     } else {
                         // 새로운 SuggestionTourist 생성
@@ -186,28 +200,19 @@ public class SuggestionService {
                                 .time(time)
                                 .build();
                         suggestion.getSuggestionTourists().add(newSt);
-                        toKeepTourists.add(newSt);
-                    }
-
-                } else if ("CUSTOM".equals(tDto.getType()) && tDto.getTouristId() != -1) {
-                    SuggestionCustomTourist sct = existingCustoms.get(key);
-                    if (sct != null) {
-                        sct.defineDate(dayDto.getDate());
-                        sct.defineTime(time);
-                        toKeepCustoms.add(sct);
-                        toDeleteCustoms.remove(sct);
                     }
                 }
             }
         }
 
-        // 5. 삭제 처리 (한 번만)
+        // 5. 삭제 처리
         suggestion.getSuggestionTourists().removeAll(toDeleteTourists);
         suggestion.getSuggestionCustomTourists().removeAll(toDeleteCustoms);
 
         // 6. 저장
         suggestionRepository.save(suggestion);
     }
+
 
     @Transactional(readOnly = true)
     public List<LikedCourseResponseDto> getLikedCourseList() {
