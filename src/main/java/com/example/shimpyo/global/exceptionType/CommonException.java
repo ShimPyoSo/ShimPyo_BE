@@ -15,11 +15,11 @@ public enum CommonException implements ExceptionType {
     private final String message;
     @Override
     public HttpStatus httpStatus() {
-        return null;
+        return this.status;
     }
 
     @Override
     public String message() {
-        return null;
+        return this.message;
     }
 }
