@@ -18,7 +18,6 @@ public class LikesResponseDto {
     private String title;
     private String region;
     private List<Category> category;
-    private String description;
     public boolean isLiked;
 
     public static LikesResponseDto toDto(Tourist tourist) {
@@ -30,7 +29,6 @@ public class LikesResponseDto {
                 .category(tourist.getTouristCategories().stream()
                         .map(TouristCategory::getCategory)
                         .collect(Collectors.toList()))
-                .description(tourist.getDescription())
                 .isLiked(true)
                 .build();
     }

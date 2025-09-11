@@ -23,9 +23,6 @@ public class Tourist extends AbstractTourist {
     private Long contentId;
 
     @Column
-    private String description;
-
-    @Column
     private String homepageUrl;
 
     @Column
