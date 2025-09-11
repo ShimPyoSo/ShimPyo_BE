@@ -15,7 +15,7 @@ public class FilterTouristByDataResponseDto {
     private String title;
     private String region;
     private String address;
-    private OperationTime operationTime;
+    private String operationTime;
     private String image;
     private Boolean isLiked;
 
@@ -25,7 +25,7 @@ public class FilterTouristByDataResponseDto {
                 .title(tourist.getName())
                 .address(tourist.getAddress())
                 .region(tourist.getRegion())
-                .operationTime(OperationTime.toDto(tourist))
+                .operationTime(tourist.getDayOffShow())
                 .image(tourist.getImage())
                 .isLiked(isLiked)
                 .build();

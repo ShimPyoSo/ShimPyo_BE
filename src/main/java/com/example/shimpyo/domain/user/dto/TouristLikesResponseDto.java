@@ -1,6 +1,5 @@
 package com.example.shimpyo.domain.user.dto;
 
-import com.example.shimpyo.domain.tourist.dto.OperationTime;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.user.entity.Likes;
 import lombok.Builder;
@@ -15,7 +14,7 @@ public class TouristLikesResponseDto {
     private String title;
     private String region;
     private String address;
-    private OperationTime operationTime;
+    private String operationTime;
     private String images;
 
     public static TouristLikesResponseDto toDto(Likes like) {
@@ -26,7 +25,7 @@ public class TouristLikesResponseDto {
                 .title(tourist.getName())
                 .region(tourist.getRegion())
                 .address(tourist.getAddress())
-                .operationTime(OperationTime.toDto(tourist))
+                .operationTime(tourist.getDayOffShow())
                 .images(tourist.getImage())
                 .build();
     }

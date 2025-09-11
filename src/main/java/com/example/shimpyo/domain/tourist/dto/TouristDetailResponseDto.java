@@ -37,7 +37,9 @@ public class TouristDetailResponseDto {
     // 위도
     private Double longitude;
 
-    private OperationTime operationTime;
+    private String operationTime;
+
+    private String calcTime;
 
     private Facilities facilities;
 
@@ -77,7 +79,8 @@ public class TouristDetailResponseDto {
                 .title(tourist.getName())
                 .region(tourist.getRegion())
                 .address(tourist.getAddress())
-                .operationTime(OperationTime.toDto(tourist))
+                .operationTime(tourist.getDayOffShow())
+                .calcTime(tourist.getDayOffCal())
                 .tel(tourist.getTel())
                 .homepage(tourist.getHomepageUrl())
                 .reservation(tourist.getReservationUrl())

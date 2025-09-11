@@ -1,6 +1,5 @@
 package com.example.shimpyo.domain.search.dto;
 
-import com.example.shimpyo.domain.tourist.dto.OperationTime;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +12,7 @@ public class SearchResponseDto {
     private String region;
     private String address;
     private String tel;
-    private OperationTime operationTime;
+    private String operationTime;
     private Double latitude;
     private Double longitude;
     private String images;
@@ -26,7 +25,7 @@ public class SearchResponseDto {
                 .address(tourist.getAddress())
                 .region(tourist.getRegion())
                 .tel(tourist.getTel())
-                .operationTime(OperationTime.toDto(tourist))
+                .operationTime(tourist.getDayOffShow())
                 .latitude(tourist.getLatitude())
                 .longitude(tourist.getLongitude())
                 .images(tourist.getImage())

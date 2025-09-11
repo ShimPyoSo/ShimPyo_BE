@@ -1,6 +1,5 @@
 package com.example.shimpyo.domain.course.dto;
 
-import com.example.shimpyo.domain.tourist.dto.OperationTime;
 import com.example.shimpyo.domain.tourist.entity.Category;
 import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.entity.TouristCategory;
@@ -18,7 +17,7 @@ public class AdditionRecommendsResponseDto {
         private String region;
         private String address;
         private List<Category> category;
-        private OperationTime operationTime;
+        private String operationTime;
         private String tel;
         private String images;
         private Double latitude;
@@ -37,7 +36,7 @@ public class AdditionRecommendsResponseDto {
                     .tel(tourist.getTel())
                     .latitude(tourist.getLatitude())
                     .longitude(tourist.getLongitude())
-                    .operationTime(OperationTime.toDto(tourist))
+                    .operationTime(tourist.getDayOffShow())
                     .images(tourist.getImage() == null? null : tourist.getImage())
                     .isLiked(false)
                     .build();
