@@ -91,7 +91,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.shimpyo.co.kr"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.shimpyo.site"));
         config.setAllowedMethods(List.of("*"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(List.of("*"));
