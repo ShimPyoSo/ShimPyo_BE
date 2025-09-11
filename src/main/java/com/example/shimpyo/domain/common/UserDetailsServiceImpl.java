@@ -18,11 +18,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return new UserDetailsImpl(userAuthRepository.findByUserLoginId(username)
-                .orElseThrow(() -> new BaseException(MemberException.MEMBER_NOT_FOUND)));
+                .orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다.")));
     }
 
     public UserDetailsImpl loadUserByUserLoginId(String username) throws UsernameNotFoundException {
         return new UserDetailsImpl(userAuthRepository.findByUserLoginId(username)
-                .orElseThrow(() -> new BaseException(MemberException.MEMBER_NOT_FOUND)));
+                .orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다.")));
     }
 }

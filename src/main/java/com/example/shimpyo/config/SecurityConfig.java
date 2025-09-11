@@ -7,6 +7,7 @@ import com.example.shimpyo.domain.auth.jwt.JwtTokenProvider;
 import com.example.shimpyo.domain.auth.repository.UserAuthRepository;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.auth.service.RedisService;
+import com.example.shimpyo.domain.common.UserDetailsServiceImpl;
 import com.example.shimpyo.domain.utils.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +38,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final CookieUtils cookieUtils;
     private final RedisService redisService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -50,7 +52,8 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
-        return new JwtAuthenticationFilter(jwtTokenProvider, cookieUtils, authenticationManager, redisService);
+        return new JwtAuthenticationFilter(jwtTokenProvider, cookieUtils, authenticationManager, redisService,
+                userDetailsService, passwordEncoder());
     }
 
     @Bean

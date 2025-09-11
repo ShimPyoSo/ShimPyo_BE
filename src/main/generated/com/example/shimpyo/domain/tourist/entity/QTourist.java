@@ -59,8 +59,6 @@ public class QTourist extends EntityPathBase<Tourist> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> deletedAt = _super.deletedAt;
 
-    public final StringPath description = createString("description");
-
     public final NumberPath<Double> femaleRatio = createNumber("femaleRatio", Double.class);
 
     public final StringPath homepageUrl = createString("homepageUrl");

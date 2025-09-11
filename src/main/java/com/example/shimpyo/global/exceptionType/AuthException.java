@@ -13,7 +13,7 @@ public enum AuthException implements ExceptionType{
     USERNAME_NOT_VALIDATE(HttpStatus.BAD_REQUEST, "아이디가 유효하지 않습니다.[영 소문자 + 숫자 (6~12자)]"),
     TWO_PASSWORD_NOT_MATCHED(HttpStatus.BAD_REQUEST, "새로 입력한 비밀번호가 일치하지 않습니다."),
     PASSWORD_DUPLICATED(HttpStatus.BAD_REQUEST, "기존 비밀번호와 동일한 비밀번호입니다."),
-    AUTHENTICATION_GET_FAILED(HttpStatus.CONFLICT, "사용자 인증 정보가 없습니다."),
+    AUTHENTICATION_GET_FAILED(HttpStatus.BAD_REQUEST, "사용자 인증 정보가 없습니다."),
     SOCIAL_USER_CANT_CHANGE_PASSWORD(HttpStatus.FORBIDDEN, "소셜 유저는 패스워드 변경이 불가능합니다."),
     FILE_SIZE_OVER(HttpStatus.BAD_REQUEST, "파일 용량이 초과하였습니다.");
 

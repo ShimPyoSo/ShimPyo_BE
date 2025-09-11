@@ -112,7 +112,6 @@ public class QTouristRepository {
         }
         String like = "%" + keyword.toLowerCase().trim() + "%";
         return tourist.name.lower().like(like)
-                .or(tourist.description.lower().like(like))
                 .or(tourist.address.lower().like(like));
     }
 
