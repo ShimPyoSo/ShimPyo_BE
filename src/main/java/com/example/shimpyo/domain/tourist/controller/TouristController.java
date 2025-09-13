@@ -48,16 +48,10 @@ public class TouristController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "관광지 카테고리별 필터링")
     @GetMapping("/category")
-    @SwaggerErrorApi(
-        type = {TouristException.class},
-        codes = {
-            "ILLEGAL_CATEGORY",
-            "INVALID_VISIT_TIME_FORMAT",
-            "UNSUPPORTED_GENDER",
-            "UNSUPPORTED_AGE_GROUP"
-        }
-    )
+    @SwaggerErrorApi(type = {TouristException.class},
+        codes = {"ILLEGAL_CATEGORY",  "INVALID_VISIT_TIME_FORMAT", "UNSUPPORTED_GENDER","UNSUPPORTED_AGE_GROUP"})
     public ResponseEntity<?> filterTouristByCategory(@RequestParam("category") @NotBlank String category,
                                                      @ModelAttribute  FilterRequestDto filter) {
         return ResponseEntity.ok(touristService.filteredTourist(filter, category));

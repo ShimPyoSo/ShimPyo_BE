@@ -154,14 +154,14 @@ public class QTouristRepository {
             visitEnd = LocalTime.parse(time[1].trim());
         }
 
-        if (visitEnd.isBefore(visitStart) || visitStart.isBefore(LocalTime.of(9, 0))) {
+        if (visitEnd.isBefore(visitStart) || visitStart.isBefore(LocalTime.of(5, 0))) {
             throw new BaseException(INVALID_VISIT_TIME_FORMAT);
         }
 
         // LocalTime을 문자열로 변환하여 비교하거나 TIME 함수 사용
         return Expressions.booleanTemplate(
-                "TIME({0}) <= TIME({1}) AND TIME({2}) >= TIME({3})",
-                tourist.openTime, visitStart, tourist.closeTime, visitEnd
+                "TIME({0}) < TIME({1}) AND TIME({2}) > TIME({3})",
+                visitEnd, tourist.openTime, visitStart, tourist.closeTime
         );
     }
 
