@@ -1,6 +1,7 @@
 package com.example.shimpyo.domain.tourist.entity;
 
 import com.example.shimpyo.domain.survey.entity.SuggestionTourist;
+import com.example.shimpyo.domain.tourist.listeners.TouristEntityListener;
 import com.example.shimpyo.domain.user.entity.Likes;
 import com.example.shimpyo.domain.user.entity.Review;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ import java.util.List;
 @Table(name = "tourist")
 @SuperBuilder
 @NoArgsConstructor
+@EntityListeners(TouristEntityListener.class)
 public class Tourist extends AbstractTourist {
 
     @Column

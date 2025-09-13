@@ -24,7 +24,18 @@ services:
       - 6379:6379
     volumes:
       - redis_data:/data
-
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4 # 버전 고정 추천
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node # 단일 노드 실행
+      - xpack.security.enabled=false # 보안(인증) 끔 (개발용)
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m # JVM 힙 메모리 제한
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
 volumes:
   mariadb_data:
   redis_data:

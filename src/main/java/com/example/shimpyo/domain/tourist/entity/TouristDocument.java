@@ -19,15 +19,11 @@ public class TouristDocument {
     @Id
     private String id;
 
-    @Field(type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
+    // ngram analyzer 적용된 필드
+    @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
     private String name;
 
-    @Field(type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
+    // 정확 매칭용 필드
+    @Field(type = FieldType.Keyword)
     private String region;
-
-    @Field(type = FieldType.Keyword)
-    private List<String> nameKeywords;
-
-    @Field(type = FieldType.Keyword)
-    private List<String> regionKeywords;
 }
