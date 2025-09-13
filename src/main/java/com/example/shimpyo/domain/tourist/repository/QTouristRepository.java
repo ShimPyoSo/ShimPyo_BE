@@ -305,6 +305,7 @@ public class QTouristRepository {
             boolean isLiked = likedIds.contains(t.getId());
             result.add(FilterTouristByDataResponseDto.from(t, isLiked));
         }
+        result.sort(Comparator.comparing(FilterTouristByDataResponseDto::getId));
         return result;
     }
 }
