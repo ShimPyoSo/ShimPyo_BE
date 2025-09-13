@@ -44,13 +44,16 @@ public class MailService {
         * 메일 전송 타입 : find 인 경우 메일이 존재하지 않을 경우 : "해당 이메일이 존재하지 않습니다." 예외 처리
          */
         Optional<User> findUser = userRepository.findByEmail(dto.getEmail());
+        String type = null;
         if(dto.getType().equals("register")){
             if (findUser.isPresent()) {
                 throw new BaseException(EMAIL_DUPLICATION);
             }
+            type = "회원가입 이메일 인증";
         } else if(dto.getType().equals("find")){
             if (findUser.isEmpty())
                 throw new BaseException(EMAIL_NOT_FOUNDED);
+            type = "계정 확인 이메일 인증";
         }
         String email = dto.getEmail();
 
@@ -64,7 +67,7 @@ public class MailService {
         authkey.append(String.valueOf(random.nextInt(888) + 111));
 
         try {
-            sendAuthEmail(email, authkey.toString());
+            sendAuthEmail(email, authkey.toString(), type);
             // 5분 5초의 제한 시간으로 레디스에 인증 코드 저장
             redisTemplate.opsForValue().set(email, authkey.toString(), 305, TimeUnit.SECONDS);
         } catch (MessagingException e) {
@@ -72,13 +75,13 @@ public class MailService {
         }
     }
 
-    private void sendAuthEmail(String email, String authKey) throws MessagingException {
+    private void sendAuthEmail(String email, String authKey, String type) throws MessagingException {
         String subject = "[쉼표] 이메일 주소 확인을 위한 인증 메일입니다";
         String content = "안녕하세요, <b>[쉼표]</b>에 가입해주셔서 감사합니다.<br>" +
                 "아래 인증 번호를 입력해주세요.<br>" +
                 "<div class='highlight'>" + authKey + "</div><br>" +
                 "보안을 위해 이 메일은 타인과 공유하지 마시기 바랍니다.";
-        String text = buildMailTemplate("회원가입 이메일 인증", content);
+        String text = buildMailTemplate(type, content);
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
