@@ -24,10 +24,10 @@ public class Tourist extends AbstractTourist {
     @Column
     private Long contentId;
 
-    @Column
+    @Column(length = 2000)
     private String homepageUrl;
 
-    @Column
+    @Column(length = 2000)
     private String reservationUrl;
 
     @Column

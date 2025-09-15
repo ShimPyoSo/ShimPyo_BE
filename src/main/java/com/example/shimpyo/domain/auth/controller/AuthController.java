@@ -4,6 +4,7 @@ import com.example.shimpyo.domain.auth.dto.*;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.auth.service.MailService;
 import com.example.shimpyo.domain.auth.service.OAuth2Service;
+import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.SwaggerErrorApi;
 import com.example.shimpyo.global.exceptionType.AuthException;
 import com.example.shimpyo.global.exceptionType.MemberException;
@@ -82,9 +83,12 @@ public class AuthController {
 
     // 아이디 중복 검사 로직
     @Operation(summary = "아이디 중복 검사", description = "사용자 로그인 아이디를 기반으로 중복 검사.")
-    @SwaggerErrorApi(type = AuthException.class, codes = {"LOGIN_ID_DUPLICATION"})
+    @SwaggerErrorApi(type = AuthException.class, codes = {"LOGIN_ID_DUPLICATION, USERNAME_NOT_VALIDATE"})
     @GetMapping("/duplicate/username")
     public ResponseEntity<?> getDuplicate(@RequestParam String username){
+        if (!username.matches("^[a-z0-9]{6,12}$")) {
+            throw new BaseException(AuthException.USERNAME_NOT_VALIDATE);
+        }
         authService.validateDuplicateUsername(username);
 
         return ResponseEntity.ok().build();
