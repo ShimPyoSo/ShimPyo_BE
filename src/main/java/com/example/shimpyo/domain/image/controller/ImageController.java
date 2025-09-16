@@ -28,7 +28,7 @@ public class ImageController {
     @Operation(summary = "이미지 업로드")
     @PostMapping()
     public ResponseEntity<Map<String, String>> upload(@Valid @RequestBody ImageRequestDto requestDto) {
-        if(requestDto.getFileSize()/ (1024 * 1024) > 10)
+        if(requestDto.getFileSize()/ (1024 * 1024) > 20)
             throw new BaseException(FILE_SIZE_OVER);
         return ResponseEntity.ok(Map.of("uploadUrl", s3Service.generatePresignedUrl(requestDto)));
     }
