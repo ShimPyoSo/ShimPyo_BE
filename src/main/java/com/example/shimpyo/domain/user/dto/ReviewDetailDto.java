@@ -21,7 +21,7 @@ public class ReviewDetailDto {
                 .reviewId(review.getId())
                 .createdAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
                 .contents(review.getContent())
-                .images(review.getImage() == null? null : review.getImage())
+                .images(review.getImage())
                 .build();
     }
 }

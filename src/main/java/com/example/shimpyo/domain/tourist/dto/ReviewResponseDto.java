@@ -25,7 +25,7 @@ public class ReviewResponseDto {
                 .nickname(user.getDeletedAt() == null? user.getNickname() : null)
                 .createdAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
                 .contents(review.getContent())
-                .images(review.getImage() == null? null : review.getImage())
+                .images(review.getImage())
                 .build();
     }
 }
