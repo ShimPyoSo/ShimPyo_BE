@@ -80,27 +80,6 @@ public class QTouristRepository {
                     .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
         }
 
-        // 커서 조건
-//        BooleanExpression cursor = buildCursorCondition(filter.getSortBy(), filter.getLastId(),
-//                lastTourist);
-//        if (cursor != null) {
-//            whereClause.and(cursor);
-//        }
-//
-//        // 정렬
-//        List<OrderSpecifier<?>> orderBy = buildOrder(filter.getSortBy(), tourist, likes, review);
-//
-//        return queryFactory
-//                .selectFrom(tourist)
-//                .leftJoin(tourist.touristCategories, touristCategory)
-//                .leftJoin(tourist.touristOffers, touristOffer)
-//                .leftJoin(tourist.likes, likes)
-//                .leftJoin(tourist.reviews, review)
-//                .where(whereClause)
-//                .groupBy(tourist.id)
-//                .orderBy(orderBy.toArray(new OrderSpecifier[0]))
-//                .limit(8)
-//                .fetch();
         return getTouristsBySort(filter.getSortBy(), whereClause, filter.getLastId());
     }
     private Set<Long> findLikedIds(List<Tourist>results) {
@@ -399,11 +378,7 @@ public class QTouristRepository {
         Set<Long> likedIds = findLikedIds(tourists);
 
         return tourists.stream()
-                .map(t -> {
-                    FilterTouristByDataResponseDto dto = FilterTouristByDataResponseDto.from(t, likedIds.contains(t.getId()));
-                    dto.setTotalScore(t.getTotalScore());
-                    return dto;
-                })
+                .map(t -> FilterTouristByDataResponseDto.from(t, likedIds.contains(t.getId())))
                 .collect(Collectors.toList());
     }
 }
