@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.shimpyo.global.exceptionType.TokenException.*;
+import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
 
 @Repository
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class QTouristRepository {
     private final JPAQueryFactory queryFactory;
     private final LikesRepository likesRepository;
     private final AuthService authService;
+    private final TouristRepository touristRepository;
 
     QTourist tourist = QTourist.tourist;
     QTouristCategory touristCategory = QTouristCategory.touristCategory;
@@ -71,23 +73,35 @@ public class QTouristRepository {
         whereClause.and(facilitiesCondition(filter.getFacilities(), tourist, touristOffer));
         whereClause.and(genderCondition(filter.getGender(), tourist));
         whereClause.and(ageGroupCondition(filter.getAgeGroup(), tourist));
-        whereClause.and(cursorCondition(filter.getLastId(), tourist));
-        // 3. 정렬 조건
-//        List<OrderSpecifier<?>> orderBy =
 
-        // 4. 쿼리 실행
-        return getTouristsBySort(filter.getSortBy(), whereClause);
-        /*return queryFactory
-                .selectFrom(tourist)
-                .leftJoin(tourist.touristCategories, touristCategory)
-                .leftJoin(tourist.touristOffers, touristOffer)
-                .leftJoin(tourist.likes, likes)
-                .leftJoin(tourist.reviews, review)
-                .where(whereClause)
-                .groupBy(tourist.id)
-                .orderBy(orderBy.toArray(new OrderSpecifier[0]))
-                .limit(8)
-                .fetch();*/
+        Tourist lastTourist = null;
+        if (filter.getLastId() != null) {
+            lastTourist = touristRepository.findById(filter.getLastId())
+                    .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
+        }
+
+        // 커서 조건
+//        BooleanExpression cursor = buildCursorCondition(filter.getSortBy(), filter.getLastId(),
+//                lastTourist);
+//        if (cursor != null) {
+//            whereClause.and(cursor);
+//        }
+//
+//        // 정렬
+//        List<OrderSpecifier<?>> orderBy = buildOrder(filter.getSortBy(), tourist, likes, review);
+//
+//        return queryFactory
+//                .selectFrom(tourist)
+//                .leftJoin(tourist.touristCategories, touristCategory)
+//                .leftJoin(tourist.touristOffers, touristOffer)
+//                .leftJoin(tourist.likes, likes)
+//                .leftJoin(tourist.reviews, review)
+//                .where(whereClause)
+//                .groupBy(tourist.id)
+//                .orderBy(orderBy.toArray(new OrderSpecifier[0]))
+//                .limit(8)
+//                .fetch();
+        return getTouristsBySort(filter.getSortBy(), whereClause, filter.getLastId());
     }
     private Set<Long> findLikedIds(List<Tourist>results) {
         // 5. 좋아요 정보 조회 및 응답 생성
@@ -247,12 +261,44 @@ public class QTouristRepository {
         return result;
     }
 
-    private BooleanExpression cursorCondition(Long lastId, QTourist tourist) {
-        return lastId != null ? tourist.id.gt(lastId) : null;
+    private double calculateTotalScore(Tourist t) {
+        double male = t.getMaleRatio() != null ? t.getMaleRatio() : 0;
+        double female = t.getFemaleRatio() != null ? t.getFemaleRatio() : 0;
+        double genderScore = Math.min(male, female);
+
+        double ageScore =
+                (t.getAge20EarlyRatio() != null ? t.getAge20EarlyRatio() : 0)
+                        + (t.getAge20MidRatio() != null ? t.getAge20MidRatio() : 0)
+                        + (t.getAge20LateRatio() != null ? t.getAge20LateRatio() : 0)
+                        + (t.getAge30EarlyRatio() != null ? t.getAge30EarlyRatio() : 0)
+                        + (t.getAge30MidRatio() != null ? t.getAge30MidRatio() : 0)
+                        + (t.getAge30LateRatio() != null ? t.getAge30LateRatio() : 0)
+                        + (t.getAge40Ratio() != null ? t.getAge40Ratio() : 0)
+                        + (t.getAge50Ratio() != null ? t.getAge50Ratio() : 0)
+                        + (t.getAge60PlusRatio() != null ? t.getAge60PlusRatio() : 0);
+
+        return genderScore + ageScore;
     }
 
-    private List<Tourist> getTouristsBySort(String sortBy, BooleanBuilder whereClause) {
+    private long getLikesCount(Tourist t) {
+        return t.getLikes() != null ? t.getLikes().size() : 0;
+    }
+
+    private long getReviewCount(Tourist t) {
+        return t.getReviews() != null ? t.getReviews().size() : 0;
+    }
+
+    private List<Tourist> getTouristsBySort(String sortBy, BooleanBuilder whereClause, Long lastId) {
+        // 1. lastTourist 조회
+        Tourist lastTourist = null;
+        if (lastId != null) {
+            lastTourist = touristRepository.findById(lastId)
+                    .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
+        }
+
+        // 2. 정렬 조건 빌드
         List<OrderSpecifier<?>> orderBy = new ArrayList<>();
+        NumberExpression<Double> totalScoreExp = null;
 
         if ("popular".equalsIgnoreCase(sortBy)) {
             NumberExpression<Double> maleRatio = tourist.maleRatio.coalesce(0.0);
@@ -273,7 +319,7 @@ public class QTouristRepository {
                             .add(tourist.age50Ratio.coalesce(0.0))
                             .add(tourist.age60PlusRatio.coalesce(0.0));
 
-            NumberExpression<Double> totalScoreExp = genderScore.add(ageScore);
+            totalScoreExp = genderScore.add(ageScore);
             orderBy.add(totalScoreExp.desc());
 
         } else if ("likes".equalsIgnoreCase(sortBy)) {
@@ -282,25 +328,54 @@ public class QTouristRepository {
             orderBy.add(review.count().desc());
         }
 
-        orderBy.add(tourist.id.asc()); // 동점자 처리용
+        // 동점자 처리
+        orderBy.add(tourist.id.asc());
 
-        // 쿼리 실행
-        List<Tourist> tourists = queryFactory
+        // 3. 쿼리 빌드
+        var baseQuery = queryFactory
                 .selectFrom(tourist)
                 .leftJoin(tourist.touristCategories, touristCategory)
                 .leftJoin(tourist.touristOffers, touristOffer)
                 .leftJoin(tourist.likes, likes)
                 .leftJoin(tourist.reviews, review)
                 .where(whereClause)
-                .groupBy(tourist.id)
+                .groupBy(tourist.id);
+
+        // 4. 커서 조건 추가
+        if (lastTourist != null) {
+            if ("popular".equalsIgnoreCase(sortBy)) {
+                double lastTotalScore = calculateTotalScore(lastTourist);
+                baseQuery.where(
+                        totalScoreExp.lt(lastTotalScore)
+                                .or(totalScoreExp.eq(lastTotalScore).and(tourist.id.gt(lastId)))
+                );
+
+            } else if ("likes".equalsIgnoreCase(sortBy)) {
+                long lastLikes = getLikesCount(lastTourist);
+                baseQuery.having(
+                        likes.count().lt(lastLikes)
+                                .or(likes.count().eq(lastLikes).and(tourist.id.gt(lastId)))
+                );
+
+            } else if ("review".equalsIgnoreCase(sortBy)) {
+                long lastReviews = getReviewCount(lastTourist);
+                baseQuery.having(
+                        review.count().lt(lastReviews)
+                                .or(review.count().eq(lastReviews).and(tourist.id.gt(lastId)))
+                );
+            }
+        }
+
+        // 5. 실행
+        List<Tourist> tourists = baseQuery
                 .orderBy(orderBy.toArray(new OrderSpecifier[0]))
                 .limit(8)
                 .fetch();
 
-        // popular 정렬이면 totalScore 계산
+        // 6. totalScore 업데이트 (popular일 때만)
         if ("popular".equalsIgnoreCase(sortBy)) {
             tourists.forEach(t -> {
-                Double genderVal = t.getMaleRatio() < t.getFemaleRatio() ? t.getMaleRatio() : t.getFemaleRatio();
+                Double genderVal = (t.getMaleRatio() < t.getFemaleRatio()) ? t.getMaleRatio() : t.getFemaleRatio();
                 Double ageVal = t.getAge20EarlyRatio() + t.getAge20MidRatio() + t.getAge20LateRatio()
                         + t.getAge30EarlyRatio() + t.getAge30MidRatio() + t.getAge30LateRatio()
                         + t.getAge40Ratio() + t.getAge50Ratio() + t.getAge60PlusRatio();
@@ -325,7 +400,9 @@ public class QTouristRepository {
 
         return tourists.stream()
                 .map(t -> {
-                    return FilterTouristByDataResponseDto.from(t, likedIds.contains(t.getId()));
+                    FilterTouristByDataResponseDto dto = FilterTouristByDataResponseDto.from(t, likedIds.contains(t.getId()));
+                    dto.setTotalScore(t.getTotalScore());
+                    return dto;
                 })
                 .collect(Collectors.toList());
     }
