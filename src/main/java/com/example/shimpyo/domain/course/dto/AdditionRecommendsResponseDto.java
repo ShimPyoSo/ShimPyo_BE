@@ -37,7 +37,7 @@ public class AdditionRecommendsResponseDto {
                     .latitude(tourist.getLatitude())
                     .longitude(tourist.getLongitude())
                     .operationTime(tourist.getDayOffShow())
-                    .images(tourist.getImage() == null? null : tourist.getImage())
+                    .images(tourist.getImage())
                     .isLiked(false)
                     .build();
         }
