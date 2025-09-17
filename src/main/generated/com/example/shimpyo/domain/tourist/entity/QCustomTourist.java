@@ -49,6 +49,9 @@ public class QCustomTourist extends EntityPathBase<CustomTourist> {
     //inherited
     public final StringPath region = _super.region;
 
+    //inherited
+    public final StringPath regionDetail = _super.regionDetail;
+
     public final ListPath<com.example.shimpyo.domain.survey.entity.SuggestionCustomTourist, com.example.shimpyo.domain.survey.entity.QSuggestionCustomTourist> suggestionCustomTourists = this.<com.example.shimpyo.domain.survey.entity.SuggestionCustomTourist, com.example.shimpyo.domain.survey.entity.QSuggestionCustomTourist>createList("suggestionCustomTourists", com.example.shimpyo.domain.survey.entity.SuggestionCustomTourist.class, com.example.shimpyo.domain.survey.entity.QSuggestionCustomTourist.class, PathInits.DIRECT2);
 
     //inherited

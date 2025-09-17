@@ -85,11 +85,11 @@ public class Tourist extends AbstractTourist {
     @OneToMany(mappedBy = "tourist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
-    public void addSuggestionTourist(SuggestionTourist st) {
-        suggestionTourists.add(st);
-        if (st.getTourist() != this) {
-            st.addTourist(this);
-        }
+    @Transient
+    private Double totalScore;
+
+    public void updateTotalScore(Double totalScore) {
+        this.totalScore = totalScore;
     }
 
     public void setId(Long id) {

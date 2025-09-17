@@ -37,6 +37,8 @@ public class QAbstractTourist extends EntityPathBase<AbstractTourist> {
 
     public final StringPath region = createString("region");
 
+    public final StringPath regionDetail = createString("regionDetail");
+
     public final StringPath tel = createString("tel");
 
     public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);

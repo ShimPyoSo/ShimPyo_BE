@@ -87,6 +87,9 @@ public class QTourist extends EntityPathBase<Tourist> {
     //inherited
     public final StringPath region = _super.region;
 
+    //inherited
+    public final StringPath regionDetail = _super.regionDetail;
+
     public final StringPath reservationUrl = createString("reservationUrl");
 
     public final ListPath<com.example.shimpyo.domain.user.entity.Review, com.example.shimpyo.domain.user.entity.QReview> reviews = this.<com.example.shimpyo.domain.user.entity.Review, com.example.shimpyo.domain.user.entity.QReview>createList("reviews", com.example.shimpyo.domain.user.entity.Review.class, com.example.shimpyo.domain.user.entity.QReview.class, PathInits.DIRECT2);

@@ -35,6 +35,9 @@ public abstract class AbstractTourist {
     private String region;
 
     @Column
+    private String regionDetail;
+
+    @Column
     protected Double latitude;
 
     @Column
