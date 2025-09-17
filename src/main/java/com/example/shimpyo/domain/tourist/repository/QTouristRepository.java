@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.shimpyo.global.exceptionType.TokenException.*;
+import static com.example.shimpyo.global.exceptionType.TouristException.ILLEGAL_FILTER;
 import static com.example.shimpyo.global.exceptionType.TouristException.TOURIST_NOT_FOUND;
 
 @Repository
@@ -260,11 +261,21 @@ public class QTouristRepository {
     }
 
     private long getLikesCount(Tourist t) {
-        return t.getLikes() != null ? t.getLikes().size() : 0;
+        Long count = queryFactory
+                .select(likes.count())
+                .from(likes)
+                .where(likes.tourist.eq(t))
+                .fetchOne();
+        return count == null ? 0 : count;
     }
 
     private long getReviewCount(Tourist t) {
-        return t.getReviews() != null ? t.getReviews().size() : 0;
+        Long count = queryFactory
+                .select(review.count())
+                .from(review)
+                .where(review.tourist.eq(t))
+                .fetchOne();
+        return count == null ? 0 : count;
     }
 
     private List<Tourist> getTouristsBySort(String sortBy, BooleanBuilder whereClause, Long lastId) {
@@ -301,10 +312,12 @@ public class QTouristRepository {
             totalScoreExp = genderScore.add(ageScore);
             orderBy.add(totalScoreExp.desc());
 
-        } else if ("likes".equalsIgnoreCase(sortBy)) {
+        } else if ("liked".equalsIgnoreCase(sortBy)) {
             orderBy.add(likes.count().desc());
         } else if ("review".equalsIgnoreCase(sortBy)) {
             orderBy.add(review.count().desc());
+        } else {
+            throw new BaseException(ILLEGAL_FILTER);
         }
 
         // 동점자 처리
@@ -329,7 +342,7 @@ public class QTouristRepository {
                                 .or(totalScoreExp.eq(lastTotalScore).and(tourist.id.gt(lastId)))
                 );
 
-            } else if ("likes".equalsIgnoreCase(sortBy)) {
+            } else if ("liked".equalsIgnoreCase(sortBy)) {
                 long lastLikes = getLikesCount(lastTourist);
                 baseQuery.having(
                         likes.count().lt(lastLikes)
@@ -342,6 +355,8 @@ public class QTouristRepository {
                         review.count().lt(lastReviews)
                                 .or(review.count().eq(lastReviews).and(tourist.id.gt(lastId)))
                 );
+            } else {
+                throw new BaseException(ILLEGAL_FILTER);
             }
         }
 
