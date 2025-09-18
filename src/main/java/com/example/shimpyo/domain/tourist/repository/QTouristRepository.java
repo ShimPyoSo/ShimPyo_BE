@@ -290,7 +290,7 @@ public class QTouristRepository {
         List<OrderSpecifier<?>> orderBy = new ArrayList<>();
         NumberExpression<Double> totalScoreExp = null;
 
-        if ("popular".equalsIgnoreCase(sortBy)) {
+        if ("popular".equalsIgnoreCase(sortBy) || sortBy == null) {
             NumberExpression<Double> maleRatio = tourist.maleRatio.coalesce(0.0);
             NumberExpression<Double> femaleRatio = tourist.femaleRatio.coalesce(0.0);
 
