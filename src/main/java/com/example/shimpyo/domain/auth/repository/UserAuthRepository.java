@@ -20,4 +20,5 @@ public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
     @Modifying
     @Query("UPDATE UserAuth ua SET ua.lastLogin = CURRENT_TIMESTAMP WHERE ua.userLoginId = :loginId")
     void updateLastLogin(@Param("loginId") String loginId);
+
 }

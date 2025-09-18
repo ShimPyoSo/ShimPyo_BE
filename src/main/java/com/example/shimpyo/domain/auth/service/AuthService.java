@@ -89,7 +89,7 @@ public class AuthService {
     // [#MOO1] 사용자 회원가입
     public LoginResponseDto registerUser(RegisterUserRequest dto, HttpServletResponse response) {
         // 삭제되지 않은 사용자 중 이메일 중복 체크
-        if (userRepository.findByEmailAndDeletedAtIsNull(dto.getEmail()).isPresent()) {
+        if (userRepository.findByEmailAndUserAuth_SocialType(dto.getEmail(), SocialType.LOCAL).isPresent()) {
             throw new BaseException(EMAIL_DUPLICATION);
         }
 
