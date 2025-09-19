@@ -130,7 +130,7 @@ public class TouristService {
         reviewRepository.deleteAll(reviewRepository.findByUserAndTouristId(user, touristId));
     }
 
-    public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<String> categories, int count) {
+    public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<Category> categories, int count) {
         return touristRepository.findByRegionsAndCategoriesAndOpenTimeIsNotNull(regions, categories, count);
     }
 
@@ -140,5 +140,27 @@ public class TouristService {
 
     public List<Tourist> getRecommendsOnAddition(List<Category> categories, List<String> regions) {
         return touristRepository.findByRegionsAndCategories(regions, categories);
+    }
+
+    public List<String> findDistinctRegionDetailsByRegion(String region) {
+        return touristRepository.findDistinctRegionDetailsByRegion(region);
+    }
+
+    /**
+     * regionDetail 기준으로 category 필터 후 랜덤으로 count 만큼 반환
+     */
+    public List<Tourist> getTouristsByRegionDetailAndCategoryAndCount(
+            String regionDetail, List<Category> categories, int count) {
+
+        List<Tourist> candidates = touristRepository.findByRegionDetailAndCategories(regionDetail, categories);
+
+        if (candidates == null || candidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Collections.shuffle(candidates);
+        return candidates.stream()
+                .limit(count)
+                .collect(Collectors.toList());
     }
 }

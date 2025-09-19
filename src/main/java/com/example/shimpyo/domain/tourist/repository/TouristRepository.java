@@ -27,7 +27,7 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
             nativeQuery = true)
     List<Tourist> findByRegionsAndCategoriesAndOpenTimeIsNotNull(
             @Param("regions") List<String> regions,
-            @Param("categories") List<String> categories,
+            @Param("categories") List<Category> categories,
             @Param("count") int count);
 
     @Query(value = "SELECT DISTINCT t FROM Tourist t " +
@@ -36,5 +36,17 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
             "AND tc.category IN (:categories)")
     List<Tourist> findByRegionsAndCategories(@Param("regions") List<String> regions,
                                              @Param("categories") List<Category> categories);
+
+
+    // 특정 region (예: "경북") 안의 regionDetail 목록 distinct 조회
+    @Query("select distinct t.regionDetail from Tourist t where t.region = :region")
+    List<String> findDistinctRegionDetailsByRegion(@Param("region") String region);
+
+    // regionDetail + category 조건으로 관광지 조회 (join TouristCategory)
+    @Query("select distinct t from Tourist t " +
+            "join t.touristCategories tc " +
+            "where t.regionDetail = :regionDetail and tc.category in :categories")
+    List<Tourist> findByRegionDetailAndCategories(@Param("regionDetail") String regionDetail,
+                                                  @Param("categories") List<Category> categories);
 
 }
