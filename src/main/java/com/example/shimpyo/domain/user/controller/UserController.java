@@ -87,7 +87,7 @@ public class UserController {
     }
 
     @Operation(summary = "후기 삭제")
-    @SwaggerErrorApi(type = {MemberException.class}, codes = {"MEMBER_NOT_FOUND"})
+    @SwaggerErrorApi(type = {MemberException.class, TouristException.class}, codes = {"MEMBER_NOT_FOUND", "REVIEW_NOT_FOUND"})
     @DeleteMapping("/review")
     public ResponseEntity<Void> deleteReview(@RequestParam("touristId") Long touristId,
                                              @RequestParam(name = "reviewId", required = false) Long reviewId) {

@@ -127,7 +127,15 @@ public class TouristService {
 
     public void deleteReview(Long touristId) {
         User user = authService.findUser().getUser();
-        reviewRepository.deleteAll(reviewRepository.findByUserAndTouristId(user, touristId));
+        reviewRepository.deleteAll(getReviewByUserAndTouristId(touristId, user));
+    }
+
+    public List<Review> getReviewByUserAndTouristId(Long touristId, User user) {
+        List<Review> result = reviewRepository.findByUserAndTouristId(user, touristId);
+        if (result.isEmpty()) {
+            throw new BaseException(REVIEW_NOT_FOUND);
+        }
+        return result;
     }
 
     public List<Tourist> getTouristsByRegionAndCategoryAndCount(List<String> regions, List<Category> categories, int count) {

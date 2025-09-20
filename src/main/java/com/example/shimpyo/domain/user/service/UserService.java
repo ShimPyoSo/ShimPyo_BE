@@ -3,6 +3,7 @@ package com.example.shimpyo.domain.user.service;
 import com.example.shimpyo.domain.auth.service.AuthService;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.dto.*;
+import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
 import com.example.shimpyo.global.exceptionType.MemberException;
@@ -44,9 +45,8 @@ public class UserService {
 
     public MyReviewDetailResponseDto getMyReviewTourists(Long touristId) {
 
+        User user = authService.findUser().getUser();
         return MyReviewDetailResponseDto.toDto(touristService.findTourist(touristId),
-                authService.findUser().getUser().getReviews()
-                        .stream().map(ReviewDetailDto::toDto).collect(Collectors.toList()));
-
+               touristService.getReviewByUserAndTouristId(touristId, user).stream().map(ReviewDetailDto::toDto).collect(Collectors.toList()));
     }
 }
