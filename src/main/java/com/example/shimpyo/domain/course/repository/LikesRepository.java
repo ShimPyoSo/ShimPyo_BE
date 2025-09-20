@@ -26,8 +26,8 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
                 JOIN l.tourist t
                 JOIN t.touristCategories tc
                 WHERE l.user = :user
-                  AND l.id < :cursor
                   AND tc.category = :category
+                  AND (:cursor IS NULL OR l.id < :cursor)
                 ORDER BY l.id DESC
             """)
     List<Likes> findLikesDtoByUserAndCategory(
@@ -36,12 +36,13 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
             @Param("category") Category category,
             Pageable pageable
     );
+
     @Query("""
                 SELECT l
                 FROM Likes l
                 JOIN l.tourist t
                 WHERE l.user = :user
-                  AND l.id < :cursor
+                AND (:cursor IS NULL OR l.id < :cursor)
                 ORDER BY l.id DESC
             """)
     List<Likes> findLikesDtoByUser(
