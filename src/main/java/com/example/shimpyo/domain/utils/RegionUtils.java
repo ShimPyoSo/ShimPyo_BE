@@ -8,7 +8,7 @@ public class RegionUtils {
             "경상도", List.of("경북", "경남"),
             "전라도", List.of("전북", "전남"),
             "충청도", List.of("충북", "충남"),
-            "수도권", List.of("서울", "경기"),
+            "수도권", List.of("서울", "경기", "인천"),
             "강원도", List.of("강원"),
             "제주도", List.of("제주")
     );

@@ -45,8 +45,9 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
     // regionDetail + category 조건으로 관광지 조회 (join TouristCategory)
     @Query("select distinct t from Tourist t " +
             "join t.touristCategories tc " +
-            "where t.regionDetail = :regionDetail and tc.category in :categories")
-    List<Tourist> findByRegionDetailAndCategories(@Param("regionDetail") String regionDetail,
+            "where t.region = :region and t.regionDetail = :regionDetail and tc.category in :categories")
+    List<Tourist> findByRegionDetailAndCategories(@Param("region") String region,
+                                                  @Param("regionDetail") String regionDetail,
                                                   @Param("categories") List<Category> categories);
 
 }

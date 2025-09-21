@@ -158,9 +158,10 @@ public class TouristService {
      * regionDetail 기준으로 category 필터 후 랜덤으로 count 만큼 반환
      */
     public List<Tourist> getTouristsByRegionDetailAndCategoryAndCount(
-            String regionDetail, List<Category> categories, int count) {
 
-        List<Tourist> candidates = touristRepository.findByRegionDetailAndCategories(regionDetail, categories);
+            String region, String regionDetail, List<Category> categories, int count) {
+
+        List<Tourist> candidates = touristRepository.findByRegionDetailAndCategories(region, regionDetail, categories);
 
         if (candidates == null || candidates.isEmpty()) {
             return Collections.emptyList();

@@ -96,9 +96,9 @@ public class SurveyService {
                 regionDetailForDay = availableDetails.remove(0);
 
                 meals = touristService.getTouristsByRegionDetailAndCategoryAndCount(
-                        regionDetailForDay, List.of(Category.건강식), mealCount);
+                        region, regionDetailForDay, List.of(Category.건강식), mealCount);
                 activities = touristService.getTouristsByRegionDetailAndCategoryAndCount(
-                        regionDetailForDay, activityCategories, 3);
+                        region, regionDetailForDay, activityCategories, 3);
 
                 if (!meals.isEmpty() || !activities.isEmpty()) {
                     found = true;
@@ -109,6 +109,7 @@ public class SurveyService {
 
             // 그래도 못 찾으면 region 전체 fallback
             if (!found) {
+                System.out.println("Tourists Not founded ===> RegionDetail sets to Region");
                 regionDetailForDay = region; // region 자체를 하나의 regionDetail로 간주
                 meals = touristService.getTouristsByRegionAndCategoryAndCount(List.of(region), List.of(Category.건강식), mealCount);
                 activities = touristService.getTouristsByRegionAndCategoryAndCount(List.of(region), activityCategories, 3);
