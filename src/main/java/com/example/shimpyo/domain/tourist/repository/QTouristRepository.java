@@ -75,12 +75,6 @@ public class QTouristRepository {
         whereClause.and(genderCondition(filter.getGender(), tourist));
         whereClause.and(ageGroupCondition(filter.getAgeGroup(), tourist));
 
-        Tourist lastTourist = null;
-        if (filter.getLastId() != null) {
-            lastTourist = touristRepository.findById(filter.getLastId())
-                    .orElseThrow(() -> new BaseException(TOURIST_NOT_FOUND));
-        }
-
         return getTouristsBySort(filter.getSortBy(), whereClause, filter.getLastId());
     }
     private Set<Long> findLikedIds(List<Tourist>results) {
@@ -105,9 +99,11 @@ public class QTouristRepository {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        String like = "%" + keyword.toLowerCase().trim() + "%";
-        return tourist.name.lower().like(like)
-                .or(tourist.address.lower().like(like));
+        String like = "%" + keyword.trim().toLowerCase() + "%";
+        BooleanExpression nameLike = tourist.name.lower().like(like);
+        BooleanExpression addrLike = tourist.address.lower().like(like);
+
+        return nameLike.or(addrLike);
     }
 
     private BooleanExpression regionCondition(String region, QTourist tourist) {
@@ -155,7 +151,7 @@ public class QTouristRepository {
 
         // LocalTime을 문자열로 변환하여 비교하거나 TIME 함수 사용
         return Expressions.booleanTemplate(
-                "TIME({0}) > TIME({1}) OR TIME({2}) < TIME({3})",
+                "(TIME({0}) > TIME({1}) OR TIME({2}) < TIME({3}))",
                 visitEnd, tourist.openTime, visitStart, tourist.closeTime
         );
     }
@@ -335,7 +331,7 @@ public class QTouristRepository {
 
         // 4. 커서 조건 추가
         if (lastTourist != null) {
-            if ("popular".equalsIgnoreCase(sortBy)) {
+            if ("popular".equalsIgnoreCase(sortBy) || sortBy == null) {
                 double lastTotalScore = calculateTotalScore(lastTourist);
                 baseQuery.where(
                         totalScoreExp.lt(lastTotalScore)
