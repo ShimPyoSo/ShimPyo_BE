@@ -172,4 +172,9 @@ public class TouristService {
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
+    public Tourist findStayTourist(String regionDetail, Set<Long> used) {
+        return touristRepository.findStayByRegionDetail(regionDetail, Category.스테이.name(), used);
+    }
+
 }

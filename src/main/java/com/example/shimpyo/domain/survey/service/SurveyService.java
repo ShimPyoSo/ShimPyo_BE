@@ -164,6 +164,7 @@ public class SurveyService {
         int totalSlots = mealCount + 3; // 식사 수 + 활동 3회
         Set<Long> usedToday = new HashSet<>();
 
+        Tourist lastCandidate = null;
         for (int slot = 0; slot < totalSlots; slot++) {
             boolean isMealTurn = startWithMeal == (slot % 2 == 0);
             Tourist candidate = null;
@@ -198,6 +199,21 @@ public class SurveyService {
             if (candidate != null) {
                 touristInfos.add(CourseResponseDto.TouristInfoDto.toDto(candidate, visitTime));
                 usedToday.add(candidate.getId());
+                lastCandidate = candidate;
+            }
+        }
+
+        // 🔽 마지막에 "스테이" 체크 로직 추가
+        if (!touristInfos.isEmpty()) {
+            // 마지막 관광지가 "스테이"가 아니면 추가
+            if (!lastCandidate.getTouristCategories().contains(Category.스테이)) {
+                String regionDetail = lastCandidate.getRegionDetail();
+                String region = lastCandidate.getRegion();
+                Tourist stayCandidate = touristService.findStayTourist(regionDetail, usedToday);
+                if (stayCandidate != null) {
+                    touristInfos.add(CourseResponseDto.TouristInfoDto.toDto(stayCandidate, time));
+                    usedToday.add(stayCandidate.getId());
+                }
             }
         }
 

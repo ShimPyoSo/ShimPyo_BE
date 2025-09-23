@@ -9,9 +9,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
-public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpecificationExecutor<Tourist> {
+public interface TouristRepository extends JpaRepository<Tourist, Long>, JpaSpecificationExecutor<Tourist> {
 
     @Query(value = "SELECT * FROM tourist ORDER BY RAND() LIMIT 8", nativeQuery = true)
     List<Tourist> findRandom8Recommends();
@@ -50,4 +51,18 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> , JpaSpe
                                                   @Param("regionDetail") String regionDetail,
                                                   @Param("categories") List<Category> categories);
 
+    @Query(value = """
+                SELECT t.*
+                FROM tourist t
+                JOIN tourist_category tc ON t.id = tc.tourist_id
+                WHERE tc.category = :category
+                  AND t.region_detail = :regionDetail
+                  AND t.id NOT IN (:usedToday)
+                LIMIT 1
+            """, nativeQuery = true)
+    Tourist findStayByRegionDetail(
+            @Param("regionDetail") String regionDetail,
+            @Param("category") String category,
+            @Param("usedToday") Set<Long> usedToday
+    );
 }
