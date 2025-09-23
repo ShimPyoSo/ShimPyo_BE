@@ -15,6 +15,8 @@ public enum Category {
     K뷰티("beauty"),
     자연친화("nature"),
     건강식("food"),
+    스테이("stay"),
+    체험("activity"),
     전체("all");
 
     private final String code;
