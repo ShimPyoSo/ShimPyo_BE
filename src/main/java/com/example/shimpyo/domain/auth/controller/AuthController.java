@@ -150,8 +150,7 @@ public class AuthController {
     @Operation(summary = "자동 로그인")
     @PostMapping("/relogin")
     public ResponseEntity<?> relogin(HttpServletRequest request, HttpServletResponse response){
-        authService.refreshToken(request, response);
-        LoginResponseDto dto = authService.reLoginResponse(request);
+        LoginResponseDto dto = authService.reLoginResponse(request, response);
         return ResponseEntity.ok(dto);
     }
 

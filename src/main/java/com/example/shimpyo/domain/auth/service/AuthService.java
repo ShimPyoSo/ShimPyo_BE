@@ -111,9 +111,13 @@ public class AuthService {
     }
 
     /* ================= 재발급/로그아웃 ================= */
-    // [#MOO6] AccessToken 재발급
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieUtils.getCookieValue(request);
+        refreshTokenAndGetUsername(refreshToken, response);
+    }
+
+    // [#MOO6] AccessToken 재발급
+    private String refreshTokenAndGetUsername(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             throw new BaseException(INVALID_REFRESH_TOKEN);
         }
@@ -129,6 +133,7 @@ public class AuthService {
         String newAccessToken = jwtTokenProvider.createAccessToken(userName);
         cookieUtils.addCookies(response,
                 cookieUtils.buildAccessCookie(newAccessToken, expiration / 1000L));
+        return userName;
     }
 
     public void logout(String accessToken, HttpServletResponse response) {
@@ -144,11 +149,9 @@ public class AuthService {
     }
 
     // 자동 로그인(리프레시만으로 사용자 정보 응답)
-    public LoginResponseDto reLoginResponse(HttpServletRequest request) {
-        String token = cookieUtils.getCookieValue(request);
-        if (jwtTokenProvider.validateToken(token))
-            throw new BaseException(INVALID_REFRESH_TOKEN);
-        String username = jwtTokenProvider.getUserNameFromRefresh(token);
+    public LoginResponseDto reLoginResponse(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = cookieUtils.getCookieValue(request);
+        String username = refreshTokenAndGetUsername(refreshToken, response);
 
         User user = userAuthRepository.findByUserLoginId(username)
                 .orElseThrow(() -> new BaseException(MEMBER_NOT_FOUND)).getUser();
