@@ -18,5 +18,5 @@ public interface SuggestionTouristRepository extends JpaRepository<SuggestionTou
             "WHERE st.suggestion.id = :suggestionId")
     List<String> findDistinctRegionsBySuggestionId(@Param("suggestionId") Long suggestionId);
 
-    SuggestionTourist findTop1BySuggestionOrderByIdAsc(@Param("suggestion") Suggestion suggestion);
+    SuggestionTourist findTop1BySuggestionOrderByTimeAsc(@Param("suggestion") Suggestion suggestion);
 }
