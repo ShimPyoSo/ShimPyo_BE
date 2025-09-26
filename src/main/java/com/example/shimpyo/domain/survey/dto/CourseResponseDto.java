@@ -23,6 +23,7 @@ public class CourseResponseDto {
     private String title;
     private String typename;
     private String token;
+    private String duration;
     private List<CourseDayDto> days;
 
     @Getter
@@ -131,6 +132,7 @@ public class CourseResponseDto {
                 .title(suggestion.getTitle())
                 .typename(suggestion.getWellnessType().getLabel())
                 .token(suggestion.getToken())
+                .duration(suggestion.getDuration())
                 .days(days)
                 .build();
     }

@@ -72,6 +72,7 @@ public class SuggestionService {
                 .title(dto.getTitle())
                 .token(dto.getToken())
                 .wellnessType(WellnessType.fromLabel(dto.getTypename()))
+                .duration(dto.getDuration())
                 .user(user)
                 .build();
 

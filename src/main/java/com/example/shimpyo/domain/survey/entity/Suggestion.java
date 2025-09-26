@@ -39,6 +39,9 @@ public class Suggestion extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private WellnessType wellnessType;
 
+    @Column
+    private String duration;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

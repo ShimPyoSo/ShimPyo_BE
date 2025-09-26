@@ -133,6 +133,7 @@ public class SurveyService {
                 .title((requestDto.getDuration() == null ? "1박 2일" : requestDto.getDuration()) + " " + regionKey + " 여행")
                 .typename(typename)
                 .token(token)
+                .duration(requestDto.getDuration())
                 .days(dayDtos)
                 .build();
 

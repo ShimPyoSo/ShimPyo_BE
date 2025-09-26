@@ -30,6 +30,8 @@ public class QSuggestion extends EntityPathBase<Suggestion> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> deletedAt = _super.deletedAt;
 
+    public final StringPath duration = createString("duration");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final ListPath<SuggestionCustomTourist, QSuggestionCustomTourist> suggestionCustomTourists = this.<SuggestionCustomTourist, QSuggestionCustomTourist>createList("suggestionCustomTourists", SuggestionCustomTourist.class, QSuggestionCustomTourist.class, PathInits.DIRECT2);
