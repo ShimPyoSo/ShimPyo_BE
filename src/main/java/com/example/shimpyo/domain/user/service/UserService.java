@@ -1,6 +1,8 @@
 package com.example.shimpyo.domain.user.service;
 
 import com.example.shimpyo.domain.auth.service.AuthService;
+import com.example.shimpyo.domain.course.repository.LikesRepository;
+import com.example.shimpyo.domain.tourist.entity.Tourist;
 import com.example.shimpyo.domain.tourist.service.TouristService;
 import com.example.shimpyo.domain.user.dto.*;
 import com.example.shimpyo.domain.user.entity.User;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -24,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final TouristService touristService;
     private final AuthService authService;
+    private final LikesRepository likesRepository;
 
     @Transactional()
     public void changeNickname(String nickname) {
@@ -38,8 +42,12 @@ public class UserService {
     }
 
     public List<SeenTouristResponseDto> getLastSeenTourists(List<Long> touristIds) {
-
-        return touristIds.stream().map(t -> SeenTouristResponseDto.toDto(touristService.findTourist(t)))
+        User user = authService.findUser().getUser();
+        return touristIds.stream().map(t -> {
+                    Tourist tourist = touristService.findTourist(t);
+                    return SeenTouristResponseDto.toDto(tourist,
+                                    likesRepository.findByUserAndTourist(user, tourist).isPresent());
+                })
                 .collect(Collectors.toList());
     }
 

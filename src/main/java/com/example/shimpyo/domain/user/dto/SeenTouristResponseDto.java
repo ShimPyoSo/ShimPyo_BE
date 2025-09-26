@@ -14,8 +14,9 @@ public class SeenTouristResponseDto {
     private String address;
     private String operationTime;
     private String images;
+    private Boolean isLiked;
 
-    public static SeenTouristResponseDto toDto(Tourist tourist) {
+    public static SeenTouristResponseDto toDto(Tourist tourist, Boolean isLiked) {
         return SeenTouristResponseDto.builder()
                 .id(tourist.getId())
                 .title(tourist.getName())
@@ -23,6 +24,7 @@ public class SeenTouristResponseDto {
                 .address(tourist.getAddress())
                 .operationTime(tourist.getDayOffShow())
                 .images(tourist.getImage())
+                .isLiked(isLiked)
                 .build();
     }
 }
