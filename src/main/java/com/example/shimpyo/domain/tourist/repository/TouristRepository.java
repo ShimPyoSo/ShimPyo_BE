@@ -34,7 +34,8 @@ public interface TouristRepository extends JpaRepository<Tourist, Long>, JpaSpec
     @Query(value = "SELECT DISTINCT t FROM Tourist t " +
             "JOIN t.touristCategories tc " +
             "WHERE t.region IN (:regions) " +
-            "AND tc.category IN (:categories)")
+            "AND tc.category IN (:categories)" +
+            "ORDER BY RAND() LIMIT 8")
     List<Tourist> findByRegionsAndCategories(@Param("regions") List<String> regions,
                                              @Param("categories") List<Category> categories);
 
