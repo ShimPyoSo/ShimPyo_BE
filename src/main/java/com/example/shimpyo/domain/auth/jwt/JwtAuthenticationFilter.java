@@ -75,7 +75,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 setResponse(response, AuthException.MEMBER_INFO_NOT_MATCHED);
                 return null;
             }
-
+            request.setAttribute("isRememberMe", dto.getIsRememberMe());
             // 토큰 생성
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(userDetails, dto.getPassword(), userDetails.getAuthorities())
@@ -96,7 +96,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         ObjectMapper objectMapper = new ObjectMapper();
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
-        boolean isRememberMe = Boolean.parseBoolean(request.getParameter("isRememberMe"));
+        boolean isRememberMe = (boolean) request.getAttribute("isRememberMe");
 
         String accessToken = jwtProvider.createAccessToken(userDetails.getUsername());
         String refreshToken = jwtProvider.createRefreshToken(userDetails.getUsername(), isRememberMe);
