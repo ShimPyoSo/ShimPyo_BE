@@ -49,24 +49,17 @@ public class SurveyService {
 
         // 2) regionValues 중에서 하나 선택 (예: "강원")
         String region = regionValues.get(random.nextInt(regionValues.size()));
-        System.out.println("Slected Region: " + region);
         int mealCount = requestDto.getMeal() == null ? 2 : requestDto.getMeal();
 
         // WellnessType에서 Category enum 리스트를 반환한다고 가정
         WellnessType wellnessType = WellnessType.fromLabel(typename);
         List<Category> activityCategories = wellnessType.getCategories(); // List<Category>
-        for (Category activityCategory : activityCategories) {
-            System.out.println("Select Categories : " + activityCategory.name());
-        }
 
         boolean startsWithMeal = mealCount == 3;
         String token = UUID.randomUUID().toString();
 
         // 3) 선택된 region(예: "강원")에서 regionDetail 목록(distinct) 조회
         List<String> regionDetails = touristService.findDistinctRegionDetailsByRegion(region);
-        for (String regionDetail : regionDetails) {
-            System.out.println("Region Details : " + regionDetail);
-        }
         if (regionDetails == null || regionDetails.isEmpty()) {
             // fallback: region 자체를 하나의 regionDetail로 간주
             regionDetails = List.of(region);
@@ -109,20 +102,9 @@ public class SurveyService {
 
             // 그래도 못 찾으면 region 전체 fallback
             if (!found) {
-                System.out.println("Tourists Not founded ===> RegionDetail sets to Region");
                 regionDetailForDay = region; // region 자체를 하나의 regionDetail로 간주
                 meals = touristService.getTouristsByRegionAndCategoryAndCount(List.of(region), List.of(Category.건강식), mealCount);
                 activities = touristService.getTouristsByRegionAndCategoryAndCount(List.of(region), activityCategories, 3);
-            }
-
-            System.out.println("Day " + day + " regionDetail: " + regionDetailForDay);
-            System.out.println("Selected Meal Tourists");
-            for (Tourist meal : meals) {
-                System.out.println(meal.getId() + "  " + meal.getName() + "  " + meal.getRegionDetail());
-            }
-            System.out.println("Selected Activity Tourists");
-            for (Tourist act : activities) {
-                System.out.println(act.getId() + "  " + act.getName() + "  " + act.getRegionDetail());
             }
 
             CourseResponseDto.CourseDayDto dayDto = generateDayCourse(day, meals, activities, mealCount, startsWithMeal);
@@ -240,7 +222,6 @@ public class SurveyService {
         if (tourist.getOpenTime() == null) return true;
         LocalTime open = tourist.getOpenTime();
         LocalTime close = tourist.getCloseTime();
-        System.out.println("Now Time + " + visitTime + " ====== " + open + "   " + close + (!visitTime.isBefore(open) && !visitTime.isAfter(close)));
         return !visitTime.isAfter(close);
     }
 
