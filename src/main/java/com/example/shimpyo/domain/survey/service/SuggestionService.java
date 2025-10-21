@@ -220,9 +220,9 @@ public class SuggestionService {
         List<LikedCourseResponseDto> result = new ArrayList<>();
         User user = authService.findUser().getUser();
         for (Suggestion likes : user.getSuggestions()) {
-            SuggestionTourist st = stRepository.findTop1BySuggestionOrderByTimeAsc(likes);
-            result.add(LikedCourseResponseDto.toDto(likes, st));
+            result.add(LikedCourseResponseDto.toDto(likes, stRepository.findThumbnailBySuggestionId(likes.getId())));
         }
+
         return result;
     }
 

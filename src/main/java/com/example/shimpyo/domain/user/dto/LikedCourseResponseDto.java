@@ -15,12 +15,12 @@ public class LikedCourseResponseDto {
     private String token;
     private String thumbnail;
 
-    public static LikedCourseResponseDto toDto(Suggestion suggestion, SuggestionTourist st) {
+    public static LikedCourseResponseDto toDto(Suggestion suggestion, String thumbnail) {
         return LikedCourseResponseDto.builder()
                 .courseId(suggestion.getId())
                 .title(suggestion.getTitle())
                 .token(suggestion.getToken())
                 .typename(suggestion.getWellnessType().getLabel())
-                .thumbnail(st.getTourist().getImage()).build();
+                .thumbnail(thumbnail).build();
     }
 }
