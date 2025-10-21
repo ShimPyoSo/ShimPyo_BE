@@ -2,6 +2,7 @@ package com.example.shimpyo.domain.auth.service;
 
 import com.example.shimpyo.domain.auth.dto.MailCodeSendDto;
 import com.example.shimpyo.domain.auth.dto.MailVerifyDto;
+import com.example.shimpyo.domain.user.entity.SocialType;
 import com.example.shimpyo.domain.user.entity.User;
 import com.example.shimpyo.domain.user.repository.UserRepository;
 import com.example.shimpyo.global.BaseException;
@@ -43,7 +44,7 @@ public class MailService {
         * 메일 전송 타입 : register 인 경우 메일이 존재할 경우 : "이미 가입된 이메일 입니다." 예외 처리
         * 메일 전송 타입 : find 인 경우 메일이 존재하지 않을 경우 : "해당 이메일이 존재하지 않습니다." 예외 처리
          */
-        Optional<User> findUser = userRepository.findByEmail(dto.getEmail());
+        Optional<User> findUser = userRepository.findByEmailAndUserAuth_SocialType(dto.getEmail(), SocialType.LOCAL);
         String type = null;
         if(dto.getType().equals("register")){
             if (findUser.isPresent()) {
