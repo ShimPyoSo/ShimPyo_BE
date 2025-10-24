@@ -220,7 +220,6 @@ public class SurveyService {
 
     private boolean canVisitAt(Tourist tourist, LocalTime visitTime) {
         if (tourist.getOpenTime() == null) return true;
-        LocalTime open = tourist.getOpenTime();
         LocalTime close = tourist.getCloseTime();
         return !visitTime.isAfter(close);
     }
