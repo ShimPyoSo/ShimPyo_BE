@@ -125,3 +125,76 @@
 
 ## ✨ 결과 화면
 
+<table>
+  <tr>
+    <td>
+      <b>1. 메인</b><br>
+      <video src="https://github.com/user-attachments/assets/dbdcc48b-d31c-47a1-8264-cb1308705eaa" width="320" autoplay loop muted></video>
+    </td>
+    <td>
+      <b>2. 일반 회원가입</b><br>
+      <video src="https://github.com/user-attachments/assets/f88e84bc-88f7-4996-a4de-2f417be5d6b8" width="320" autoplay loop muted></video>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>3. 소셜 회원가입</b><br>
+      <video src="https://github.com/user-attachments/assets/b5386e09-7b88-4116-a32f-051cac72cd18" width="320" autoplay loop muted></video>
+    </td>
+    <td>
+      <b>4. 계정 관리</b><br>
+      <video src="https://github.com/user-attachments/assets/fc69c208-f29c-4112-8b6b-9eccd64a89e4" width="320" autoplay loop muted></video>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>5. 필터링</b><br>
+      <video src="https://github.com/user-attachments/assets/df55ba27-a234-4b79-8d7a-ab4104290a55" width="320" autoplay loop muted></video>
+    </td>
+    <td>
+      <b>6. 상세페이지</b><br>
+      <video src="https://github.com/user-attachments/assets/42f8b75d-bfed-44e9-be28-72ec8d47ecba" width="320" autoplay loop muted></video>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>7. 검색</b><br>
+      <video src="https://github.com/user-attachments/assets/cbadcc68-27e8-4d2e-9816-92a3aad294de" width="320" autoplay loop muted></video>
+    </td>
+    <td>
+      <b>8. 쉼표(웰니스) 유형 테스트</b><br>
+      <video src="https://github.com/user-attachments/assets/5ff657c2-92eb-4b62-ab07-a78661b1e1a1" width="320" autoplay loop muted></video>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>9. 코스 수정</b><br>
+      <video src="https://github.com/user-attachments/assets/39823e8b-8088-4429-923b-a149e66d8763" width="320" autoplay loop muted></video>
+    </td>
+    <td>
+      <b>10. 코스 삭제</b><br>
+      <video src="https://github.com/user-attachments/assets/94fb77b8-c525-45e2-8501-6de53ac269bf" width="320" autoplay loop muted></video>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>11. 마이페이지</b><br>
+      <video src="https://github.com/user-attachments/assets/92b71ebb-cc8c-4ebf-9fc5-2a77674dc85c" width="320" autoplay loop muted></video>
+    </td>
+    <td>
+      <b>12. 후기 작성 및 삭제</b><br>
+      <video src="https://github.com/user-attachments/assets/42fa0990-0af7-4c10-89f4-a39fe9810293" width="320" autoplay loop muted></video>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>13. 코스 및 관광지 정보 공유</b><br>
+      <video src="https://github.com/user-attachments/assets/67f180bc-a9a7-4ce7-a0ef-243b61ef4271" width="320" autoplay loop muted></video>
+    </td>
+    <td>
+      <b>14. 자동 로그인</b><br>
+      <video src="https://github.com/user-attachments/assets/e6194587-d40a-4a76-b927-ea02dfa5f0af" width="320" autoplay loop muted></video>
+    </td>
+  </tr>
+</table>
+
