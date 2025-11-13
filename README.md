@@ -61,8 +61,8 @@
 
 ## 👩‍💻 팀원
 #### 송은영(Designer) - UI/UX 디자인 담당
-#### 장현지(FrontEnd) - UI/UX 개발 담당
-#### 유나영(BackEnd)  - AWS 배포 및 백엔드 기능 개발 담당
+#### 장현지(FrontEnd) - FE 개발 담당
+#### 유나영(BackEnd)  - AWS 배포 및 BE 개발 담당
 ###### <span style="color:gray"><s>허지수(PM, ~25.06) - 초기 기획 참여</s></span>
 ###### <span style="color:gray"><s>최무리(BE, ~25.07) - 기획 및 초기 개발 참여(일반 회원가입, 관광지 상세 조회)</s></span>
 
